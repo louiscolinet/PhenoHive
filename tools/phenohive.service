@@ -1,0 +1,14 @@
+[Unit]
+Description=PhenoHive station service
+Documentation=https://github.com/Oldgram/PhenoHive
+After=multi-user.target
+
+[Service]
+User=root
+WorkingDirectory=PHENOHIVE_DIRECTORY
+ExecStart=/usr/bin/python PHENOHIVE_DIRECTORY/main.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=phenoHive.service
