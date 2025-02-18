@@ -9,26 +9,51 @@ import hx711
 import RPi.GPIO as GPIO
 import logging
 from datetime import datetime
-from influxdb_client import InfluxDBClient, Point
+from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 from picamera2 import Picamera2, Preview
 from image_processing import get_total_length
 from utils import save_to_csv
 from show_display import Display
 
-CONFIG_FILE = "config.ini"
-LOGGER = logging.getLogger("PhenoHiveStation")
+LOGGER = logging.getLogger("PhenoStation")
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-DATE_FORMAT_FILE = "%Y-%m-%dT%H-%M-%SZ"  # Date format for file names (no ':', which is not illegal in Windows)
 
 
-class PhenoHiveStation:
+class PhenoStation:
     """
-    PhenoHiveStation class, contains all the variables and functions of the station.
-    It functions as a singleton. Use PhenoHiveStation.get_instance() method to get an instance.
+    PhenoStation class, contains all the variables and functions of the station.
+    It functions as a singleton. Use PhenoStation.get_instance() method to get an instance.
     """
     # Instance class variable for singleton
     __instance = None
+
+    # Station variables
+    parser = None
+    station_id = None
+    token = None
+    org = None
+    bucket = None
+    url = None
+    image_path = None
+    csv_path = None
+    pot_limit = None
+    channel = None
+    kernel_size = None
+    fill_size = None
+    cam = None  # picamera2
+    client = None
+    st7735 = None  # ST7735 display (device)
+    disp = None  # ST7735 display (object)
+    hx = None  # hx711 controller
+    time_interval = None
+    load_cell_cal = None
+    tare = None
+    connected = False  # True if the station is connected to influxDB
+    status = 0  # Current station status (-1 = Error, 0 = OK, 1 = Processing)
+    last_error = ("", None)  # Last error registered as a tuple of the form (timestamp: str, e:Exception)
+    measurements = {}  # Dictionnary to store the different measurements, sent to the database each cycle
+    to_save = []  # Measurements to save to the csv file
 
     # Station constants
     WIDTH = -1
@@ -42,55 +67,54 @@ class PhenoHiveStation:
     BUT_LEFT = -1
     BUT_RIGHT = -1
 
-    # Station variables
-    parser = None
-    token = ""
-    org = ""
-    bucket = ""
-    url = ""
-    station_id = ""
-    image_path = ""
-    csv_path = ""
-    pot_limit = -1
-    channel = ""
-    kernel_size = -1
-    fill_size = -1
-    time_interval = -1
-    load_cell_cal = -1.0
-    tare = -1.0
-    status = -1
-    last_error = ("", "")
-
     @staticmethod
-    def get_instance() -> 'PhenoHiveStation':
+    def get_instance():
         """
         Static access method to create a new instance of the station if not already initialised.
         Otherwise, return the current instance.
-        :return: A PhenoHiveStation instance
+        :return: A PhenoStation instance
         """
-        if PhenoHiveStation.__instance is None:
-            PhenoHiveStation()
-        return PhenoHiveStation.__instance
+        if PhenoStation.__instance is None:
+            PhenoStation()
+        return PhenoStation.__instance
 
     def __init__(self) -> None:
         """
         Initialize the station
-        :raises RuntimeError: If trying to instantiate a new PhenoHiveStation if one was already instantiated
+        :raises RuntimeError: If trying to instantiate a new PhenoStation if one was already instantiated
                                 (use get_instance() instead)
         """
-        if PhenoHiveStation.__instance is not None:
-            raise RuntimeError("PhenoHiveStation class is a singleton. Use PhenoHiveStation.get_instance() to "
-                               "initiate it.")
+        if PhenoStation.__instance is not None:
+            raise RuntimeError("PhenoStation class is a singleton. Use PhenoStation.get_instance() to initiate it.")
         else:
-            PhenoHiveStation.__instance = self
+            PhenoStation.__instance = self
 
         # Parse Config.ini file
-        self.parse_config_file(CONFIG_FILE)
-        self.status = 0  # 0: idle, 1: measuring, -1: error
+        self.parser = configparser.ConfigParser()
+        try:
+            self.parser.read('config.ini')
+        except configparser.ParsingError as e:
+            LOGGER.error(f"Failed to parse config file {e}")
+            raise RuntimeError(f"Failed to parse config file {e}")
+
+        self.token = str(self.parser["InfluxDB"]["token"])
+        self.org = str(self.parser["InfluxDB"]["org"])
+        self.bucket = str(self.parser["InfluxDB"]["bucket"])
+        self.url = str(self.parser["InfluxDB"]["url"])
+
+        self.station_id = str(self.parser["Station"]["ID"])
+        self.image_path = str(self.parser["Paths"]["image_path"])
+        self.csv_path = str(self.parser["Paths"]["csv_path"])
+
+        self.pot_limit = int(self.parser["image_arg"]["pot_limit"])
+        self.channel = str(self.parser["image_arg"]["channel"])
+        self.kernel_size = int(self.parser["image_arg"]["kernel_size"])
+        self.fill_size = int(self.parser["image_arg"]["fill_size"])
+
+        self.time_interval = int(self.parser["time_interval"]["time_interval"])
 
         # InfluxDB client initialization
         self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
-        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
         self.connected = self.client.ping()
         self.last_connection = datetime.now().strftime(DATE_FORMAT)
         LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
@@ -98,6 +122,13 @@ class PhenoHiveStation:
 
         # Screen initialisation
         LOGGER.debug("Initialising screen")
+        self.WIDTH = int(self.parser["Display"]["width"])
+        self.HEIGHT = int(self.parser["Display"]["height"])
+        self.SPEED_HZ = int(self.parser["Display"]["speed_hz"])
+        self.DC = int(self.parser["Display"]["dc"])
+        self.RST = int(self.parser["Display"]["rst"])
+        self.SPI_PORT = int(self.parser["Display"]["spi_port"])
+        self.SPI_DEVICE = int(self.parser["Display"]["spi_device"])
         self.st7735 = TFT.ST7735(
             self.DC,
             rst=self.RST,
@@ -120,18 +151,26 @@ class PhenoHiveStation:
         else:
             LOGGER.debug("HX711 reset")
 
+        # Load cell calibration coefficient
+        self.load_cell_cal = float(self.parser["cal_coef"]["load_cell_cal"])
+        self.tare = float(self.parser["cal_coef"]["tare"])
+
         # Camera and LED init
         self.cam = Picamera2()
         GPIO.setwarnings(False)
+
+        self.LED = int(self.parser["Camera"]["led"])
         GPIO.setup(self.LED, GPIO.OUT)
         GPIO.output(self.LED, GPIO.HIGH)
 
         # Button init
+        self.BUT_LEFT = int(self.parser["Buttons"]["left"])
+        self.BUT_RIGHT = int(self.parser["Buttons"]["right"])
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-        # Initial (placeholder) measurement data
-        self.data = {
+        # Initial (placeholder) measurements
+        self.measurements = {
             "status": self.status,  # current status
             "error_time": self.last_error[0],  # last registered error
             "error_message": str(self.last_error[1]),  # last registered error
@@ -143,60 +182,10 @@ class PhenoHiveStation:
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
 
-    def parse_config_file(self, path: str) -> None:
-        """
-        Parse the config file at the given path and initialise the station's variables with the values
-        :param path: the path to the config file
-        :raises RuntimeError: If the config file could not be parsed
-        """
-        try:
-            self.parser.read(path)
-        except configparser.ParsingError as e:
-            LOGGER.error(f"Failed to parse config file: {type(e).__name__}: {e}")
-            raise RuntimeError(f"Failed to parse config file {e}")
-
-        self.token = str(self.parser["InfluxDB"]["token"])
-        self.org = str(self.parser["InfluxDB"]["org"])
-        self.bucket = str(self.parser["InfluxDB"]["bucket"])
-        self.url = str(self.parser["InfluxDB"]["url"])
-        self.station_id = str(self.parser["Station"]["ID"])
-        self.image_path = str(self.parser["Paths"]["image_folder"])
-        self.csv_path = str(self.parser["Paths"]["csv_path"])
-        self.pot_limit = int(self.parser["image_arg"]["pot_limit"])
-        self.channel = str(self.parser["image_arg"]["channel"])
-        self.kernel_size = int(self.parser["image_arg"]["kernel_size"])
-        self.fill_size = int(self.parser["image_arg"]["fill_size"])
-        self.time_interval = int(self.parser["time_interval"]["time_interval"])
-        self.WIDTH = int(self.parser["Display"]["width"])
-        self.HEIGHT = int(self.parser["Display"]["height"])
-        self.SPEED_HZ = int(self.parser["Display"]["speed_hz"])
-        self.DC = int(self.parser["Display"]["dc"])
-        self.RST = int(self.parser["Display"]["rst"])
-        self.SPI_PORT = int(self.parser["Display"]["spi_port"])
-        self.SPI_DEVICE = int(self.parser["Display"]["spi_device"])
-        self.load_cell_cal = float(self.parser["cal_coef"]["load_cell_cal"])
-        self.tare = float(self.parser["cal_coef"]["tare"])
-        self.LED = int(self.parser["Camera"]["led"])
-        self.BUT_LEFT = int(self.parser["Buttons"]["left"])
-        self.BUT_RIGHT = int(self.parser["Buttons"]["right"])
-
-    def register_error(self, exception: Exception) -> None:
-        """
-        Register an exception by logging it, updating the station's status and sending it to the DB
-        :param exception: The exception that occurred
-        """
-        LOGGER.error(f"{type(exception).__name__}: {exception}")
-        timestamp = datetime.now().strftime(DATE_FORMAT)
-        self.status = -1
-        self.last_error = (timestamp, exception)
-        self.data["status"] = self.status
-        self.data["error_time"] = self.last_error[0]
-        self.data["error_message"] = str(self.last_error[1])
-
     def send_to_db(self) -> bool:
         """
         Saves the measurements to the csv file, then sends it to InfluxDB (if connected)
-        Uses `PhenoHiveStation.measurements` dictionary containing the measurements and their values.
+        Uses `PhenoStation.measurements` dictionary containing the measurements and their values.
         :return True if the data was sent to the DB, False otherwise
         """
         # Check connection with the database
@@ -210,26 +199,42 @@ class PhenoHiveStation:
         # Save data to the corresponding csv file
         measurements_list = [timestamp]
         for key in self.to_save:
-            measurements_list.append(self.data[key])
+            measurements_list.append(self.measurements[key])
         save_to_csv(measurements_list, "data/measurements.csv")
 
-        if not self.connected:
+        data = {
+            "measurement": f"StationID_{self.station_id}",
+            "tags": {"station_id": f"{self.station_id}"},
+            "time": timestamp,
+            "fields": self.measurements
+        }
+
+        if self.connected:
+            # Send data to the DB if the DB is reachable
+            write_api = self.client.write_api(write_options=SYNCHRONOUS)
+            LOGGER.debug(f"Sending data to the DB: {str(data)[:400]}")
+            write_api.write(bucket=self.bucket, org=self.org, record=data)
+            return True
+        else:
             return False
 
-        points = []
-        for field, value in self.data.items():
-            p = Point(f"station_{self.station_id}").field(field, value)
-            points.append(p)
+    def register_error(self, exception: Exception) -> None:
+        """
+        Register an exception by logging it, updating the station's status and sending it to the DB
+        :param exception: The exception that occurred
+        """
+        LOGGER.error(f"{type(exception)}: {exception}")
+        timestamp = datetime.now().strftime(DATE_FORMAT)
+        self.status = -1
+        self.last_error = (timestamp, exception)
+        self.measurements["status"] = self.status
+        self.measurements["error_time"] = self.last_error[0]
+        self.measurements["error_message"] = str(self.last_error[1])
 
-        # Send data to the DB
-        LOGGER.debug(f"Sending data to the DB: {str(points)}")
-        self.write_api.write(bucket=self.bucket, org=self.org, record=points)
-        return True
-
-    def get_weight(self, n: int = 15) -> tuple[float, float]:
+    def get_weight(self, n=5) -> tuple[float, float]:
         """
         Get the weight from the load cell (median of n measurements)
-        :param n: the number of measurements to take (default = 15)
+        :param n: the number of measurements to take (default = 5)
         :return: The median of the measurements (-1 in case of error) and the observed standard deviation
         """
         measurements = self.hx.get_raw_data(times=n)
@@ -271,7 +276,7 @@ class PhenoHiveStation:
         self.cam.start()
         time.sleep(time_to_wait)
         if not preview:
-            name = datetime.now().strftime(DATE_FORMAT_FILE)
+            name = datetime.now().strftime(DATE_FORMAT)
         else:
             name = "preview"
 
@@ -299,8 +304,8 @@ class PhenoHiveStation:
         try:
             self.disp.show_collecting_data("Taking photo")
             pic, growth_value = self.picture_pipeline()
-            self.data["picture"] = pic
-            self.data["growth"] = growth_value
+            self.measurements["picture"] = pic
+            self.measurements["growth"] = growth_value
         except Exception as e:
             self.register_error(type(e)(f"Error while taking the photo: {e}"))
             self.disp.show_collecting_data("Error while taking the photo")
@@ -310,9 +315,9 @@ class PhenoHiveStation:
         # Get weight
         try:
             weight, std_dev = self.weight_pipeline()
-            self.data["weight"] = weight
-            self.data["weight_g"] = weight * self.load_cell_cal
-            self.data["standard_deviation"] = std_dev
+            self.measurements["weight"] = weight
+            self.measurements["weight_g"] = weight * self.load_cell_cal
+            self.measurements["standard_deviation"] = std_dev
 
             # Measurement finished, display the weight
             self.disp.show_collecting_data(f"Weight : {round(weight, 2)}")
@@ -397,11 +402,11 @@ class DebugHx711(hx711.HX711):
     def __init__(self, dout_pin, pd_sck_pin):
         super().__init__(dout_pin, pd_sck_pin)
 
-    def _read(self, times: int = 10):
+    def _read(self, times=10):
         # Custom read function to debug (times=10 to reduce the time of the measurement)
         return super()._read(times)
 
-    def get_raw_data(self, times: int = 5):
+    def get_raw_data(self, times=5):
         # Modified read function to debug (with a max of 1000 tries) to avoid infinite loops.
         # Furthermore, we check if the data is valid (not False or -1) before appending it to the list
         data_list = []
