@@ -3,11 +3,12 @@ Main file to run the station
 This script starts the main loop of the station, and handles the different menus and measurements
 """
 from PhenoStation import PhenoStation
-from utils import setup_logger
+from utils import setup_logger, create_folders
 import time
 import datetime
 import RPi.GPIO as GPIO
 import argparse
+import configparser
 import logging
 
 CONFIG_FILE = "config.ini"
@@ -177,10 +178,19 @@ def handle_measurement_loop(station: PhenoStation, n_round: int) -> None:
 
 if __name__ == "__main__":
     # Parse arguments
-    parser = argparse.ArgumentParser(description='Définition du niveau de log')
-    parser.add_argument('-l', '--logger', type=str, help='Niveau de log (DEBUG, INFO, WARNING, ERROR,'
-                                                         'CRITICAL). Défaut = DEBUG', default='DEBUG')
-    args = parser.parse_args()
+    arg_parser = argparse.ArgumentParser(description='Définition du niveau de log')
+    arg_parser.add_argument('-l', '--logger', type=str, help='Niveau de log (DEBUG, INFO, WARNING, ERROR,'
+                                                             'CRITICAL). Défaut = DEBUG', default='DEBUG')
+    args = arg_parser.parse_args()
+    # Read configuration file and create folders if they do not exist
+    config_parser = configparser.ConfigParser()
+    config_parser.read(CONFIG_FILE)
+    paths = [
+        config_parser['Paths']['data_folder'],
+        config_parser['Paths']['image_folder'],
+        config_parser['Paths']['log_folder']
+    ]
+    create_folders(paths)
 
     # Setup logger
     log_level_map = {
@@ -191,8 +201,10 @@ if __name__ == "__main__":
         'CRITICAL': logging.CRITICAL
     }
     try:
-        LOGGER = setup_logger("PhenoStation", level=log_level_map[args.logger])
+        LOGGER = setup_logger(name="PhenoHive", level=log_level_map[args.logger],
+                              folder_path=config_parser['Paths']['log_folder'])
     except KeyError:
-        LOGGER = setup_logger("PhenoStation", level=logging.DEBUG)
+        LOGGER = setup_logger(name="PhenoHive", level=logging.DEBUG,
+                              folder_path=config_parser['Paths']['log_folder'])
 
     main()
