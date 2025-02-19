@@ -8,6 +8,7 @@ import time
 import datetime
 import RPi.GPIO as GPIO
 import argparse
+import configparser
 import logging
 
 CONFIG_FILE = "config.ini"
@@ -177,10 +178,10 @@ def handle_measurement_loop(station: PhenoStation, n_round: int) -> None:
 
 if __name__ == "__main__":
     # Parse arguments
-    parser = argparse.ArgumentParser(description='Définition du niveau de log')
-    parser.add_argument('-l', '--logger', type=str, help='Niveau de log (DEBUG, INFO, WARNING, ERROR,'
-                                                         'CRITICAL). Défaut = DEBUG', default='DEBUG')
-    args = parser.parse_args()
+    arg_parser = argparse.ArgumentParser(description='Définition du niveau de log')
+    arg_parser.add_argument('-l', '--logger', type=str, help='Niveau de log (DEBUG, INFO, WARNING, ERROR,'
+                                                             'CRITICAL). Défaut = DEBUG', default='DEBUG')
+    args = arg_parser.parse_args()
 
     # Setup logger
     log_level_map = {
