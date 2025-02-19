@@ -192,8 +192,10 @@ if __name__ == "__main__":
         'CRITICAL': logging.CRITICAL
     }
     try:
-        LOGGER = setup_logger("PhenoStation", level=log_level_map[args.logger])
+        LOGGER = setup_logger(name="PhenoHive", level=log_level_map[args.logger],
+                              folder_path=config_parser['Paths']['log_folder'])
     except KeyError:
-        LOGGER = setup_logger("PhenoStation", level=logging.DEBUG)
+        LOGGER = setup_logger(name="PhenoHive", level=logging.DEBUG,
+                              folder_path=config_parser['Paths']['log_folder'])
 
     main()
