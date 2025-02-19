@@ -9,7 +9,7 @@ class Display:
     def __init__(self, station) -> None:
         """
         Initialize the class variables
-        :param station: PhenoHiveStation instance
+        :param station: PhenoStation instance
         """
         self.STATION = station
         self.SCREEN = self.STATION.st7735
@@ -123,11 +123,10 @@ class Display:
         draw.text((0, 130), "<-- Calib           Prev -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
-    def show_cal_menu(self, raw_weight, weight_g, tare) -> None:
+    def show_cal_menu(self, weight, tare) -> None:
         """
         Show the calibration menu
-        :param raw_weight: measured weight before conversion
-        :param weight_g: measured weight in grams
+        :param weight: current weight value
         :param tare: tare value
         :return:
         """
@@ -135,8 +134,8 @@ class Display:
         # Menu
         font = ImageFont.truetype(FONT, 10)
         draw.text((0, 80), f"Tare value: {tare}", font=font, fill=(0, 0, 0))
-        draw.text((0, 95), f"Raw value: {raw_weight}", font=font, fill=(0, 0, 0))
-        draw.text((0, 110), f"Weight in grams: {weight_g}", font=font, fill=(0, 0, 0))
+        draw.text((0, 95), f"Current value: {weight}", font=font, fill=(0, 0, 0))
+        draw.text((0, 110), f"Net value: {weight - tare}", font=font, fill=(0, 0, 0))
         # Button
         font = ImageFont.truetype(FONT, 10)
         draw.text((0, 130), "<-- Get Calib    Back -->", font=font, fill=(0, 0, 0))
