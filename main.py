@@ -182,6 +182,15 @@ if __name__ == "__main__":
     arg_parser.add_argument('-l', '--logger', type=str, help='Niveau de log (DEBUG, INFO, WARNING, ERROR,'
                                                              'CRITICAL). Défaut = DEBUG', default='DEBUG')
     args = arg_parser.parse_args()
+    # Read configuration file and create folders if they do not exist
+    config_parser = configparser.ConfigParser()
+    config_parser.read(CONFIG_FILE)
+    paths = [
+        config_parser['Paths']['data_folder'],
+        config_parser['Paths']['image_folder'],
+        config_parser['Paths']['log_folder']
+    ]
+    create_folders(paths)
 
     # Setup logger
     log_level_map = {
