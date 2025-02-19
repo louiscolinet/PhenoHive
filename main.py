@@ -193,7 +193,7 @@ if __name__ == "__main__":
                                                              'CRITICAL). Défaut = DEBUG', default='DEBUG')
     args = arg_parser.parse_args()
 
-    # Read configuration file and create folders if they do not exist
+    """# Read configuration file and create folders if they do not exist
     config_parser = configparser.ConfigParser()
     config_parser.read(CONFIG_FILE)
     paths = [
@@ -201,7 +201,7 @@ if __name__ == "__main__":
         config_parser['Paths']['image_folder'],
         config_parser['Paths']['log_folder']
     ]
-    create_folders(paths)
+    create_folders(paths)"""
 
     # Setup logger
     log_level_map = {
@@ -212,10 +212,10 @@ if __name__ == "__main__":
         'CRITICAL': logging.CRITICAL
     }
     try:
-        LOGGER = setup_logger(name="PhenoHive", level=log_level_map[args.logger],
-                              folder_path=config_parser['Paths']['log_folder'])
+        LOGGER = setup_logger(name="PhenoHive", level=log_level_map[args.logger])
+                              #folder_path=config_parser['Paths']['log_folder'])
     except KeyError:
-        LOGGER = setup_logger(name="PhenoHive", level=logging.DEBUG,
-                              folder_path=config_parser['Paths']['log_folder'])
+        LOGGER = setup_logger(name="PhenoHive", level=logging.DEBUG)
+                              #folder_path=config_parser['Paths']['log_folder'])
 
     main()
