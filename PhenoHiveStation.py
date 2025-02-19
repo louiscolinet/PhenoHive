@@ -16,14 +16,14 @@ from image_processing import get_total_length
 from utils import save_to_csv
 from show_display import Display
 
-LOGGER = logging.getLogger("PhenoStation")
+LOGGER = logging.getLogger("PhenoHiveStation")
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
-class PhenoStation:
+class PhenoHiveStation:
     """
-    PhenoStation class, contains all the variables and functions of the station.
-    It functions as a singleton. Use PhenoStation.get_instance() method to get an instance.
+    PhenoHiveStation class, contains all the variables and functions of the station.
+    It functions as a singleton. Use PhenoHiveStation.get_instance() method to get an instance.
     """
     # Instance class variable for singleton
     __instance = None
@@ -72,22 +72,22 @@ class PhenoStation:
         """
         Static access method to create a new instance of the station if not already initialised.
         Otherwise, return the current instance.
-        :return: A PhenoStation instance
+        :return: A PhenoHiveStation instance
         """
-        if PhenoStation.__instance is None:
-            PhenoStation()
-        return PhenoStation.__instance
+        if PhenoHiveStation.__instance is None:
+            PhenoHiveStation()
+        return PhenoHiveStation.__instance
 
     def __init__(self) -> None:
         """
         Initialize the station
-        :raises RuntimeError: If trying to instantiate a new PhenoStation if one was already instantiated
+        :raises RuntimeError: If trying to instantiate a new PhenoHiveStation if one was already instantiated
                                 (use get_instance() instead)
         """
-        if PhenoStation.__instance is not None:
-            raise RuntimeError("PhenoStation class is a singleton. Use PhenoStation.get_instance() to initiate it.")
+        if PhenoHiveStation.__instance is not None:
+            raise RuntimeError("PhenoHiveStation class is a singleton. Use PhenoHiveStation.get_instance() to initiate it.")
         else:
-            PhenoStation.__instance = self
+            PhenoHiveStation.__instance = self
 
         # Parse Config.ini file
         self.parser = configparser.ConfigParser()
@@ -185,7 +185,7 @@ class PhenoStation:
     def send_to_db(self) -> bool:
         """
         Saves the measurements to the csv file, then sends it to InfluxDB (if connected)
-        Uses `PhenoStation.measurements` dictionary containing the measurements and their values.
+        Uses `PhenoHiveStation.measurements` dictionary containing the measurements and their values.
         :return True if the data was sent to the DB, False otherwise
         """
         # Check connection with the database
