@@ -190,7 +190,7 @@ if __name__ == "__main__":
         config_parser['Paths']['image_folder'],
         config_parser['Paths']['log_folder']
     ]
-    #create_folders(paths)
+    create_folders(paths)
 
     # Setup logger
     log_level_map = {
