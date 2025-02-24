@@ -3,7 +3,7 @@ Main file to run the station
 This script starts the main loop of the station, and handles the different menus and measurements
 """
 from PhenoStation import PhenoStation
-from utils import setup_logger
+from utils import setup_logger, create_folders
 import time
 import datetime
 import RPi.GPIO as GPIO
