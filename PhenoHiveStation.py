@@ -152,6 +152,9 @@ class PhenoHiveStation:
         :param path: the path to the config file
         :raises RuntimeError: If the config file could not be parsed
         """
+        if self.parser is None:
+            self.parser = configparser.ConfigParser()
+            
         try:
             self.parser.read(path)
         except configparser.ParsingError as e:
