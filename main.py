@@ -2,7 +2,7 @@
 Main file to run the station
 This script starts the main loop of the station, and handles the different menus and measurements
 """
-from PhenoStation import PhenoStation
+from PhenoHiveStation import PhenoHiveStation
 from utils import setup_logger, create_folders
 import time
 import datetime
@@ -21,7 +21,7 @@ def main() -> None:
     """
     LOGGER.info("Initializing the station")
     try:
-        station = PhenoStation.get_instance()  # Initialize the station
+        station = PhenoHiveStation.get_instance()  # Initialize the station
         running = int(station.parser['Station']['running'])
     except Exception as e:
         LOGGER.critical(f"Error while initializing the station: {type(e).__name__}: {e}")
@@ -44,7 +44,7 @@ def main() -> None:
                 time.sleep(5)
 
 
-def handle_button_presses(station: PhenoStation, running: int, n_round: int) -> None:
+def handle_button_presses(station: PhenoHiveStation, running: int, n_round: int) -> None:
     """
     Function to handle the button presses in the main menu
     :param station: station object
@@ -64,7 +64,7 @@ def handle_button_presses(station: PhenoStation, running: int, n_round: int) -> 
         handle_measurement_loop(station, n_round)
 
 
-def handle_configuration_menu(station: PhenoStation) -> None:
+def handle_configuration_menu(station: PhenoHiveStation) -> None:
     """
     Configuration menu
     :param station: station object
@@ -81,7 +81,7 @@ def handle_configuration_menu(station: PhenoStation) -> None:
             break
 
 
-def handle_preview_loop(station: PhenoStation) -> None:
+def handle_preview_loop(station: PhenoHiveStation) -> None:
     """
     Preview loop
     :param station: station object
@@ -93,7 +93,7 @@ def handle_preview_loop(station: PhenoStation) -> None:
             break
 
 
-def handle_calibration_loop(station: PhenoStation) -> None:
+def handle_calibration_loop(station: PhenoHiveStation) -> None:
     """
     Calibration loop.
     This function takes the tare value and displays the current weight on the screen
@@ -112,7 +112,7 @@ def handle_calibration_loop(station: PhenoStation) -> None:
             break
 
 
-def handle_status_loop(station: PhenoStation) -> bool:
+def handle_status_loop(station: PhenoHiveStation) -> bool:
     """
     Status menu: display the current status of the station
     :param station: station object
@@ -130,7 +130,7 @@ def handle_status_loop(station: PhenoStation) -> bool:
             return False
 
 
-def handle_measurement_loop(station: PhenoStation, n_round: int) -> None:
+def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
     """
     Measurement loop
     :param station: station object
