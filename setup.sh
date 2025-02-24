@@ -84,6 +84,12 @@ enable_spi() {
     fi
 }
 
+enable_picamera() {
+    echo -e "${INFO}Enabling PiCamera recognition...${WHITE}"
+    echo "start_x=1" | sudo tee -a /boot/config.txt
+    echo "camera_auto_detect=1" | sudo tee -a /boot/config.txt
+}
+
 setup_service() {
     echo -e "${INFO}Setting up PhenoHive service...${WHITE}"
     # Modify the WorkingDirectory and ExecStart in the service file to point to the correct (current) directory
@@ -113,8 +119,10 @@ install_packages
 install_python_packages
 install_st7735
 
-# Enable spi interface (should be enabled by default)
+# Enable spi interface
 enable_spi
+# Enable PiCamera recognition
+enable_picamera
 # Setup PhenoHive as a service so PhenoHive/main.py is run on boot
 setup_service
 

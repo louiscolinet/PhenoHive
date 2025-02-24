@@ -32,7 +32,7 @@ def main() -> None:
     while True:
         try:
             station.disp.show_menu()
-            handle_button_presses(station, running, n_round)
+            handle_main_menu(station, running, n_round)
         except Exception as e:
             error_count += 1
             station.register_error(exception=e)
@@ -44,7 +44,7 @@ def main() -> None:
                 time.sleep(5)
 
 
-def handle_button_presses(station: PhenoHiveStation, running: int, n_round: int) -> None:
+def handle_main_menu(station: PhenoHiveStation, running: int, n_round: int) -> None:
     """
     Function to handle the button presses in the main menu
     :param station: station object
@@ -76,14 +76,14 @@ def handle_configuration_menu(station: PhenoHiveStation) -> None:
             break
 
         if not GPIO.input(station.BUT_LEFT):
-            handle_calibration_loop(station)
+            handle_calibration_menu(station)
             time.sleep(1)
             break
 
 
 def handle_preview_loop(station: PhenoHiveStation) -> None:
     """
-    Preview loop
+    Preview loop: takes a preview photo and displays it on the screen to check the camera position
     :param station: station object
     """
     while True:
@@ -93,26 +93,36 @@ def handle_preview_loop(station: PhenoHiveStation) -> None:
             break
 
 
-def handle_calibration_loop(station: PhenoHiveStation) -> None:
+def handle_calibration_menu(station: PhenoHiveStation) -> None:
     """
     Calibration loop.
-    This function takes the tare value and displays the current weight on the screen
+    This function takes the tare value and compute the calibration coefficient when the left button is pressed
     :param station: station object
     """
     station.tare = station.get_weight(20)[0]
     station.parser['cal_coef']["tare"] = str(station.tare)
     with open(CONFIG_FILE, 'w') as configfile:
         station.parser.write(configfile)
-    weight = 0
+    raw_weight = 0
+    weight_g = 0
     while True:
-        station.disp.show_cal_menu(weight, station.tare)
+        station.disp.show_cal_menu(raw_weight, weight_g, station.tare)
         if not GPIO.input(station.BUT_LEFT):
-            weight = station.get_weight()[0]
+            # Compute the calibration coefficient
+            raw_weight = station.get_weight()[0]
+            reference_weight = station.parser['cal_coef']["calibration_weight"]
+            load_cell_cal = reference_weight / (raw_weight - station.tare)
+            # Save the calibration coefficient in the config file
+            station.parser['cal_coef']["load_cell_cal"] = str(load_cell_cal)
+            with open("config.ini", 'w') as configfile:
+                station.parser.write(configfile)
+            weight_g = (raw_weight - station.tare) * load_cell_cal
+            time.sleep(1)
         if not GPIO.input(station.BUT_RIGHT):
             break
 
 
-def handle_status_loop(station: PhenoHiveStation) -> bool:
+def handle_status_menu(station: PhenoHiveStation) -> bool:
     """
     Status menu: display the current status of the station
     :param station: station object
@@ -132,7 +142,7 @@ def handle_status_loop(station: PhenoHiveStation) -> bool:
 
 def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
     """
-    Measurement loop
+    Measurement loop, displays the measurement menu and handles the measurements cycles
     :param station: station object
     :param n_round: number of measurement rounds done
     """
@@ -165,7 +175,7 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
             break
 
         if not GPIO.input(station.BUT_LEFT):
-            continue_measurements = handle_status_loop(station)
+            continue_measurements = handle_status_menu(station)
             if not continue_measurements:
                 # Stop the measurements
                 station.parser['Station']['running'] = "0"
@@ -182,6 +192,7 @@ if __name__ == "__main__":
     arg_parser.add_argument('-l', '--logger', type=str, help='Niveau de log (DEBUG, INFO, WARNING, ERROR,'
                                                              'CRITICAL). Défaut = DEBUG', default='DEBUG')
     args = arg_parser.parse_args()
+
     # Read configuration file and create folders if they do not exist
     config_parser = configparser.ConfigParser()
     config_parser.read(CONFIG_FILE)

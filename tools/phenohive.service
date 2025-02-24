@@ -1,6 +1,6 @@
 [Unit]
 Description=PhenoHive station service
-Documentation=https://github.com/Oldgram/PhenoHive/readme.md
+Documentation=https://github.com/Oldgram/PhenoHive
 After=multi-user.target
 
 [Service]

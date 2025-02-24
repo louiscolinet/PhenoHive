@@ -100,7 +100,7 @@ Warning: be sure to remove the leading '#'
 
 Line 59: `#start_x=1` -> `start_x=1`
 
-Add line 60: `camera_auto_detect=0`
+Add line 60: `camera_auto_detect=1`
 
 ### Enable SPI interface
 
