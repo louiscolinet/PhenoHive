@@ -110,6 +110,8 @@ def handle_calibration_menu(station: PhenoHiveStation) -> None:
     weight_g = 0
     while True:
         station.disp.show_cal_menu(raw_weight, weight_g, station.tare)
+        if not GPIO.input(station.BUT_RIGHT):
+            break
         if not GPIO.input(station.BUT_LEFT):
             raw_weight = station.get_weight()[0]
             if raw_weight == -1.0:
@@ -130,8 +132,7 @@ def handle_calibration_menu(station: PhenoHiveStation) -> None:
             except (KeyError, ValueError) as e:
                 LOGGER.error(f"Error in calibration: {e}")
                 return
-        if not GPIO.input(station.BUT_RIGHT):
-            break
+
 
 
 def handle_status_menu(station: PhenoHiveStation) -> bool:
