@@ -321,7 +321,7 @@ class PhenoHiveStation:
             self.data["standard_deviation"] = std_dev
 
             # Measurement finished, display the weight
-            self.disp.show_collecting_data(f"Weight : {round(weight, 2)}")
+            self.disp.show_collecting_data(f"Weight : {round(weight * self.load_cell_cal, 2)}")
             time.sleep(2)
         except Exception as e:
             self.register_error(type(e)(f"Error while getting the weight: {e}"))
