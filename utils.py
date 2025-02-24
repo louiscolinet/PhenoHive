@@ -30,11 +30,8 @@ def create_folders(folder_paths: list[str]) -> None:
     :param folder_paths: list of strings containing the folder paths
     """
     for folder in folder_paths:
-        print(f"Vérification du dossier : {folder}")  # Debug
         if not os.path.exists(folder):
-            print(f"Création du dossier : {folder}")  # Debug
             os.makedirs(folder)
-
 
 
 def save_to_csv(data: list, filename: str) -> None:
