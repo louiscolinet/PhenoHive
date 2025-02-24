@@ -168,7 +168,7 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
     continue_measurements = True
     while continue_measurements:
         time_now = datetime.datetime.now()
-        station.disp.show_measuring_menu(round(weight, 2), round(growth_value, 2),
+        station.disp.show_measuring_menu(round(weight*station.load_cell_cal, 2), round(growth_value, 2),
                                          time_now.strftime("%Y/%m/%d %H:%M:%S"),
                                          time_nxt_measure.strftime("%H:%M:%S"), n_round)
 
