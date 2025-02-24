@@ -96,10 +96,13 @@ def handle_preview_loop(station: PhenoHiveStation) -> None:
 def handle_calibration_menu(station: PhenoHiveStation) -> None:
     """
     Calibration loop.
-    This function takes the tare value and compute the calibration coefficient when the left button is pressed
+    This function takes the tare value and computes the calibration coefficient when the left button is pressed.
     :param station: station object
     """
     station.tare = station.get_weight(20)[0]
+    if station.tare == -1.0:
+        LOGGER.error("Error: Invalid tare measurement. Aborting calibration.")
+        return
     station.parser['cal_coef']["tare"] = str(station.tare)
     with open(CONFIG_FILE, 'w') as configfile:
         station.parser.write(configfile)
@@ -108,16 +111,25 @@ def handle_calibration_menu(station: PhenoHiveStation) -> None:
     while True:
         station.disp.show_cal_menu(raw_weight, weight_g, station.tare)
         if not GPIO.input(station.BUT_LEFT):
-            # Compute the calibration coefficient
             raw_weight = station.get_weight()[0]
-            reference_weight = station.parser['cal_coef']["calibration_weight"]
-            load_cell_cal = reference_weight / (raw_weight - station.tare)
-            # Save the calibration coefficient in the config file
-            station.parser['cal_coef']["load_cell_cal"] = str(load_cell_cal)
-            with open("config.ini", 'w') as configfile:
-                station.parser.write(configfile)
-            weight_g = (raw_weight - station.tare) * load_cell_cal
-            time.sleep(1)
+            if raw_weight == -1.0:
+                LOGGER.error("Error: Invalid raw weight measurement. Aborting calibration.")
+                return
+            try:
+                reference_weight = float(station.parser['cal_coef']["calibration_weight"])
+                if raw_weight - station.tare == 0:
+                    LOGGER.error("Error: raw_weight - tare is zero, cannot compute calibration coefficient.")
+                    return
+                load_cell_cal = reference_weight / (raw_weight - station.tare)
+                # Save the calibration coefficient in the config file
+                station.parser['cal_coef']["load_cell_cal"] = str(load_cell_cal)
+                with open(CONFIG_FILE, 'w') as configfile:
+                    station.parser.write(configfile)
+                weight_g = (raw_weight - station.tare) * load_cell_cal
+                time.sleep(1)
+            except (KeyError, ValueError) as e:
+                LOGGER.error(f"Error in calibration: {e}")
+                return
         if not GPIO.input(station.BUT_RIGHT):
             break
 
