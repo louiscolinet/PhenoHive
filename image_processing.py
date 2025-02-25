@@ -94,7 +94,11 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
                                                objects=obj, label="default")
     # Get segment lengths
     # Will raise a KeyError if no segments are found
-    path_lengths = pcv.outputs.observations['default']['segment_path_length']['value']
+    if 'default' in pcv.outputs.observations and 'segment_path_length' in pcv.outputs.observations['default']:
+      path_lengths = pcv.outputs.observations['default']['segment_path_length']['value']
+    else:
+        path_lengths = []
+
     return path_lengths
 
 
