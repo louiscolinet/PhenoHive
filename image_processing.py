@@ -23,7 +23,7 @@ def get_height_pix(image_path: str, pot_limit: int, channel: str = 'k', kernel_s
     path = "data/images/edges_img/edge%s.jpg" % date
     pcv.params.debug = None
 
-    img, path, _ = pcv.readimage(image_path)
+    img, _, _ = pcv.readimage(image_path)
 
     height, width = img.shape[0], img.shape[1]
 
