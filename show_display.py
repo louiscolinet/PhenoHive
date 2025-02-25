@@ -140,7 +140,7 @@ class Display:
         # Button
         font = ImageFont.truetype(FONT, 10)
         if calib_or_test < 3:
-            draw.text((0, 130), "<-- Calib        Back -->", font=font, fill=(0, 0, 0))
+            draw.text((0, 130), "<-- Calib         Back -->", font=font, fill=(0, 0, 0))
         else:
             draw.text((0, 130), "<-- Test          Back -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
