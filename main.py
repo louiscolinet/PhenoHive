@@ -22,7 +22,7 @@ def main() -> None:
     LOGGER.info("Initializing the station")
     try:
         station = PhenoHiveStation.get_instance()  # Initialize the station
-        running = int(station.parser['Station']['running'])
+        station.running = int(station.parser['Station']['running'])
     except Exception as e:
         LOGGER.critical(f"Error while initializing the station: {type(e).__name__}: {e}")
         raise e
@@ -32,7 +32,7 @@ def main() -> None:
     while True:
         try:
             station.disp.show_menu()
-            handle_main_menu(station, running, n_round)
+            handle_main_menu(station, n_round)
         except Exception as e:
             error_count += 1
             station.register_error(exception=e)
@@ -44,11 +44,10 @@ def main() -> None:
                 time.sleep(5)
 
 
-def handle_main_menu(station: PhenoHiveStation, running: int, n_round: int) -> None:
+def handle_main_menu(station: PhenoHiveStation, n_round: int) -> None:
     """
     Function to handle the button presses in the main menu
     :param station: station object
-    :param running: flag to indicate if the station is running (1) or not (0)
     :param n_round: number of measurement rounds done
     """
     if not GPIO.input(station.BUT_LEFT):
@@ -56,8 +55,9 @@ def handle_main_menu(station: PhenoHiveStation, running: int, n_round: int) -> N
         time.sleep(1)
         handle_configuration_menu(station)
 
-    if not GPIO.input(station.BUT_RIGHT) or running:
+    if not GPIO.input(station.BUT_RIGHT) or station.running:
         station.parser['Station']['running'] = "1"
+        station.running = 1
         with open(CONFIG_FILE, 'w') as configfile:
             station.parser.write(configfile)
         time.sleep(1)
@@ -182,6 +182,7 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
         if not GPIO.input(station.BUT_RIGHT):
             # Stop the measurements
             station.parser['Station']['running'] = "0"
+            station.running = 0
             with open(CONFIG_FILE, 'w') as configfile:
                 station.parser.write(configfile)
             time.sleep(1)
@@ -192,6 +193,7 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
             if not continue_measurements:
                 # Stop the measurements
                 station.parser['Station']['running'] = "0"
+                station.running = 0
                 with open(CONFIG_FILE, 'w') as configfile:
                     station.parser.write(configfile)
                 break
