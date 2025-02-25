@@ -2,7 +2,6 @@
 Script python qui process les images prisent par la caméra pour évaluer la croissance des plantes
 """
 from plantcv import plantcv as pcv
-from plantcv import morphology
 import numpy as np
 import datetime
 import cv2
