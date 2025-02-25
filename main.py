@@ -124,11 +124,12 @@ def handle_calibration_menu(station: PhenoHiveStation) -> None:
                 if raw_weight - station.tare == 0:
                     LOGGER.error("Error: raw_weight - tare is zero, cannot compute calibration coefficient.")
                     return
-                load_cell_cal = reference_weight / (raw_weight - station.tare)
-                # Save the calibration coefficient in the config file
-                station.parser['cal_coef']["load_cell_cal"] = str(load_cell_cal)
-                with open(CONFIG_FILE, 'w') as configfile:
-                    station.parser.write(configfile)
+                if calib_or_test < 3
+                    load_cell_cal = reference_weight / (raw_weight - station.tare)
+                    # Save the calibration coefficient in the config file
+                    station.parser['cal_coef']["load_cell_cal"] = str(load_cell_cal)
+                    with open(CONFIG_FILE, 'w') as configfile:
+                        station.parser.write(configfile)
                 weight_g = (raw_weight - station.tare) * load_cell_cal
                 time.sleep(1)
             except (KeyError, ValueError) as e:
