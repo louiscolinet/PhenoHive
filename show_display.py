@@ -123,7 +123,7 @@ class Display:
         draw.text((0, 130), "<-- Calib           Prev -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
-    def show_cal_menu(self, raw_weight, weight_g, tare) -> None:
+    def show_cal_menu(self, raw_weight, weight_g, tare, calib_or_test) -> None:
         """
         Show the calibration menu
         :param raw_weight: measured weight before conversion
@@ -139,7 +139,10 @@ class Display:
         draw.text((0, 110), f"Weight in grams: {weight_g}", font=font, fill=(0, 0, 0))
         # Button
         font = ImageFont.truetype(FONT, 10)
-        draw.text((0, 130), "<-- Get Calib    Back -->", font=font, fill=(0, 0, 0))
+        if calib_or_test < 3:
+            draw.text((0, 130), "<-- Get Calib    Back -->", font=font, fill=(0, 0, 0))
+        else:
+            draw.text((0, 130), "<-- Test         Back -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
     def show_collecting_data(self, action):
