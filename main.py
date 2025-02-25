@@ -141,6 +141,7 @@ def handle_status_menu(station: PhenoHiveStation) -> bool:
     :param station: station object
     :return: True if the measurement loop should continue, False otherwise
     """
+    time.sleep(0.5)
     while True:
         station.disp.show_status()
         if not GPIO.input(station.BUT_RIGHT):
