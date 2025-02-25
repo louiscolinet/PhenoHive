@@ -60,6 +60,7 @@ class PhenoHiveStation:
     tare = -1.0
     status = -1
     last_error = ("", "")
+    running = 0
 
     @staticmethod
     def get_instance() -> 'PhenoHiveStation':
