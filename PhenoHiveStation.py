@@ -388,7 +388,7 @@ class PhenoHiveStation:
         start = time.time()
         median_weight, std_dev = self.get_weight(n)
         median_weight = median_weight - self.tare
-        if median_weight == -1:
+        if median_weight == -1.0:
             return -1.0, -1.0
         elapsed = time.time() - start
         LOGGER.debug(f"Weight: {median_weight} in {elapsed}s (with standard deviation: {std_dev}")
