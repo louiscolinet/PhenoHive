@@ -108,11 +108,13 @@ def handle_calibration_menu(station: PhenoHiveStation) -> None:
         station.parser.write(configfile)
     raw_weight = 0
     weight_g = 0
+    calib_or_test = 0
     while True:
-        station.disp.show_cal_menu(raw_weight, weight_g, station.tare)
+        station.disp.show_cal_menu(raw_weight, weight_g, station.tare, calib_or_test)
         if not GPIO.input(station.BUT_RIGHT):
             break
         if not GPIO.input(station.BUT_LEFT):
+            calib_or_test += 1
             raw_weight = station.get_weight()[0]
             if raw_weight == -1.0:
                 LOGGER.error("Error: Invalid raw weight measurement. Aborting calibration.")
