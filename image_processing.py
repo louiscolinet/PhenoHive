@@ -117,4 +117,4 @@ def get_total_length(image_path: str, channel: str = 'k', kernel_size: int = 20)
 
     # Get the sum of segment lengths
     return sum(segment_list)"""
-    return def get_height_pix(image_path, 5, channel, kernel_size)
+    return get_height_pix(image_path, 5, channel, kernel_size)
