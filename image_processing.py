@@ -73,6 +73,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     # Close gaps in plant contour
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
     closing = cv2.morphologyEx(edges_crop, cv2.MORPH_CLOSE, kernel)
+    cv2.imwrite("data/closing.jpg", closing)
 
     # Find contours
     thresh = cv2.threshold(closing, 128, 255, cv2.THRESH_BINARY)[1]
@@ -83,11 +84,13 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     # Fill contour to get maize shape
     result = np.zeros_like(closing)
     cv2.drawContours(result, [big_contour], 0, (255, 255, 255), cv2.FILLED)
+    cv2.imwrite("data/result.jpg", result)
 
     # Draw plant skeleton and segment
     pcv.params.line_thickness = 3
     skeleton = pcv.morphology.skeletonize(mask=result)
     segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
+    cv2.imwrite("data/skeleton.jpg", skeleton)
 
     if pcv.params.debug is not None:
         # The labelled image is only useful for debugging purposes
