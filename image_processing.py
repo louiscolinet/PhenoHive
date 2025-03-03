@@ -112,9 +112,9 @@ def get_total_length(image_path: str, channel: str = 'k', kernel_size: int = 20)
     :raises: KeyError if no segments are found in the image
     :return: the total length of the plant skeleton
     """
-    """# May raise a KeyError if no segments are found
+    # May raise a KeyError if no segments are found
     segment_list = get_segment_list(image_path, channel, kernel_size)
 
     # Get the sum of segment lengths
-    return sum(segment_list)"""
-    return get_height_pix(image_path, 5, channel, kernel_size)
+    return sum(segment_list)
+    #return get_height_pix(image_path, 5, channel, kernel_size)
