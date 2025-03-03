@@ -68,7 +68,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
 
     # Crop image edges
     edges_crop = pcv.crop(edges, 5, 5, height - 10, width - 10)
-    cv2.imwrite("debug_images/edges_crop.jpg", edges_crop)
+    cv2.imwrite("data/edges_crop.jpg", edges_crop)
 
     # Close gaps in plant contour
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
