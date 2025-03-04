@@ -52,7 +52,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     :raises: KeyError if no segments are found in the image
     :return: list of segments lengths
     """
-    pcv.params.debug = 1
+    #pcv.params.debug = 1
 
     # Read image
     img, _, _ = pcv.readimage(image_path)
@@ -93,10 +93,11 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     cv2.imwrite("data/skeleton.jpg", skeleton)
     cv2.imwrite("data/segmented_img.jpg", segmented_img)
 
-    if pcv.params.debug is not None:
-        # The labelled image is only useful for debugging purposes
-        _ = pcv.morphology.segment_path_length(segmented_img=segmented_img,
+
+    labeled_img = pcv.morphology.segment_path_length(segmented_img=segmented_img,
                                                objects=obj, label="default")
+    cv2.imwrite("data/labeled_img.jpg", labeled_img)
+  
     # Get segment lengths
     # Will raise a KeyError if no segments are found
     if 'default' in pcv.outputs.observations and 'segment_path_length' in pcv.outputs.observations['default']:
