@@ -52,7 +52,6 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     :raises: KeyError if no segments are found in the image
     :return: list of segments lengths
     """
-    kernel_size = 5
     pcv.params.debug = None
 
     # Read image
@@ -78,7 +77,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
 
     # Find contours
     thresh = cv2.threshold(closing, 128, 255, cv2.THRESH_BINARY)[1]
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = contours[0]
     big_contour = max(contours, key=cv2.contourArea)
 
@@ -92,6 +91,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     skeleton = pcv.morphology.skeletonize(mask=result)
     segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
     cv2.imwrite("data/skeleton.jpg", skeleton)
+    cv2.imwrite("data/segmented_img.jpg", segmented_img)
 
     if pcv.params.debug is not None:
         # The labelled image is only useful for debugging purposes
