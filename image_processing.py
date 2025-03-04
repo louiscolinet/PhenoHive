@@ -64,7 +64,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     k = pcv.rgb2gray_cmyk(rgb_img=img, channel=channel)
 
     # Perform canny=edge detection
-    edges = pcv.canny_edge_detect(k, sigma=1)
+    edges = pcv.canny_edge_detect(k, sigma=0.8)
 
     # Crop image edges
     edges_crop = pcv.crop(edges, 5, 5, height - 10, width - 10)
