@@ -92,6 +92,8 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
     cv2.imwrite("data/skeleton.jpg", skeleton)
     cv2.imwrite("data/segmented_img.jpg", segmented_img)
+    if len(obj) == 0:
+      return [-1, -1, -1, -1, -1, -1]
 
     if pcv.params.debug is not None:
         # The labelled image is only useful for debugging purposes
