@@ -94,8 +94,8 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     cv2.imwrite("data/segmented_img.jpg", segmented_img)
 
 
-    labeled_img = pcv.morphology.segment_path_length(segmented_img=segmented_img,
-                                               objects=obj, label="default")
+    """labeled_img = pcv.morphology.segment_path_length(segmented_img=segmented_img,
+                                               objects=obj, label="default")"""
     cv2.imwrite("data/labeled_img.jpg", labeled_img)
   
     # Get segment lengths
