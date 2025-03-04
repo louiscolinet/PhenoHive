@@ -52,7 +52,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     :raises: KeyError if no segments are found in the image
     :return: list of segments lengths
     """
-    #kernel_size = 5
+    kernel_size = 5
     pcv.params.debug = None
 
     # Read image
