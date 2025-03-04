@@ -27,6 +27,7 @@ def get_height_pix(image_path: str, pot_limit: int, channel: str = 'k', kernel_s
 
     height, width = img.shape[0], img.shape[1]
 
+    kernel_size = 5
     k = pcv.rgb2gray_cmyk(rgb_img=img, channel=channel)
     k_mblur = pcv.median_blur(k, kernel_size)
 
