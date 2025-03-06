@@ -105,10 +105,6 @@ class PhenoHiveStation:
         for thread in threads:
             thread.join()
 
-        # Button init
-        GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
         # Initial (placeholder) measurement data
         self.data = {
             "status": self.status,  # current status
@@ -152,6 +148,10 @@ class PhenoHiveStation:
         GPIO.setwarnings(False)
         GPIO.setup(self.LED, GPIO.OUT)
         GPIO.output(self.LED, GPIO.HIGH)
+
+        # Button init
+        GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
     def init_load():
