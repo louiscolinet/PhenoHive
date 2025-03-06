@@ -97,7 +97,7 @@ class PhenoHiveStation:
             threading.Thread(target=self.init_display),
             threading.Thread(target=self.init_influxdb),
             #threading.Thread(target=self.init_camera),
-            threading.Thread(target=self.init_load)
+            #threading.Thread(target=self.init_load)
         ]
         
         for thread in threads:
@@ -105,6 +105,16 @@ class PhenoHiveStation:
         for thread in threads:
             thread.join()
 
+        # Hx711
+        self.hx = DebugHx711(dout_pin=5, pd_sck_pin=6)
+        try:
+            LOGGER.debug("Resetting HX711")
+            self.hx.reset()
+        except hx711.GenericHX711Exception as e:
+            self.register_error(type(e)(f"Error while resetting HX711 : {e}"))
+        else:
+            LOGGER.debug("HX711 reset")
+        
         # Camera and LED init
         self.cam = Picamera2()
         GPIO.setwarnings(False)
@@ -164,7 +174,7 @@ class PhenoHiveStation:
         GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)"""
 
 
-    def init_load():
+    """def init_load():
         # Hx711
         self.hx = DebugHx711(dout_pin=5, pd_sck_pin=6)
         try:
@@ -173,7 +183,7 @@ class PhenoHiveStation:
         except hx711.GenericHX711Exception as e:
             self.register_error(type(e)(f"Error while resetting HX711 : {e}"))
         else:
-            LOGGER.debug("HX711 reset")
+            LOGGER.debug("HX711 reset")"""
 
     def parse_config_file(self, path: str) -> None:
         """
