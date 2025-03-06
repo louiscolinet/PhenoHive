@@ -93,9 +93,9 @@ class PhenoHiveStation:
         self.parse_config_file(CONFIG_FILE)
         self.status = 0  # 0: idle, 1: measuring, -1: error
 
-        """threads = [
+        threads = [
             threading.Thread(target=self.init_display),
-            threading.Thread(target=self.init_influxdb),
+            #threading.Thread(target=self.init_influxdb),
             #threading.Thread(target=self.init_camera),
             #threading.Thread(target=self.init_load)
         ]
@@ -103,9 +103,9 @@ class PhenoHiveStation:
         for thread in threads:
             thread.start()
         for thread in threads:
-            thread.join()"""
+            thread.join()
 
-        # Screen initialisation
+       """ # Screen initialisation
         LOGGER.debug("Initialising screen")
         self.st7735 = TFT.ST7735(
             self.DC,
@@ -117,7 +117,7 @@ class PhenoHiveStation:
             )
         )
         self.disp = Display(self)
-        self.disp.show_image("assets/logo_elia.jpg")
+        self.disp.show_image("assets/logo_elia.jpg")"""
 
         # InfluxDB client initialization
         self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
@@ -160,7 +160,7 @@ class PhenoHiveStation:
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
 
-    """def init_display():
+    def init_display():
         # Screen initialisation
         LOGGER.debug("Initialising screen")
         self.st7735 = TFT.ST7735(
@@ -175,7 +175,7 @@ class PhenoHiveStation:
         self.disp = Display(self)
         self.disp.show_image("assets/logo_elia.jpg")
 
-    def init_influxdb():
+    """def init_influxdb():
         # InfluxDB client initialization
         self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
         self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
