@@ -93,7 +93,7 @@ class PhenoHiveStation:
         self.parse_config_file(CONFIG_FILE)
         self.status = 0  # 0: idle, 1: measuring, -1: error
 
-        threads = [
+        """threads = [
             threading.Thread(target=self.init_display),
             threading.Thread(target=self.init_influxdb),
             #threading.Thread(target=self.init_camera),
@@ -103,7 +103,29 @@ class PhenoHiveStation:
         for thread in threads:
             thread.start()
         for thread in threads:
-            thread.join()
+            thread.join()"""
+
+        # Screen initialisation
+        LOGGER.debug("Initialising screen")
+        self.st7735 = TFT.ST7735(
+            self.DC,
+            rst=self.RST,
+            spi=SPI.SpiDev(
+                self.SPI_PORT,
+                self.SPI_DEVICE,
+                max_speed_hz=self.SPEED_HZ
+            )
+        )
+        self.disp = Display(self)
+        self.disp.show_image("assets/logo_elia.jpg")
+
+        # InfluxDB client initialization
+        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
+        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
+        self.connected = self.client.ping()
+        self.last_connection = datetime.now().strftime(DATE_FORMAT)
+        LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
+                     f", Ping returned : {self.connected}")
 
         # Hx711
         self.hx = DebugHx711(dout_pin=5, pd_sck_pin=6)
@@ -138,7 +160,7 @@ class PhenoHiveStation:
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
 
-    def init_display():
+    """def init_display():
         # Screen initialisation
         LOGGER.debug("Initialising screen")
         self.st7735 = TFT.ST7735(
@@ -160,7 +182,7 @@ class PhenoHiveStation:
         self.connected = self.client.ping()
         self.last_connection = datetime.now().strftime(DATE_FORMAT)
         LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
-                     f", Ping returned : {self.connected}")
+                     f", Ping returned : {self.connected}")"""
 
     """def init_camera():
         # Camera and LED init
