@@ -3,7 +3,6 @@ import configparser
 import os
 import statistics
 import time
-import threading
 import Adafruit_GPIO.SPI as SPI
 import ST7735 as TFT
 import hx711
@@ -93,25 +92,14 @@ class PhenoHiveStation:
         self.parse_config_file(CONFIG_FILE)
         self.status = 0  # 0: idle, 1: measuring, -1: error
 
-        init_display()
-        init_influxdb()
-        init_load()
-        init_camera()
+        # InfluxDB client initialization
+        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
+        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
+        self.connected = self.client.ping()
+        self.last_connection = datetime.now().strftime(DATE_FORMAT)
+        LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
+                     f", Ping returned : {self.connected}")
 
-        # Initial (placeholder) measurement data
-        self.data = {
-            "status": self.status,  # current status
-            "error_time": self.last_error[0],  # last registered error
-            "error_message": str(self.last_error[1]),  # last registered error
-            "growth": -1.0,  # plant's growth
-            "weight": -1.0,  # plant's (measured) weight
-            "weight_g": -1.0,  # plant's (measured) weight in grams (if calibrated)
-            "standard_deviation": -1.0,  # measured weight standard deviation
-            "picture": ""  # last picture as a base-64 string
-        }
-        self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
-
-    def init_display():
         # Screen initialisation
         LOGGER.debug("Initialising screen")
         self.st7735 = TFT.ST7735(
@@ -126,16 +114,16 @@ class PhenoHiveStation:
         self.disp = Display(self)
         self.disp.show_image("assets/logo_elia.jpg")
 
-    def init_influxdb():
-        # InfluxDB client initialization
-        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
-        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
-        self.connected = self.client.ping()
-        self.last_connection = datetime.now().strftime(DATE_FORMAT)
-        LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
-                     f", Ping returned : {self.connected}")
+        # Hx711
+        self.hx = DebugHx711(dout_pin=5, pd_sck_pin=6)
+        try:
+            LOGGER.debug("Resetting HX711")
+            self.hx.reset()
+        except hx711.GenericHX711Exception as e:
+            self.register_error(type(e)(f"Error while resetting HX711 : {e}"))
+        else:
+            LOGGER.debug("HX711 reset")
 
-    def init_camera():
         # Camera and LED init
         self.cam = Picamera2()
         GPIO.setwarnings(False)
@@ -146,17 +134,18 @@ class PhenoHiveStation:
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-
-    def init_load():
-        # Hx711
-        self.hx = DebugHx711(dout_pin=5, pd_sck_pin=6)
-        try:
-            LOGGER.debug("Resetting HX711")
-            self.hx.reset()
-        except hx711.GenericHX711Exception as e:
-            self.register_error(type(e)(f"Error while resetting HX711 : {e}"))
-        else:
-            LOGGER.debug("HX711 reset")
+        # Initial (placeholder) measurement data
+        self.data = {
+            "status": self.status,  # current status
+            "error_time": self.last_error[0],  # last registered error
+            "error_message": str(self.last_error[1]),  # last registered error
+            "growth": -1.0,  # plant's growth
+            "weight": -1.0,  # plant's (measured) weight
+            "weight_g": -1.0,  # plant's (measured) weight in grams (if calibrated)
+            "standard_deviation": -1.0,  # measured weight standard deviation
+            "picture": ""  # last picture as a base-64 string
+        }
+        self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
 
     def parse_config_file(self, path: str) -> None:
         """
