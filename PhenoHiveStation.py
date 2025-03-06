@@ -155,6 +155,7 @@ class PhenoHiveStation:
         GPIO.setup(self.LED, GPIO.OUT)
         GPIO.output(self.LED, GPIO.HIGH)
 
+
     def init_load(self):
         # Hx711
         self.hx = DebugHx711(dout_pin=5, pd_sck_pin=6)
@@ -165,6 +166,25 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while resetting HX711 : {e}"))
         else:
             LOGGER.debug("HX711 reset")
+
+    def init_button(self):
+        # Button init
+        GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    def init_data(self):
+        # Initial (placeholder) measurement data
+        self.data = {
+            "status": self.status,  # current status
+            "error_time": self.last_error[0],  # last registered error
+            "error_message": str(self.last_error[1]),  # last registered error
+            "growth": -1.0,  # plant's growth
+            "weight": -1.0,  # plant's (measured) weight
+            "weight_g": -1.0,  # plant's (measured) weight in grams (if calibrated)
+            "standard_deviation": -1.0,  # measured weight standard deviation
+            "picture": ""  # last picture as a base-64 string
+        }
+        self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
 
     def parse_config_file(self, path: str) -> None:
         """
