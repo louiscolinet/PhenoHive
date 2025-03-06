@@ -96,7 +96,7 @@ class PhenoHiveStation:
         threads = [
             threading.Thread(target=self.init_display),
             threading.Thread(target=self.init_influxdb),
-            threading.Thread(target=self.init_camera),
+            #threading.Thread(target=self.init_camera),
             threading.Thread(target=self.init_load)
         ]
         
@@ -104,6 +104,16 @@ class PhenoHiveStation:
             thread.start()
         for thread in threads:
             thread.join()
+
+        # Camera and LED init
+        self.cam = Picamera2()
+        GPIO.setwarnings(False)
+        GPIO.setup(self.LED, GPIO.OUT)
+        GPIO.output(self.LED, GPIO.HIGH)
+
+        # Button init
+        GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
         # Initial (placeholder) measurement data
         self.data = {
@@ -142,7 +152,7 @@ class PhenoHiveStation:
         LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
                      f", Ping returned : {self.connected}")
 
-    def init_camera():
+    """def init_camera():
         # Camera and LED init
         self.cam = Picamera2()
         GPIO.setwarnings(False)
@@ -151,7 +161,7 @@ class PhenoHiveStation:
 
         # Button init
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)"""
 
 
     def init_load():
