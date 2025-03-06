@@ -4,7 +4,6 @@ import os
 import statistics
 import time
 import threading
-from concurrent.futures import ThreadPoolExecutor
 import Adafruit_GPIO.SPI as SPI
 import ST7735 as TFT
 import hx711
@@ -94,22 +93,31 @@ class PhenoHiveStation:
         self.parse_config_file(CONFIG_FILE)
         self.status = 0  # 0: idle, 1: measuring, -1: error
 
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = {
-                executor.submit(self.init_display): "screen",
-                #executor.submit(self.init_load): "capteur_poids",
-                #executor.submit(self.init_camera): "camera",
-                #executor.submit(self.init_influxdb): "influxdb_client"
-            }
-            
-            for future in futures:
-                try:
-                    result = future.result()
-                    setattr(self, futures[future], result)
-                except Exception as e:
-                    print(f"Erreur lors de l'initialisation de {futures[future]}: {e}")
+        threads = [
+            threading.Thread(target=self.init_display),
+            #threading.Thread(target=self.init_influxdb),
+            #threading.Thread(target=self.init_camera),
+            #threading.Thread(target=self.init_load)
+        ]
+        
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
 
-        # init_display()
+        # Screen initialisation
+        """LOGGER.debug("Initialising screen")
+        self.st7735 = TFT.ST7735(
+            self.DC,
+            rst=self.RST,
+            spi=SPI.SpiDev(
+                self.SPI_PORT,
+                self.SPI_DEVICE,
+                max_speed_hz=self.SPEED_HZ
+            )
+        )
+        self.disp = Display(self)
+        self.disp.show_image("assets/logo_elia.jpg")"""
 
         # InfluxDB client initialization
         self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
@@ -167,16 +175,16 @@ class PhenoHiveStation:
         self.disp = Display(self)
         self.disp.show_image("assets/logo_elia.jpg")
 
-    def init_influxdb():
+    """def init_influxdb():
         # InfluxDB client initialization
         self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
         self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
         self.connected = self.client.ping()
         self.last_connection = datetime.now().strftime(DATE_FORMAT)
         LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
-                     f", Ping returned : {self.connected}")
+                     f", Ping returned : {self.connected}")"""
 
-    def init_camera():
+    """def init_camera():
         # Camera and LED init
         self.cam = Picamera2()
         GPIO.setwarnings(False)
@@ -185,10 +193,10 @@ class PhenoHiveStation:
 
         # Button init
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)"""
 
 
-    def init_load():
+    """def init_load():
         # Hx711
         self.hx = DebugHx711(dout_pin=5, pd_sck_pin=6)
         try:
@@ -197,7 +205,7 @@ class PhenoHiveStation:
         except hx711.GenericHX711Exception as e:
             self.register_error(type(e)(f"Error while resetting HX711 : {e}"))
         else:
-            LOGGER.debug("HX711 reset")
+            LOGGER.debug("HX711 reset")"""
 
     def parse_config_file(self, path: str) -> None:
         """
