@@ -3,6 +3,7 @@ import configparser
 import os
 import statistics
 import time
+import threading
 import Adafruit_GPIO.SPI as SPI
 import ST7735 as TFT
 import hx711
@@ -92,43 +93,17 @@ class PhenoHiveStation:
         self.parse_config_file(CONFIG_FILE)
         self.status = 0  # 0: idle, 1: measuring, -1: error
 
-        # InfluxDB client initialization
-        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
-        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
-        self.connected = self.client.ping()
-        self.last_connection = datetime.now().strftime(DATE_FORMAT)
-        LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
-                     f", Ping returned : {self.connected}")
-
-        # Screen initialisation
-        LOGGER.debug("Initialising screen")
-        self.st7735 = TFT.ST7735(
-            self.DC,
-            rst=self.RST,
-            spi=SPI.SpiDev(
-                self.SPI_PORT,
-                self.SPI_DEVICE,
-                max_speed_hz=self.SPEED_HZ
-            )
-        )
-        self.disp = Display(self)
-        self.disp.show_image("assets/logo_elia.jpg")
-
-        # Hx711
-        self.hx = DebugHx711(dout_pin=5, pd_sck_pin=6)
-        try:
-            LOGGER.debug("Resetting HX711")
-            self.hx.reset()
-        except hx711.GenericHX711Exception as e:
-            self.register_error(type(e)(f"Error while resetting HX711 : {e}"))
-        else:
-            LOGGER.debug("HX711 reset")
-
-        # Camera and LED init
-        self.cam = Picamera2()
-        GPIO.setwarnings(False)
-        GPIO.setup(self.LED, GPIO.OUT)
-        GPIO.output(self.LED, GPIO.HIGH)
+        threads = [
+            threading.Thread(target=self.init_display),
+            threading.Thread(target=self.init_influxdb),
+            threading.Thread(target=self.init_camera),
+            threading.Thread(target=self.init_load)
+        ]
+        
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
 
         # Button init
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -146,6 +121,49 @@ class PhenoHiveStation:
             "picture": ""  # last picture as a base-64 string
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
+
+    def init_display(self):
+        # Screen initialisation
+        LOGGER.debug("Initialising screen")
+        self.st7735 = TFT.ST7735(
+            self.DC,
+            rst=self.RST,
+            spi=SPI.SpiDev(
+                self.SPI_PORT,
+                self.SPI_DEVICE,
+                max_speed_hz=self.SPEED_HZ
+            )
+        )
+        self.disp = Display(self)
+        self.disp.show_image("assets/logo_elia.jpg")
+
+    def init_influxdb(self):
+        # InfluxDB client initialization
+        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
+        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
+        self.connected = self.client.ping()
+        self.last_connection = datetime.now().strftime(DATE_FORMAT)
+        LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
+                     f", Ping returned : {self.connected}")
+
+    def init_camera(self):
+        # Camera and LED init
+        self.cam = Picamera2()
+        GPIO.setwarnings(False)
+        GPIO.setup(self.LED, GPIO.OUT)
+        GPIO.output(self.LED, GPIO.HIGH)
+
+
+    def init_load(self):
+        # Hx711
+        self.hx = DebugHx711(dout_pin=5, pd_sck_pin=6)
+        try:
+            LOGGER.debug("Resetting HX711")
+            self.hx.reset()
+        except hx711.GenericHX711Exception as e:
+            self.register_error(type(e)(f"Error while resetting HX711 : {e}"))
+        else:
+            LOGGER.debug("HX711 reset")
 
     def parse_config_file(self, path: str) -> None:
         """
