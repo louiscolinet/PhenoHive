@@ -96,16 +96,29 @@ class PhenoHiveStation:
         threads = [
             threading.Thread(target=self.init_display),
             threading.Thread(target=self.init_influxdb),
-            threading.Thread(target=self.init_camera),
-            threading.Thread(target=self.init_load),
-            threading.Thread(target=self.init_button),
-            threading.Thread(target=self.init_data)
+            threading.Thread(target=self.init_camera_button),
+            threading.Thread(target=self.init_load)
+            #threading.Thread(target=self.init_button)
+            #threading.Thread(target=self.init_data)
         ]
         
         for thread in threads:
             thread.start()
         for thread in threads:
             thread.join()
+
+        # Initial (placeholder) measurement data
+        self.data = {
+            "status": self.status,  # current status
+            "error_time": self.last_error[0],  # last registered error
+            "error_message": str(self.last_error[1]),  # last registered error
+            "growth": -1.0,  # plant's growth
+            "weight": -1.0,  # plant's (measured) weight
+            "weight_g": -1.0,  # plant's (measured) weight in grams (if calibrated)
+            "standard_deviation": -1.0,  # measured weight standard deviation
+            "picture": ""  # last picture as a base-64 string
+        }
+        self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
 
     def init_display(self):
         # Screen initialisation
@@ -131,12 +144,16 @@ class PhenoHiveStation:
         LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
                      f", Ping returned : {self.connected}")
 
-    def init_camera(self):
+    def init_camera_button(self):
         # Camera and LED init
         self.cam = Picamera2()
         GPIO.setwarnings(False)
         GPIO.setup(self.LED, GPIO.OUT)
         GPIO.output(self.LED, GPIO.HIGH)
+
+        # Button init
+        GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
     def init_load(self):
