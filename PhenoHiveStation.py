@@ -97,9 +97,9 @@ class PhenoHiveStation:
             threading.Thread(target=self.init_display),
             threading.Thread(target=self.init_influxdb),
             threading.Thread(target=self.init_camera_button),
-            threading.Thread(target=self.init_load)
-            #threading.Thread(target=self.init_button)
-            #threading.Thread(target=self.init_data)
+            threading.Thread(target=self.init_load),
+            threading.Thread(target=self.init_button),
+            threading.Thread(target=self.init_data)
         ]
         
         for thread in threads:
@@ -108,10 +108,27 @@ class PhenoHiveStation:
             thread.join()
 
         # Button init
+        """GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)"""
+
+        # Initial (placeholder) measurement data
+        """self.data = {
+            "status": self.status,  # current status
+            "error_time": self.last_error[0],  # last registered error
+            "error_message": str(self.last_error[1]),  # last registered error
+            "growth": -1.0,  # plant's growth
+            "weight": -1.0,  # plant's (measured) weight
+            "weight_g": -1.0,  # plant's (measured) weight in grams (if calibrated)
+            "standard_deviation": -1.0,  # measured weight standard deviation
+            "picture": ""  # last picture as a base-64 string
+        }
+        self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]"""
+
+    def init_button(self):
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-        # Initial (placeholder) measurement data
+    def init_data(self):
         self.data = {
             "status": self.status,  # current status
             "error_time": self.last_error[0],  # last registered error
@@ -123,6 +140,7 @@ class PhenoHiveStation:
             "picture": ""  # last picture as a base-64 string
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
+
 
     def init_display(self):
         # Screen initialisation
