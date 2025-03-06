@@ -105,8 +105,8 @@ class PhenoHiveStation:
         for thread in threads:
             thread.join()
 
-       """ # Screen initialisation
-        LOGGER.debug("Initialising screen")
+        # Screen initialisation
+        """LOGGER.debug("Initialising screen")
         self.st7735 = TFT.ST7735(
             self.DC,
             rst=self.RST,
