@@ -14,7 +14,8 @@ import logging
 CONFIG_FILE = "config.ini"
 LOGGER = None
 
-print(Picamera2.global_camera_info())
+
+print(Picamera2().global_camera_info())
 
 def main() -> None:
     """
