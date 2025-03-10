@@ -15,9 +15,8 @@ CONFIG_FILE = "config.ini"
 LOGGER = None
 
 from picamera2 import Picamera2
-picam2 = Picamera2()
-camera_info = picam2.global_camera_info()
-print(camera_info)
+picam2 = Picamera2(camera_num=0)
+print("Caméra initialisée avec succès !")
 
 
 def main() -> None:
