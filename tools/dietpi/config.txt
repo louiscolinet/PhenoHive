@@ -58,7 +58,7 @@ disable_overscan=1
 #-------RPi camera module-------
 start_x=1
 camera_auto_detect=1
-#disable_camera_led=1
+disable_camera_led=0
 
 #-------GPU memory splits-------
 gpu_mem_256=16
