@@ -1,12 +1,12 @@
 [Unit]
 Description=PhenoHive station service
-Documentation=https://github.com/Oldgram/PhenoHive
+Documentation=https://github.com/louiscolinet/PhenoHive
 After=multi-user.target
 
 [Service]
 User=root
-WorkingDirectory=PHENOHIVE_DIRECTORY
-ExecStart=/usr/bin/python PHENOHIVE_DIRECTORY/main.py
+WorkingDirectory==/root/PhenoHive
+ExecStart=/usr/bin/python  /root/PhenoHive/main.py
 Restart=on-failure
 
 [Install]
