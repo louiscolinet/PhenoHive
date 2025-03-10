@@ -5,7 +5,7 @@ After=multi-user.target
 
 [Service]
 User=root
-WorkingDirectory=/root/PhenoHive
+WorkingDirectory=/root/PhenoHive/
 ExecStart=/usr/bin/python /root/PhenoHive/main.py
 Restart=on-failure
 
