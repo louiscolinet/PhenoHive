@@ -14,11 +14,6 @@ import logging
 CONFIG_FILE = "config.ini"
 LOGGER = None
 
-from picamera2 import Picamera2
-picam2 = Picamera2(camera_num=0)
-print("Caméra initialisée avec succès !")
-
-
 def main() -> None:
     """
     Main function, initialise the station and start the main loop
