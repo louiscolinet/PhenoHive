@@ -181,8 +181,6 @@ class PhenoHiveStation:
             LOGGER.error(f"Failed to parse config file: {type(e).__name__}: {e}")
             raise RuntimeError(f"Failed to parse config file {e}")
 
-        LOGGER.debug(f"sigma brut = {self.parser['image_arg'].get('sigma')}")
-
         self.token = str(self.parser["InfluxDB"]["token"])
         self.org = str(self.parser["InfluxDB"]["org"])
         self.bucket = str(self.parser["InfluxDB"]["bucket"])
@@ -193,7 +191,6 @@ class PhenoHiveStation:
         self.pot_limit = int(self.parser["image_arg"]["pot_limit"])
         self.channel = str(self.parser["image_arg"]["channel"])
         self.kernel_size = int(self.parser["image_arg"]["kernel_size"])
-        self.sigma = float(self.parser["image_arg"]["sigma"])
         self.fill_size = int(self.parser["image_arg"]["fill_size"])
         self.time_interval = int(self.parser["time_interval"]["time_interval"])
         self.WIDTH = int(self.parser["Display"]["width"])
@@ -388,7 +385,7 @@ class PhenoHiveStation:
         growth_value = -1
         if pic != "" and path_img != "":
             try:
-                growth_value = get_total_length(image_path=path_img, channel=self.channel, kernel_size=self.kernel_size, sigma=self.sigma)
+                growth_value = get_total_length(image_path=path_img, channel=self.channel, kernel_size=self.kernel_size)
             except KeyError:
                 self.register_error(KeyError("Error while processing the photo, no segment found in the image."
                                              "Check that the plant is clearly visible."))
