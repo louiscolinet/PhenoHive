@@ -79,13 +79,13 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
 
     # Find contours
     thresh = cv2.adaptiveThreshold(closing, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-    thresh = cv2.bitwise_not(thresh)
     contours = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = contours[0]
     big_contour = max(contours, key=cv2.contourArea)
 
     # Fill contour to get maize shape
     result = np.zeros_like(closing)
+    result = cv2.bitwise_not(result)
     cv2.drawContours(result, [big_contour], 0, (255, 255, 255), cv2.FILLED)
     cv2.imwrite("data/result.jpg", result)
 
