@@ -181,6 +181,8 @@ class PhenoHiveStation:
             LOGGER.error(f"Failed to parse config file: {type(e).__name__}: {e}")
             raise RuntimeError(f"Failed to parse config file {e}")
 
+        print(f"DEBUG: sigma brut = {self.parser['image_arg'].get('sigma')}")
+
         self.token = str(self.parser["InfluxDB"]["token"])
         self.org = str(self.parser["InfluxDB"]["org"])
         self.bucket = str(self.parser["InfluxDB"]["bucket"])
