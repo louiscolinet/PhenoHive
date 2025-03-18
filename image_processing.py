@@ -87,7 +87,6 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     # Fill contour to get maize shape
     result = np.zeros_like(closing)
     cv2.drawContours(result, [big_contour], 0, (255, 255, 255), cv2.FILLED)
-    result = cv2.bitwise_not(result)
     cv2.imwrite("data/result.jpg", result)
 
     # Draw plant skeleton and segment
