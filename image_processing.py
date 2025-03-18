@@ -31,7 +31,7 @@ def get_height_pix(image_path: str, pot_limit: int, channel: str = 'k', kernel_s
     k_mblur = pcv.median_blur(k, kernel_size)
 
     edges = pcv.canny_edge_detect(k_mblur, sigma=2)
-    edges_crop = pcv.crop(edges, 5, 5, height - pot_limit - 10, width - 10)
+    edges_crop = pcv.crop(edges, 5, 5, height - pot_limit - 5, width)
     new_height = edges_crop.shape[0]
     edges_filled = pcv.fill(edges_crop, fill_size)
     pcv.print_image(edges_filled, path)
@@ -42,7 +42,7 @@ def get_height_pix(image_path: str, pot_limit: int, channel: str = 'k', kernel_s
     return plant_height_pix
 
 
-def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20) -> list[int]:
+def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20, sigma: float = 1.0) -> list[int]:
     """
     Get the list of segments lengths from the plant skeleton
     :param image_path: path to the image
@@ -64,12 +64,12 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     k = pcv.rgb2gray_cmyk(rgb_img=img, channel=channel)
 
     # Perform canny=edge detection
-    edges = pcv.canny_edge_detect(k, sigma=0.4)
+    edges = pcv.canny_edge_detect(k, sigma)
 
     # Crop image edges
-    edges_crop = pcv.crop(edges, 5, 5, height - 10, width - 10)
+    edges_crop = pcv.crop(edges, 5, 5, height - 5, width)
     cv2.imwrite("data/edges_crop.jpg", edges_crop)
-    crop = pcv.crop(img, 5, 5, height - 10, width - 10)
+    crop = pcv.crop(img, 5, 5, height - 5, width)
     cv2.imwrite("data/crop.jpg", crop)
 
     # Close gaps in plant contour
@@ -106,7 +106,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20)
     return path_lengths
 
 
-def get_total_length(image_path: str, channel: str = 'k', kernel_size: int = 20) -> int:
+def get_total_length(image_path: str, channel: str = 'k', kernel_size: int = 20, sigma: float = 1.0) -> int:
     """
     Get the total length of the plant skeleton
     :param image_path: path to the image
@@ -117,7 +117,7 @@ def get_total_length(image_path: str, channel: str = 'k', kernel_size: int = 20)
     :return: the total length of the plant skeleton
     """
     # May raise a KeyError if no segments are found
-    segment_list = get_segment_list(image_path, channel, kernel_size)
+    segment_list = get_segment_list(image_path, channel, kernel_size; sigma)
 
     # Get the sum of segment lengths
     return int(sum(segment_list))
