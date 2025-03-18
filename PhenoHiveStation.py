@@ -191,6 +191,7 @@ class PhenoHiveStation:
         self.pot_limit = int(self.parser["image_arg"]["pot_limit"])
         self.channel = str(self.parser["image_arg"]["channel"])
         self.kernel_size = int(self.parser["image_arg"]["kernel_size"])
+        self.sigma = int(self.parser["image_arg"]["sigma"])
         self.fill_size = int(self.parser["image_arg"]["fill_size"])
         self.time_interval = int(self.parser["time_interval"]["time_interval"])
         self.WIDTH = int(self.parser["Display"]["width"])
