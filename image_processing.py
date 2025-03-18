@@ -62,10 +62,10 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
 
     # Extract channel (grey image)
     k = pcv.rgb2gray_cmyk(rgb_img=img, channel=channel)
-    thresh = cv2.adaptiveThreshold(k, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    thresh1 = cv2.adaptiveThreshold(k, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
 
     # Perform canny=edge detection
-    edges = pcv.canny_edge_detect(k, sigma=sigma)
+    edges = pcv.canny_edge_detect(thresh1, sigma=sigma)
 
     # Crop image edges
     edges_crop = pcv.crop(edges, 5, 5, height - 10, width - 10)
