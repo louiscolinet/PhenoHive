@@ -68,14 +68,14 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
 
     # Crop image edges
     edges_crop = pcv.crop(edges, 5, 5, height - 10, width - 10)
-    cv2.imwrite("data/edges_crop.jpg", edges_crop)
+    #cv2.imwrite("data/edges_crop.jpg", edges_crop)
     crop = pcv.crop(img, 5, 5, height - 10, width - 10)
     cv2.imwrite("data/crop.jpg", crop)
 
     # Close gaps in plant contour
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
     closing = cv2.morphologyEx(edges_crop, cv2.MORPH_CLOSE, kernel)
-    cv2.imwrite("data/closing.jpg", closing)
+    #cv2.imwrite("data/closing.jpg", closing)
 
     # Find contours
     thresh = cv2.adaptiveThreshold(closing, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
@@ -94,7 +94,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     skeleton = pcv.morphology.skeletonize(mask=result)
     segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
     cv2.imwrite("data/skeleton.jpg", skeleton)
-    cv2.imwrite("data/segmented_img.jpg", segmented_img)
+    #cv2.imwrite("data/segmented_img.jpg", segmented_img)
 
     #if pcv.params.debug is not None:
         # The labelled image is only useful for debugging purposes
