@@ -63,7 +63,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     # Extract channel (grey image)
     k = pcv.rgb2gray_cmyk(rgb_img=img, channel=channel)
     cv2.imwrite("data/k.jpg", k)
-    #thresh1 = cv2.adaptiveThreshold(k, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_TRUNC, 5, 2)
+    #thresh1 = cv2.adaptiveThreshold(k, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_TRUNC, 9, 2)
     #thresh1 = cv2.bitwise_not(thresh1)
     #cv2.imwrite("data/thresh1.jpg", thresh1)
 
