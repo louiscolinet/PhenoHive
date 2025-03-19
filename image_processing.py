@@ -82,7 +82,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     cv2.imwrite("data/closing.jpg", closing)
 
     # Find contours
-    thresh = cv2.adaptiveThreshold(k, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 3, 2)
+    #thresh = cv2.adaptiveThreshold(k, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
     #thresh = cv2.threshold(closing, 128, 255, cv2.THRESH_BINARY)[1]
     contours = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = contours[0]
