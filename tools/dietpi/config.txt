@@ -101,3 +101,4 @@ initial_turbo=20
 #core_freq_min=250
 #sdram_freq_min=400
 arm_64bit=1
+ 
