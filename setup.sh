@@ -122,7 +122,7 @@ install_st7735
 # Enable spi interface
 enable_spi
 # Enable PiCamera recognition
-enable_picamera
+#enable_picamera
 # Setup PhenoHive as a service so PhenoHive/main.py is run on boot
 setup_service
 
