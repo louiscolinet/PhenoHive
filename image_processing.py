@@ -71,10 +71,10 @@ def get_segment_list(image_path: str, channel: str = 'b', kernel_size: int = 20,
     skeleton = pcv.morphology.skeletonize(mask=smoothed)
 
     # Suppression des artefacts du squelette
-    skeleton_pruned = pcv.morphology.prune(skel_img=skeleton, size=5)
+    #skeleton_pruned = pcv.morphology.prune(skel_img=skeleton, size=5)
 
     # Segmentation du squelette et récupération des longueurs
-    segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton_pruned)
+    segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
     _ = pcv.morphology.segment_path_length(segmented_img=segmented_img, objects=obj, label="plant")
 
     try:
