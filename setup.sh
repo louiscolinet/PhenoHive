@@ -86,8 +86,19 @@ enable_spi() {
 
 enable_picamera() {
     echo -e "${INFO}Enabling PiCamera recognition...${WHITE}"
-    echo "start_x=1" | sudo tee -a /boot/config.txt
-    echo "camera_auto_detect=1" | sudo tee -a /boot/config.txt
+    if [ -f /etc/modprobe.d/dietpi-disable_rpi_camera.conf ]; then
+        sudo rm /etc/modprobe.d/dietpi-disable_rpi_camera.conf
+    fi
+    if [ -f /etc/modprobe.d/dietpi-disable_rpi_codec.conf ]; then
+        sudo rm /etc/modprobe.d/dietpi-disable_rpi_codec.conf
+    fi
+    if ! grep -q "^start_x=1" /boot/config.txt; then
+        echo "start_x=1" | sudo tee -a /boot/config.txt
+    fi
+    if ! grep -q "^camera_auto_detect=1" /boot/config.txt; then
+        echo "camera_auto_detect=1" | sudo tee -a /boot/config.txt
+    fi
+    sudo dietpi-set_hardware rpi-camera enable
 }
 
 setup_service() {
@@ -122,7 +133,7 @@ install_st7735
 # Enable spi interface
 enable_spi
 # Enable PiCamera recognition
-#enable_picamera
+enable_picamera
 # Setup PhenoHive as a service so PhenoHive/main.py is run on boot
 setup_service
 
