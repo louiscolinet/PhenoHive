@@ -47,7 +47,7 @@ def get_segment_list(image_path: str, channel: str = 'b', kernel_size: int = 20,
     img, _, _ = pcv.readimage(image_path)
 
     # Utilisation de Lab au lieu de CMYK
-    lab = pcv.rgb2gray_lab(img, channel=channel)
+    lab = pcv.rgb2gray_lab(img, channel='b')
 
     # Seuillage adaptatif + Filtrage morphologique optimisé
     thresh = cv2.adaptiveThreshold(lab, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
