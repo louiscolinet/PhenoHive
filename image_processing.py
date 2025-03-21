@@ -42,74 +42,47 @@ def get_height_pix(image_path: str, pot_limit: int, channel: str = 'k', kernel_s
     return plant_height_pix
 
 
-def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20, sigma: float = 2) -> list[int]:
-    """
-    Get the list of segments lengths from the plant skeleton
-    :param image_path: path to the image
-    :param channel: CMYK channel for conversion from RGB to CMYK colorspace
-    (c = cyan, m = magenta, y = yellow, k=black)
-    :param kernel_size: kernel size for the closing operation
-    :raises: KeyError if no segments are found in the image
-    :return: list of segments lengths
-    """
-    #pcv.params.debug = None
-
-    # Read image
+def get_segment_list(image_path: str, channel: str = 'b', kernel_size: int = 20, sigma: float = 2) -> list[int]:
+    pcv.outputs.clear()
     img, _, _ = pcv.readimage(image_path)
 
-    # Get image dimension
-    height, width = img.shape[0], img.shape[1]
+    # Utilisation de Lab au lieu de CMYK
+    lab = pcv.rgb2gray_lab(img, channel=channel)
 
-    # Extract channel (grey image)
-    lab = pcv.rgb2gray_lab(img, channel='b')
-    #gray = pcv.gaussian_blur(lab, ksize=(kernel_size, kernel_size))
-    cv2.imwrite("data/k.jpg", lab)
+    # Seuillage adaptatif + Filtrage morphologique optimisé
+    thresh = cv2.adaptiveThreshold(lab, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 2)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
+    closing = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
-    # Perform canny=edge detection
-    edges = pcv.canny_edge_detect(lab, sigma=sigma)
+    # Détection des contours avec filtrage
+    contours = cv2.findContours(closing, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+    filtered_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > 500 and cv2.boundingRect(cnt)[3] > cv2.boundingRect(cnt)[2]]
+    if not filtered_contours:
+        raise KeyError("Aucun contour valide détecté")
 
-    # Crop image edges
-    edges_crop = pcv.crop(edges, 5, 5, height - 10, width - 10)
-    cv2.imwrite("data/edges_crop.jpg", edges_crop)
-    # pour le debug
-    crop = pcv.crop(img, 5, 5, height - 10, width - 10)
-    cv2.imwrite("data/crop.jpg", crop)
+    big_contour = max(filtered_contours, key=cv2.contourArea)
 
-    # Close gaps in plant contour
-    kernel = np.ones((kernel_size, kernel_size), np.uint8)
-    closing = cv2.morphologyEx(edges_crop, cv2.MORPH_CLOSE, kernel)
-    cv2.imwrite("data/closing.jpg", closing)
-
-    # Find contours
-    #thresh = cv2.adaptiveThreshold(k, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 10)
-    thresh = cv2.threshold(closing, 128, 255, cv2.THRESH_BINARY)[1]
-    contours = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contours = contours[0]
-    big_contour = max(contours, key=cv2.contourArea)
-
-    # Fill contour to get maize shape
+    # Remplissage du masque
     result = np.zeros_like(closing)
-    cv2.drawContours(result, [big_contour], 0, (255, 255, 255), cv2.FILLED)
-    cv2.imwrite("data/result.jpg", result)
+    cv2.drawContours(result, [big_contour], 0, 255, cv2.FILLED)
 
-    # Draw plant skeleton and segment
-    pcv.params.line_thickness = 3
-    skeleton = pcv.morphology.skeletonize(mask=result)
-    #skeleton_pruned = pcv.morphology.prune(skel_img=skeleton, size=7)
-    segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
-    cv2.imwrite("data/skeleton.jpg", skeleton)
-    cv2.imwrite("data/segmented_img.jpg", segmented_img)
+    # Filtrage médian avant squelette
+    smoothed = cv2.medianBlur(result, 5)
+    skeleton = pcv.morphology.skeletonize(mask=smoothed)
 
-    #if pcv.params.debug is not None:
-        # The labelled image is only useful for debugging purposes
-    _ = pcv.morphology.segment_path_length(segmented_img=segmented_img,
-                                               objects=obj, label="default")
-    # Get segment lengths
-    # Will raise a KeyError if no segments are found
-    path_lengths = pcv.outputs.observations['default']['segment_path_length']['value']
+    # Suppression des artefacts du squelette
+    skeleton_pruned = pcv.morphology.prune(skel_img=skeleton, size=5)
+
+    # Segmentation du squelette et récupération des longueurs
+    segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton_pruned)
+    _ = pcv.morphology.segment_path_length(segmented_img=segmented_img, objects=obj, label="plant")
+
+    try:
+        path_lengths = pcv.outputs.observations["plant"]["segment_path_length"]["value"]
+    except KeyError:
+        raise KeyError("Impossible de récupérer les longueurs des segments")
 
     return path_lengths
-
 
 def get_total_length(image_path: str, channel: str = 'k', kernel_size: int = 20, sigma: float = 1) -> int:
     """
