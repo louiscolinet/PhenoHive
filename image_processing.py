@@ -28,9 +28,9 @@ def get_height_pix(image_path: str, pot_limit: int, channel: str = 'k', kernel_s
     height, width = img.shape[0], img.shape[1]
 
     lab = pcv.rgb2gray_lab(img, channel='b')
-    gray = pcv.gaussian_blur(lab, ksize=kernel_size, sigma=1)
+    gray = pcv.gaussian_blur(lab, ksize=(kernel_size, kernel_size))
 
-    edges = pcv.canny_edge_detect(k_mblur, sigma=2)
+    edges = pcv.canny_edge_detect(gray, sigma=2)
     edges_crop = pcv.crop(edges, 5, 5, height - pot_limit - 10, width - 10)
     new_height = edges_crop.shape[0]
     edges_filled = pcv.fill(edges_crop, fill_size)
@@ -62,11 +62,11 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
 
     # Extract channel (grey image)
     lab = pcv.rgb2gray_lab(img, channel='b')
-    gray = pcv.gaussian_blur(lab, ksize=kernel_size)
+    gray = pcv.gaussian_blur(lab, ksize=(kernel_size, kernel_size))
     cv2.imwrite("data/k.jpg", lab)
 
     # Perform canny=edge detection
-    edges = pcv.canny_edge_detect(k, sigma=sigma)
+    edges = pcv.canny_edge_detect(gray, sigma=sigma)
 
     # Crop image edges
     edges_crop = pcv.crop(edges, 5, 5, height - 10, width - 10)
