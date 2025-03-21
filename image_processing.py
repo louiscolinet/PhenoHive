@@ -62,11 +62,11 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
 
     # Extract channel (grey image)
     lab = pcv.rgb2gray_lab(img, channel='b')
-    gray = pcv.gaussian_blur(lab, ksize=(kernel_size, kernel_size))
+    #gray = pcv.gaussian_blur(lab, ksize=(kernel_size, kernel_size))
     cv2.imwrite("data/k.jpg", lab)
 
     # Perform canny=edge detection
-    edges = pcv.canny_edge_detect(gray, sigma=sigma)
+    edges = pcv.canny_edge_detect(lab, sigma=sigma)
 
     # Crop image edges
     edges_crop = pcv.crop(edges, 5, 5, height - 10, width - 10)
