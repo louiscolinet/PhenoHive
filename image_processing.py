@@ -95,8 +95,8 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     pcv.params.line_thickness = 3
     skeleton = pcv.morphology.skeletonize(mask=result)
     #skeleton_pruned = pcv.morphology.prune(skel_img=skeleton, size=7)
-    segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton_pruned)
-    cv2.imwrite("data/skeleton.jpg", skeleton_pruned)
+    segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
+    cv2.imwrite("data/skeleton.jpg", skeleton)
     cv2.imwrite("data/segmented_img.jpg", segmented_img)
 
     #if pcv.params.debug is not None:
