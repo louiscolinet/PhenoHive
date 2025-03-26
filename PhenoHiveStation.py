@@ -174,8 +174,15 @@ class PhenoHiveStation:
     best_score = -np.inf
     sigma_values = np.linspace(sigma_range[0], sigma_range[1], num=10)
     kernel_values = range(kernel_range[0], kernel_range[1] + 1, 10)
+
+    # Take the photo
+        GPIO.output(self.LED, GPIO.LOW)
+        image_path = self.save_photo(preview=False, time_to_wait=6)
+        time.sleep(2)
+        GPIO.output(self.LED, GPIO.HIGH)
     
     for sigma, kernel_size in product(sigma_values, kernel_values):
+        
         try:
             path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
         except KeyError:
