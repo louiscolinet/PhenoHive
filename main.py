@@ -119,13 +119,14 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
     sigma = float(station.parser['image_arg']["sigma"])
     kernel_size = int(station.parser['image_arg']["kernel_size"])
     time.sleep(1)
+    station.disp.show_img_param_menu(sigma, kernel_size, calib_test_num)
     while True:
         if not GPIO.input(station.BUT_RIGHT):
             time.sleep(1)
-            #break
+            break
         if not GPIO.input(station.BUT_LEFT):
             if calib_test_num > 10:
-               # break
+                break
                 calib_test_num = 0
             station.disp.show_img_param_menu(sigma, kernel_size, calib_test_num)
             calib_test_num += 1
