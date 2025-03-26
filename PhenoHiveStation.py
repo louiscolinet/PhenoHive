@@ -177,12 +177,6 @@ class PhenoHiveStation:
         best_score = -np.inf
         sigma_values = np.linspace(sigma*calib_test_num/30, sigma*30/calib_test_num, num=10)
         kernel_values = range(kernel*calib_test_num, kernel//calib_test_num + 1, 10)
-    
-        # Take the photo
-        GPIO.output(self.LED, GPIO.LOW)
-        image_path = self.save_photo(preview=False, time_to_wait=6)
-        time.sleep(2)
-        GPIO.output(self.LED, GPIO.HIGH)
         
         for sigma, kernel_size in product(sigma_values, kernel_values):
             
