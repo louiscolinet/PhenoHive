@@ -203,7 +203,7 @@ class PhenoHiveStation:
                 best_params = (sigma, kernel_size)
         return best_params
 
-    def evaluate_skeleton(generated_skeleton_path: str, reference_skeleton_path: str) -> dict:
+    def evaluate_skeleton(self, generated_skeleton_path: str, reference_skeleton_path: str) -> dict:
         """
         Compare un squelette généré avec un squelette de référence.
         
