@@ -2,6 +2,7 @@ import base64
 import configparser
 import os
 import numpy as np
+from itertools import product
 import statistics
 import time
 import threading
