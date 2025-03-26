@@ -166,7 +166,7 @@ class PhenoHiveStation:
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
 
-    def calib_img_param(self, image_path: str, channel: str = 'k', sigma_range=(0.3, 5), kernel_range=(10, 50), ):
+    def calib_img_param(self, image_path: str, channel: str = 'k', sigma_range=(0.3, 5), kernel_range=(10, 50)):
     """
     Automatically calibrate sigma and kernel_size for optimal segmentation.
     """
