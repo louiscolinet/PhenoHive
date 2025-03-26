@@ -159,7 +159,7 @@ class Display:
             draw.text((0, 130), "<-- Test          Back -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
-    def show_img_param_menu(self, sigma, kernel_size, calib_test_num) -> None:
+    def show_img_param_menu(self, sigma, kernel_size, inc) -> None:
         """
         Show the measuring menu
         :param sigma: sigma used in image processing
@@ -171,8 +171,12 @@ class Display:
         font = ImageFont.truetype(FONT, 10)
         draw.text((0, 80), f"Sigma value: {sigma}", font=font, fill=(0, 0, 0))
         draw.text((0, 95), f"Kernel size value: {kernel_size}", font=font, fill=(0, 0, 0))
-        draw.text((0, 130), f"<-- Calib {calib_test_num}       Back -->", font=font, fill=(0, 0, 0))
-        self.SCREEN.display(img)
+        if inc%2 == 0:
+            draw.text((0, 130), f"<-- Calib {calib_test_num}       Back -->", font=font, fill=(0, 0, 0))
+            self.SCREEN.display(img)
+        else:
+            draw.text((0, 130), f"<-- Photo        Back -->", font=font, fill=(0, 0, 0))
+            self.SCREEN.display(img)
 
     def show_collecting_data(self, action):
         """
