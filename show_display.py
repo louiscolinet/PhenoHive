@@ -133,7 +133,7 @@ class Display:
         draw.text((24, 80), "Calibration", font=font, fill=(0, 0, 0))
         # Button
         font = ImageFont.truetype(FONT, 10)
-        draw.text((0, 130), "<-- Weight      Img -->", font=font, fill=(0, 0, 0))
+        draw.text((0, 130), "<-- Weight       Img -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
     def show_weight_cal_menu(self, raw_weight, weight_g, tare, calib_or_test) -> None:
