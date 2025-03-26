@@ -139,7 +139,7 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
                 inc += 1
                 time.sleep(1)
             else:
-                image_path = station.save_photo()
+                image_path = station.save_photo(img_name = skeleton)
 
 
 def handle_weight_calibration_menu(station: PhenoHiveStation) -> None:
