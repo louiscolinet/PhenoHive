@@ -166,12 +166,12 @@ class Display:
         :param kernel_size: kernel_size used in image processing for the bluring
         :param calib_test_num: to know how much test had already done
         """
-        img, draw = self.create_image(logo=True)
+        """img, draw = self.create_image(logo=True)
         # Button
         font = ImageFont.truetype(FONT, 10)
         draw.text((0, 80), f"Sigma value: {sigma}", font=font, fill=(0, 0, 0))
         draw.text((0, 95), f"Kernel size value: {kernel_size}", font=font, fill=(0, 0, 0))
-        draw.text((0, 130), f"<-- Calib {calib_test_num}         Back -->", font=font, fill=(0, 0, 0))
+        draw.text((0, 130), f"<-- Calib {calib_test_num}         Back -->", font=font, fill=(0, 0, 0))"""
         self.SCREEN.display(img)
 
     def show_collecting_data(self, action):
