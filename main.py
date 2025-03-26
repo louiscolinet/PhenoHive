@@ -75,6 +75,8 @@ def handle_configuration_menu(station: PhenoHiveStation) -> None:
             break
 
         if not GPIO.input(station.BUT_LEFT):
+            station.disp.show_calib_menu()
+            time.sleep(1)
             handle_calibration_menu(station)
             time.sleep(1)
             break
@@ -91,10 +93,34 @@ def handle_preview_loop(station: PhenoHiveStation) -> None:
         if not GPIO.input(station.BUT_RIGHT):
             break
 
-
 def handle_calibration_menu(station: PhenoHiveStation) -> None:
     """
-    Calibration loop.
+    Calibration menu
+    :param station: station object
+    """
+    while True:
+        if not GPIO.input(station.BUT_RIGHT):
+            handle_imag_param_calibration_menu(station)
+            time.sleep(1)
+            break
+
+        if not GPIO.input(station.BUT_LEFT):
+            handle_weight_calibration_menu(station)
+            time.sleep(1)
+            break
+
+def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
+    """
+    Image parameters calibration loop.
+    .......
+    :param station: station object
+    """
+    time.sleep(3)
+    
+
+def handle_weight_calibration_menu(station: PhenoHiveStation) -> None:
+    """
+    Weight calibration loop.
     This function takes the tare value and computes the calibration coefficient when the left button is pressed.
     :param station: station object
     """
