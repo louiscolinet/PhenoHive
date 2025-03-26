@@ -129,7 +129,7 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
         if not GPIO.input(station.BUT_LEFT):
             if calib_test_num > 20:
                 break
-            if else inc % 2 == 0:
+            elif inc % 2 == 0:
                 station.disp.show_img_param_menu(sigma, kernel_size, calib_test_num)
                 sigma, kernel_size = station.calib_img_param(image_path, channel, sigma, kernel_size, calib_test_num)
                 station.parser['image_arg']["sigma"] = sigma
