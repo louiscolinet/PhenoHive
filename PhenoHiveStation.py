@@ -182,7 +182,7 @@ class PhenoHiveStation:
             path_lengths = []
             
         num_segments = len(path_lengths)
-        dsc, num_branches, intersections = evaluate_skeleton(generated_skeleton_path, reference_skeleton_path)
+        dsc, num_branches, intersections = evaluate_skeleton("data/skeleton.jpg", "data/skeleton_ref.jpg")
 
         if num_segments < num_branches - 1/3* num_branches and num_segments > num_branches + 1/3* num_branches:
             score = 0
