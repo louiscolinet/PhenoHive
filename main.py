@@ -116,8 +116,9 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
     :param station: station object
     """
     calib_test_num = 0
-    sigma = float(station.parser['image_arg']["sigma"])
-    kernel_size = int(station.parser['image_arg']["kernel_size"])
+    sigma = station.sigma
+    kernel_size = station.kernel_size
+    channel = station.channel
     time.sleep(1)
     station.disp.show_img_param_menu(sigma, kernel_size, calib_test_num)
     while True:
@@ -131,6 +132,8 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
             sigma, kernel_size = station.calib_img_param(channel, sigma, kernel_size, calib_test_num)
             station.parser['image_arg']["sigma"] = sigma
             station.parser['image_arg']["kernel_size"] = kernel_size
+            station.sigma = sigma
+            station.kernel_size = kernel_size
             calib_test_num += 1
             time.sleep(1)
 
