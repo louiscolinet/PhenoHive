@@ -166,14 +166,14 @@ class PhenoHiveStation:
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
 
-    def calib_img_param(self, image_path: str, channel: str = 'k', sigma_range=(0.3, 5), kernel_range=(10, 50)):
+    def calib_img_param(self, image_path: str, channel: str = 'k', sigma=1, kernel=20, calib_test_num=1):
     """
     Automatically calibrate sigma and kernel_size for optimal segmentation.
     """
     best_params = None
     best_score = -np.inf
-    sigma_values = np.linspace(sigma_range[0], sigma_range[1], num=10)
-    kernel_values = range(kernel_range[0], kernel_range[1] + 1, 10)
+    sigma_values = np.linspace(sigma*calib_test_num/30, sigma*30/calib_test_num, num=10)
+    kernel_values = range(kernel*calib_test_num, kernel//calib_test_num + 1, 10)
 
     # Take the photo
         GPIO.output(self.LED, GPIO.LOW)
