@@ -166,6 +166,66 @@ class PhenoHiveStation:
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
 
+    def calib_img_param(self, image_path: str, channel: str = 'k', sigma_range=(0.3, 5), kernel_range=(10, 50), ):
+    """
+    Automatically calibrate sigma and kernel_size for optimal segmentation.
+    """
+    best_params = None
+    best_score = -np.inf
+    sigma_values = np.linspace(sigma_range[0], sigma_range[1], num=10)
+    kernel_values = range(kernel_range[0], kernel_range[1] + 1, 10)
+    
+    for sigma, kernel_size in product(sigma_values, kernel_values):
+        try:
+            path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
+        except KeyError:
+            path_lengths = []
+            
+        num_segments = len(path_lengths)
+        dsc, num_branches, intersections = evaluate_skeleton(generated_skeleton_path, reference_skeleton_path)
+
+        if num_segments < num_branches - 1/3* num_branches and num_segments > num_branches + 1/3* num_branches:
+            score = 0
+        else
+            score = dsc
+        
+        if score > best_score:
+            best_score = score
+            best_params = (sigma, kernel_size)
+    return best_params
+
+    def evaluate_skeleton(generated_skeleton_path: str, reference_skeleton_path: str) -> dict:
+    """
+    Compare un squelette généré avec un squelette de référence.
+    
+    :param generated_skeleton_path: Chemin de l'image du squelette généré
+    :param reference_skeleton_path: Chemin de l'image du squelette de référence
+    :return: Dictionnaire contenant le nombre de branches, intersections et DSC
+    """
+    # Charger les images en niveaux de gris
+    gen_skel = cv2.imread(generated_skeleton_path, cv2.IMREAD_GRAYSCALE)
+    ref_skel = cv2.imread(reference_skeleton_path, cv2.IMREAD_GRAYSCALE)
+    
+    # Convertir en format binaire (0 et 1)
+    gen_skel_bin = gen_skel // 255
+    ref_skel_bin = ref_skel // 255
+    
+    # Calcul du Dice Similarity Coefficient (DSC)
+    intersection = np.sum(gen_skel_bin * ref_skel_bin)
+    dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
+    
+    # Détection des points d'intersection
+    kernel = np.array([[1, 1, 1], [1, 10, 1], [1, 1, 1]])
+    intersection_map = cv2.filter2D(gen_skel_bin, -1, kernel)
+    intersections = np.sum(intersection_map == 30)  # Points où 3+ pixels voisins existent
+    
+    # Comptage des branches avec l'opération de squelette
+    skeleton = skeletonize(gen_skel_bin)
+    num_branches = np.sum(skeleton)
+    
+    return (dsc, num_branches, intersections)
+        
+
     def parse_config_file(self, path: str) -> None:
         """
         Parse the config file at the given path and initialise the station's variables with the values
