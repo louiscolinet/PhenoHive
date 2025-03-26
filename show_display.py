@@ -167,9 +167,6 @@ class Display:
         :param calib_test_num: to know how much test had already done
         """
         img, draw = self.create_image(logo=True)
-        # Menu
-        font = ImageFont.truetype(FONT, 13)
-        draw.text((11, 80), "Image parameters", font=font, fill=(0, 0, 0))
         # Button
         font = ImageFont.truetype(FONT, 10)
         draw.text((0, 80), f"Sigma value: {sigma}", font=font, fill=(0, 0, 0))
