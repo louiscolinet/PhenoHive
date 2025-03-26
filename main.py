@@ -115,28 +115,31 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
     .......
     :param station: station object
     """
-    calib_test_num = 1
+    inc = 1
     sigma = float(station.sigma)
     kernel_size = int(station.kernel_size)
     channel = str(station.channel)
     image_path=str(station.image_path)
     time.sleep(1)
-    station.disp.show_img_param_menu(sigma, kernel_size, calib_test_num)
+    station.disp.show_img_param_menu(sigma, kernel_size, inc)
     while True:
         if not GPIO.input(station.BUT_RIGHT):
             time.sleep(1)
             break
         if not GPIO.input(station.BUT_LEFT):
-            if calib_test_num > 10:
+            if calib_test_num > 20:
                 break
-            station.disp.show_img_param_menu(sigma, kernel_size, calib_test_num)
-            sigma, kernel_size = station.calib_img_param(image_path, channel, sigma, kernel_size, calib_test_num)
-            station.parser['image_arg']["sigma"] = sigma
-            station.parser['image_arg']["kernel_size"] = kernel_size
-            station.sigma = sigma
-            station.kernel_size = kernel_size
-            calib_test_num += 1
-            time.sleep(1)
+            if else inc % 2 == 0:
+                station.disp.show_img_param_menu(sigma, kernel_size, calib_test_num)
+                sigma, kernel_size = station.calib_img_param(image_path, channel, sigma, kernel_size, calib_test_num)
+                station.parser['image_arg']["sigma"] = sigma
+                station.parser['image_arg']["kernel_size"] = kernel_size
+                station.sigma = sigma
+                station.kernel_size = kernel_size
+                calib_test_num += 1
+                time.sleep(1)
+            else:
+                image_path = station.save_photo()
 
 
 def handle_weight_calibration_menu(station: PhenoHiveStation) -> None:
