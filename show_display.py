@@ -123,6 +123,19 @@ class Display:
         draw.text((0, 130), "<-- Calib          Prev -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
+    def show_calib_menu(self) -> None:
+        """
+        Show the preview menu
+        """
+        img, draw = self.create_image(logo=True)
+        # Menu
+        font = ImageFont.truetype(FONT, 13)
+        draw.text((13, 80), "Calibration", font=font, fill=(0, 0, 0))
+        # Button
+        font = ImageFont.truetype(FONT, 10)
+        draw.text((0, 130), "<-- weight        Img param -->", font=font, fill=(0, 0, 0))
+        self.SCREEN.display(img)
+
     def show_cal_menu(self, raw_weight, weight_g, tare, calib_or_test) -> None:
         """
         Show the calibration menu
