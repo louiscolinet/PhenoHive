@@ -179,7 +179,6 @@ class PhenoHiveStation:
         kernel_values = range(kernel*calib_test_num, kernel//calib_test_num + 1, 10)
         
         for sigma, kernel_size in product(sigma_values, kernel_values):
-            
             try:
                 path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except KeyError:
@@ -188,10 +187,11 @@ class PhenoHiveStation:
             num_segments = len(path_lengths)
             dsc, num_branches, intersections = self.evaluate_skeleton(self.image_path + "/skeleton.jpg", self.image_path + "data/skeleton_ref.jpg")
     
-            if num_segments < num_branches - 1/3* num_branches and num_segments > num_branches + 1/3* num_branches:
+            if num_segments < num_branches - 1/2* num_branches and num_segments > num_branches + 1/2* num_branches:
                 score = 0
             else:
                 score = dsc
+            print(score)
             
             if score > best_score:
                 best_score = score
