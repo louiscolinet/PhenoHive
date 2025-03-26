@@ -172,7 +172,7 @@ class Display:
         draw.text((0, 80), f"Sigma value: {sigma}", font=font, fill=(0, 0, 0))
         draw.text((0, 95), f"Kernel size value: {kernel_size}", font=font, fill=(0, 0, 0))
         if inc%2 == 0:
-            draw.text((0, 130), f"<-- Calib {calib_test_num}       Back -->", font=font, fill=(0, 0, 0))
+            draw.text((0, 130), f"<-- Calib {inc}       Back -->", font=font, fill=(0, 0, 0))
             self.SCREEN.display(img)
         else:
             draw.text((0, 130), f"<-- Photo        Back -->", font=font, fill=(0, 0, 0))
