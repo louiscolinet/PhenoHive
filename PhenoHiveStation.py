@@ -361,7 +361,7 @@ class PhenoHiveStation:
         self.cam.start_preview(Preview.NULL)
         self.cam.start()
         time.sleep(time_to_wait)
-        if path != None:
+        if img_name != None:
             name = img_name
         if not preview:
             name = datetime.now().strftime(DATE_FORMAT_FILE)
