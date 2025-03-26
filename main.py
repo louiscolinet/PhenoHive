@@ -130,6 +130,7 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
                 calib_test_num = 0
             station.disp.show_img_param_menu(sigma, kernel_size, calib_test_num)
             calib_test_num += 1
+            sleep(1.5)
 
         
     
