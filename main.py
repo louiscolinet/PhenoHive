@@ -128,7 +128,7 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
             if calib_test_num > 10:
                 break
             station.disp.show_img_param_menu(sigma, kernel_size, calib_test_num)
-            sigma, kernel_size = station.calib_img_param(channel, sigma, kernel_size)
+            sigma, kernel_size = station.calib_img_param(channel, sigma, kernel_size, calib_test_num)
             station.parser['image_arg']["sigma"] = sigma
             station.parser['image_arg']["kernel_size"] = kernel_size
             calib_test_num += 1
