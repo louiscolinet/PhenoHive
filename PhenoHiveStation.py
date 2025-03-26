@@ -15,7 +15,7 @@ from datetime import datetime
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from picamera2 import Picamera2, Preview
-from image_processing import get_total_length
+from image_processing import get_total_length, get_segment_list
 from utils import save_to_csv
 from show_display import Display
 
