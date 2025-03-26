@@ -351,7 +351,7 @@ class PhenoHiveStation:
         else:
             return "", ""
 
-    def save_photo(self, preview: bool = False, time_to_wait: int = 8) -> str:
+    def save_photo(self, preview: bool = False, time_to_wait: int = 8, img_name: str = None) -> str:
         """
         Take a photo and save it
         :param preview: if True the photo will be saved as "img.jpg" (used for the display)
@@ -361,6 +361,8 @@ class PhenoHiveStation:
         self.cam.start_preview(Preview.NULL)
         self.cam.start()
         time.sleep(time_to_wait)
+        if path =! None:
+            name = img_name
         if not preview:
             name = datetime.now().strftime(DATE_FORMAT_FILE)
         else:
