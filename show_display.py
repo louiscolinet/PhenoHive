@@ -130,10 +130,10 @@ class Display:
         img, draw = self.create_image(logo=True)
         # Menu
         font = ImageFont.truetype(FONT, 13)
-        draw.text((18, 80), "Calibration", font=font, fill=(0, 0, 0))
+        draw.text((24, 80), "Calibration", font=font, fill=(0, 0, 0))
         # Button
         font = ImageFont.truetype(FONT, 10)
-        draw.text((0, 130), "<-- Weight    Img param -->", font=font, fill=(0, 0, 0))
+        draw.text((0, 130), "<-- Weight      Img -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
     def show_cal_menu(self, raw_weight, weight_g, tare, calib_or_test) -> None:
@@ -142,6 +142,7 @@ class Display:
         :param raw_weight: measured weight before conversion
         :param weight_g: measured weight in grams
         :param tare: tare value
+        :param calib_or_test: to know if calib or test have to be show
         :return:
         """
         img, draw = self.create_image(logo=True)
@@ -156,6 +157,24 @@ class Display:
             draw.text((0, 130), "<-- Calib         Back -->", font=font, fill=(0, 0, 0))
         else:
             draw.text((0, 130), "<-- Test          Back -->", font=font, fill=(0, 0, 0))
+        self.SCREEN.display(img)
+
+    def show_img_param_menu(self, sigma, kernel_size, calib_test_num) -> None:
+        """
+        Show the measuring menu
+        :param sigma: sigma used in image processing
+        :param kernel_size: kernel_size used in image processing for the bluring
+        :param calib_test_num: to know how much test had already done
+        """
+        img, draw = self.create_image(logo=True)
+        # Menu
+        font = ImageFont.truetype(FONT, 13)
+        draw.text((11, 80), "Image parameters", font=font, fill=(0, 0, 0))
+        # Button
+        font = ImageFont.truetype(FONT, 10)
+        draw.text((0, 80), f"Sigma value: {sigma}", font=font, fill=(0, 0, 0))
+        draw.text((0, 95), f"Kernel size value: {kernel_size}", font=font, fill=(0, 0, 0))
+        draw.text((0, 130), f"<-- Calib {calib_test_num}         Back -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
     def show_collecting_data(self, action):
