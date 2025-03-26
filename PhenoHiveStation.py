@@ -1,6 +1,7 @@
 import base64
 import configparser
 import os
+import sys
 import numpy as np
 import cv2
 from itertools import product
@@ -191,7 +192,9 @@ class PhenoHiveStation:
                 score = 0
             else:
                 score = dsc
-            os.system(f'echo "{score}"')
+            
+            sys.stdout.write("Message affiché sans saut de ligne automatique\n")
+
             
             if score > best_score:
                 best_score = score
