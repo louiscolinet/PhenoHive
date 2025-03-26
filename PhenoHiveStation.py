@@ -167,39 +167,39 @@ class PhenoHiveStation:
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
 
     def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float=1, kernel: int=20, calib_test_num: int=1):
-    """
-    Automatically calibrate sigma and kernel_size for optimal segmentation.
-    """
-    best_params = None
-    best_score = -np.inf
-    sigma_values = np.linspace(sigma*calib_test_num/30, sigma*30/calib_test_num, num=10)
-    kernel_values = range(kernel*calib_test_num, kernel//calib_test_num + 1, 10)
-
-    # Take the photo
-        GPIO.output(self.LED, GPIO.LOW)
-        image_path = self.save_photo(preview=False, time_to_wait=6)
-        time.sleep(2)
-        GPIO.output(self.LED, GPIO.HIGH)
+        """
+        Automatically calibrate sigma and kernel_size for optimal segmentation.
+        """
+        best_params = None
+        best_score = -np.inf
+        sigma_values = np.linspace(sigma*calib_test_num/30, sigma*30/calib_test_num, num=10)
+        kernel_values = range(kernel*calib_test_num, kernel//calib_test_num + 1, 10)
     
-    for sigma, kernel_size in product(sigma_values, kernel_values):
+        # Take the photo
+            GPIO.output(self.LED, GPIO.LOW)
+            image_path = self.save_photo(preview=False, time_to_wait=6)
+            time.sleep(2)
+            GPIO.output(self.LED, GPIO.HIGH)
         
-        try:
-            path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
-        except KeyError:
-            path_lengths = []
+        for sigma, kernel_size in product(sigma_values, kernel_values):
             
-        num_segments = len(path_lengths)
-        dsc, num_branches, intersections = evaluate_skeleton("data/skeleton.jpg", "data/skeleton_ref.jpg")
-
-        if num_segments < num_branches - 1/3* num_branches and num_segments > num_branches + 1/3* num_branches:
-            score = 0
-        else
-            score = dsc
-        
-        if score > best_score:
-            best_score = score
-            best_params = (sigma, kernel_size)
-    return best_params
+            try:
+                path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
+            except KeyError:
+                path_lengths = []
+                
+            num_segments = len(path_lengths)
+            dsc, num_branches, intersections = evaluate_skeleton("data/skeleton.jpg", "data/skeleton_ref.jpg")
+    
+            if num_segments < num_branches - 1/3* num_branches and num_segments > num_branches + 1/3* num_branches:
+                score = 0
+            else
+                score = dsc
+            
+            if score > best_score:
+                best_score = score
+                best_params = (sigma, kernel_size)
+        return best_params
 
     def evaluate_skeleton(generated_skeleton_path: str, reference_skeleton_path: str) -> dict:
     """
