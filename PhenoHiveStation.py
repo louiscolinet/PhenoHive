@@ -193,7 +193,7 @@ class PhenoHiveStation:
     
             if num_segments < num_branches - 1/3* num_branches and num_segments > num_branches + 1/3* num_branches:
                 score = 0
-            else
+            else:
                 score = dsc
             
             if score > best_score:
