@@ -191,7 +191,7 @@ class PhenoHiveStation:
                 score = 0
             else:
                 score = dsc
-            print(score)
+            os.system(f'echo "{score}"')
             
             if score > best_score:
                 best_score = score
