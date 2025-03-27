@@ -134,17 +134,17 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
                 break
             elif inc % 2 == 0:
                 print("calcul")
-                station.disp.show_img_param_menu(sigma, kernel_size, inc-1)
                 sigma, kernel_size = station.calib_img_param(image_path, channel, sigma, kernel_size, inc)
                 station.parser['image_arg']["sigma"] = sigma
                 station.parser['image_arg']["kernel_size"] = kernel_size
                 station.sigma = sigma
                 station.kernel_size = kernel_size
+                station.disp.show_img_param_menu(sigma, kernel_size, inc-1)
                 inc += 1
                 time.sleep(1)
             else:
                 print("photo")
-                image_path = station.save_photo(img_name = 'skeleton')
+                image_path = station.save_photo(img_name = 'img_calib')
                 station.disp.show_photo_taken(inc-1)
                 time.sleep(1)
                 station.disp.show_img_param_menu(sigma, kernel_size, inc-1)
