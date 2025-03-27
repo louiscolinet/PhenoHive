@@ -191,6 +191,8 @@ class PhenoHiveStation:
                 path_lengths = []
 
             #print(f"                              path_lengths:{path_lengths}")
+            if path_lengths == None:
+                continue
                 
             num_segments = len(path_lengths)
             try:
