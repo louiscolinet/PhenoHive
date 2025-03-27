@@ -178,7 +178,7 @@ class PhenoHiveStation:
         best_params = None
         best_score = -np.inf
         sigma_values = np.linspace(sigma*calib_test_num/30, sigma*30/calib_test_num, num=10)
-        kernel_values = range(kernel//calib_test_num + 1, kernel*calib_test_num, 10)
+        kernel_values = np.linspace(kernel//calib_test_num + 1, kernel*calib_test_num, num=10)
         print(f"AVANT sigma:{sigma}, kernel:{kernel}")
         print(f"AVANT sigma:{sigma_values}, kernel:{kernel_values}")
         for sigma, kernel_size in product(sigma_values, kernel_values):
@@ -189,7 +189,7 @@ class PhenoHiveStation:
                 path_lengths = []
             print(path_lengths)
             num_segments = len(path_lengths)
-            dsc, num_branches, intersections = self.evaluate_skeleton(self.image_path + "/skeleton.jpg", self.image_path + "data/skeleton_ref.jpg")
+            dsc, num_branches, intersections = self.evaluate_skeleton(self.image_path + "skeleton.jpg", self.image_path + "skeleton_ref.jpg")
     
             if num_segments < num_branches - 1/2* num_branches and num_segments > num_branches + 1/2* num_branches:
                 score = 0
@@ -222,16 +222,11 @@ class PhenoHiveStation:
         intersection = np.sum(gen_skel_bin * ref_skel_bin)
         dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
         
-        # Détection des points d'intersection
-        kernel = np.array([[1, 1, 1], [1, 10, 1], [1, 1, 1]])
-        intersection_map = cv2.filter2D(gen_skel_bin, -1, kernel)
-        intersections = np.sum(intersection_map == 30)  # Points où 3+ pixels voisins existent
-        
         # Comptage des branches avec l'opération de squelette
-        skeleton = skeletonize(gen_skel_bin)
+        skeleton = skeletonize(ref_skel_bin)
         num_branches = np.sum(skeleton)
         
-        return (dsc, num_branches, intersections)
+        return (dsc, num_branches)
         
 
     def parse_config_file(self, path: str) -> None:
