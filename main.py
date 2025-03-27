@@ -115,6 +115,7 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
     .......
     :param station: station object
     """
+    print("entrée menu calib")
     inc = 1
     sigma = float(station.sigma)
     kernel_size = int(station.kernel_size)
@@ -124,12 +125,15 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
     station.disp.show_img_param_menu(sigma, kernel_size, inc)
     while True:
         if not GPIO.input(station.BUT_RIGHT):
+            print("bouton droit")
             time.sleep(1)
             break
         if not GPIO.input(station.BUT_LEFT):
+            print("bouton gauche")
             if inc > 20:
                 break
             elif inc % 2 == 0:
+                print("calcul")
                 station.disp.show_img_param_menu(sigma, kernel_size, inc-1)
                 sigma, kernel_size = station.calib_img_param(image_path, channel, sigma, kernel_size, inc)
                 station.parser['image_arg']["sigma"] = sigma
@@ -139,6 +143,7 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
                 inc += 1
                 time.sleep(1)
             else:
+                print("photo")
                 image_path = station.save_photo(img_name = 'skeleton')
                 station.disp.show_photo_taken(inc-1)
                 time.sleep(1)
