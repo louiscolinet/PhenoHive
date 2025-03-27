@@ -181,9 +181,9 @@ class PhenoHiveStation:
         sigma_values = np.linspace(sigma*calib_test_num/30, sigma*30/calib_test_num, num=10)
         kernel_values = np.arange(kernel//calib_test_num, kernel*calib_test_num, step=((kernel*calib_test_num)-(kernel//calib_test_num))/10, dtype=int )
         
-        print(f"AVANT sigma:{sigma_values}, kernel:{kernel_values}")
+        print(f"sigma:{sigma_values}, kernel:{kernel_values}")
         for sigma, kernel_size in product(sigma_values, kernel_values):
-            print(f"APRES sigma:{sigma}, kernel:{kernel_size}")
+            print(f"sigma:{sigma}, kernel:{kernel_size}")
             try:
                 path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except KeyError:
@@ -192,9 +192,10 @@ class PhenoHiveStation:
             num_segments = len(path_lengths)
             try:
                 dsc, num_branches = self.evaluate_skeleton(self.image_path + "skeleton.jpg", self.image_path + "skeleton_ref.jpg")
-                print(f"dsc:{dsc}, branches:{num_branches}")
+                print(f"           dsc:{dsc}, branches:{num_branches}")
             except KeyError:
                 dsc, num_branches = (0,0)
+                print("                   :(")
     
             if num_segments < num_branches - 1/2* num_branches and num_segments > num_branches + 1/2* num_branches:
                 score = 0
@@ -203,7 +204,7 @@ class PhenoHiveStation:
                 
             if score > best_score:
                 best_score = score
-                print(f"best score:{best_score}")
+                print(f"-----------> best score:{best_score}")
                 best_params = (sigma, kernel_size)
         return best_params
 
