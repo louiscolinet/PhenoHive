@@ -237,10 +237,10 @@ class PhenoHiveStation:
         dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
         
         # Comptage des branches avec l'opération de squelette
-        skeleton = pcv.morphology.skeletonize(mask=gen_skel_bin)
+        """skeleton = pcv.morphology.skeletonize(mask=gen_skel_bin)
         num_branches = np.sum(skeleton)
         segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
-        _ = pcv.morphology.segment_path_length(segmented_img=segmented_img, objects=obj, label="default")
+        _ = pcv.morphology.segment_path_length(segmented_img=segmented_img, objects=obj, label="default")"""
         
         return (dsc, num_branches)
         
