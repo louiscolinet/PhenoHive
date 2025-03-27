@@ -179,7 +179,7 @@ class PhenoHiveStation:
         best_score = -np.inf
         sigma_values = np.linspace(sigma*calib_test_num/30, sigma*30/calib_test_num, num=10)
         kernel_values = np.arange(kernel//calib_test_num, kernel*calib_test_num, step=((kernel*calib_test_num)-(kernel//calib_test_num))/10, dtype=int )
-        print(f"AVANT sigma:{sigma}, kernel:{kernel}")
+        
         print(f"AVANT sigma:{sigma_values}, kernel:{kernel_values}")
         for sigma, kernel_size in product(sigma_values, kernel_values):
             print(f"APRES sigma:{sigma}, kernel:{kernel}")
@@ -187,7 +187,7 @@ class PhenoHiveStation:
                 path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except KeyError:
                 path_lengths = []
-            print(path_lengths)
+                
             num_segments = len(path_lengths)
             dsc, num_branches, intersections = self.evaluate_skeleton(self.image_path + "skeleton.jpg", self.image_path + "skeleton_ref.jpg")
     
@@ -213,6 +213,11 @@ class PhenoHiveStation:
         # Charger les images en niveaux de gris
         gen_skel = cv2.imread(generated_skeleton_path, cv2.IMREAD_GRAYSCALE)
         ref_skel = cv2.imread(reference_skeleton_path, cv2.IMREAD_GRAYSCALE)
+
+        # Get image dimension
+        height, width = ref_skel.shape[0], ref_skel.shape[1]
+        # Crop image edges
+        ref_skel = pcv.crop(ref_skel, 5, 5, height - 10, width - 10)
         
         # Convertir en format binaire (0 et 1)
         gen_skel_bin = gen_skel // 255
