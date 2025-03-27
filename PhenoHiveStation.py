@@ -180,6 +180,7 @@ class PhenoHiveStation:
         sigma_values = np.linspace(sigma*calib_test_num/30, sigma*30/calib_test_num, num=10)
         kernel_values = range(kernel*calib_test_num, kernel//calib_test_num + 1, 10)
         print(f"AVANT sigma:{sigma}, kernel:{kernel}")
+        print(f"AVANT sigma:{sigma_values}, kernel:{kernel_values}")
         for sigma, kernel_size in product(sigma_values, kernel_values):
             print(f"APRES sigma:{sigma}, kernel:{kernel}")
             try:
