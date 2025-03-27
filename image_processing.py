@@ -80,8 +80,10 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     # Find contours
     thresh = cv2.threshold(closing, 128, 255, cv2.THRESH_BINARY)[1]
     contours = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    print(f"          contour:{contours}")
+    #print(f"          contour:{contours}")
     contours = contours[0]
+    if len(contours) == 0:
+      return None
     big_contour = max(contours, key=cv2.contourArea)
 
     # Fill contour to get maize shape
