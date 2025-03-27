@@ -193,10 +193,11 @@ class PhenoHiveStation:
             num_segments = len(path_lengths)
             try:
                 dsc, num_branches = self.evaluate_skeleton(self.image_path + "skeleton.jpg", self.image_path + "skeleton_ref.jpg")
-                print(f"           dsc:{dsc}, branches:{num_branches}")
             except KeyError:
                 dsc, num_branches = (0,0)
                 print("Erreur: evaluate_skeleton a échoué (KeyError)")
+
+            print(f"Résultats: num_segments={num_segments}, num_branches={num_branches}, dsc={dsc}")
     
             if abs(num_segments - num_branches) > (num_branches / 2):
                 score = 0
@@ -237,7 +238,7 @@ class PhenoHiveStation:
         dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
         
         # Comptage des branches avec l'opération de squelette
-        skeleton = pcv.morphology.skeletonize(ref_skel_bin)
+        skeleton = pcv.morphology.skeletonize(mask=ref_skel_bin)
         num_branches = np.sum(skeleton)
         
         return (dsc, num_branches)
