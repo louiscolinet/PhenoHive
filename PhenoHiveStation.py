@@ -183,7 +183,7 @@ class PhenoHiveStation:
         
         print(f"AVANT sigma:{sigma_values}, kernel:{kernel_values}")
         for sigma, kernel_size in product(sigma_values, kernel_values):
-            print(f"APRES sigma:{sigma}, kernel:{kernel}")
+            print(f"APRES sigma:{sigma}, kernel:{kernel_size}")
             try:
                 path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except KeyError:
