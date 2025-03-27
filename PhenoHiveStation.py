@@ -192,6 +192,7 @@ class PhenoHiveStation:
             num_segments = len(path_lengths)
             try:
                 dsc, num_branches = self.evaluate_skeleton(self.image_path + "skeleton.jpg", self.image_path + "skeleton_ref.jpg")
+                print(f"dsc:{dsc}, branches:{num_branches}")
             except KeyError:
                 dsc, num_branches = (0,0)
     
@@ -202,6 +203,7 @@ class PhenoHiveStation:
                 
             if score > best_score:
                 best_score = score
+                print(f"best score:{best_score}")
                 best_params = (sigma, kernel_size)
         return best_params
 
