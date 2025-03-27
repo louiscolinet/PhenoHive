@@ -181,7 +181,7 @@ class PhenoHiveStation:
         kernel_values = range(kernel*calib_test_num, kernel//calib_test_num + 1, 10)
         
         for sigma, kernel_size in product(sigma_values, kernel_values):
-            print(f"sigma:{sigma}, kernel:{kernel_size}")
+            #print(f"sigma:{sigma}, kernel:{kernel_size}")
             try:
                 path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except KeyError:
