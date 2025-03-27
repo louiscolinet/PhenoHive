@@ -199,9 +199,9 @@ class PhenoHiveStation:
 
             print(f"Résultats: num_segments={num_segments}, num_branches={num_branches}, dsc={dsc}")
     
-            if abs(num_segments - num_branches) > (num_branches / 2):
+            """if abs(num_segments - num_branches) > (num_branches / 2):
                 score = 0
-            else:
+            else:"""
                 score = dsc
 
             print(f"Score calculé: {score}")
@@ -221,25 +221,26 @@ class PhenoHiveStation:
         :return: Dictionnaire contenant le nombre de branches, intersections et DSC
         """
         # Charger les images en niveaux de gris
-        gen_skel = cv2.imread(generated_skeleton_path, cv2.IMREAD_GRAYSCALE)
-        ref_skel = cv2.imread(reference_skeleton_path, cv2.IMREAD_GRAYSCALE)
+        gen_skel = cv2.imread(generated_skeleton_path)
+        ref_skel = cv2.imread(reference_skeleton_path)
 
-        # Get image dimension
-        height, width = ref_skel.shape[0], ref_skel.shape[1]
         # Crop image edges
+        height, width = ref_skel.shape[0], ref_skel.shape[1]
         ref_skel = pcv.crop(ref_skel, 5, 5, height - 10, width - 10)
         
         # Convertir en format binaire (0 et 1)
-        gen_skel_bin = gen_skel // 255
-        ref_skel_bin = ref_skel // 255
+        """gen_skel_bin = gen_skel // 255
+        ref_skel_bin = ref_skel // 255"""
         
         # Calcul du Dice Similarity Coefficient (DSC)
-        intersection = np.sum(gen_skel_bin * ref_skel_bin)
-        dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
+        intersection = np.sum(gen_skel * ref_skel)
+        dsc = (2.0 * intersection) / (np.sum(gen_skel) + np.sum(ref_skel))
         
         # Comptage des branches avec l'opération de squelette
-        skeleton = pcv.morphology.skeletonize(mask=ref_skel_bin)
+        skeleton = pcv.morphology.skeletonize(mask=gen_skel)
         num_branches = np.sum(skeleton)
+        segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
+        _ = pcv.morphology.segment_path_length(segmented_img=segmented_img, objects=obj, label="default")
         
         return (dsc, num_branches)
         
