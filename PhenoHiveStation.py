@@ -196,8 +196,7 @@ class PhenoHiveStation:
                 score = 0
             else:
                 score = dsc
-            
-            
+                
             if score > best_score:
                 best_score = score
                 best_params = (sigma, kernel_size)
@@ -229,7 +228,7 @@ class PhenoHiveStation:
         dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
         
         # Comptage des branches avec l'opération de squelette
-        skeleton = skeletonize(ref_skel_bin)
+        skeleton = pcv.morphology.skeletonize(ref_skel_bin)
         num_branches = np.sum(skeleton)
         
         return (dsc, num_branches)
