@@ -183,10 +183,11 @@ class PhenoHiveStation:
         
         print(f"sigma:{sigma_values}, kernel:{kernel_values}")
         for sigma, kernel_size in product(sigma_values, kernel_values):
-            print(f"sigma:{sigma}, kernel:{kernel_size}")
+            print(f"Test avec sigma={sigma}, kernel={kernel_size}")
             try:
                 path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except KeyError:
+                print("Erreur: get_segment_list a échoué (KeyError)")
                 path_lengths = []
                 
             num_segments = len(path_lengths)
@@ -195,16 +196,18 @@ class PhenoHiveStation:
                 print(f"           dsc:{dsc}, branches:{num_branches}")
             except KeyError:
                 dsc, num_branches = (0,0)
-                print("                   :(")
+                print("Erreur: evaluate_skeleton a échoué (KeyError)")
     
-            if num_segments < num_branches - 1/2* num_branches and num_segments > num_branches + 1/2* num_branches:
+            if abs(num_segments - num_branches) > (num_branches / 2):
                 score = 0
             else:
                 score = dsc
+
+            print(f"Score calculé: {score}")
                 
             if score > best_score:
                 best_score = score
-                print(f"-----------> best score:{best_score}")
+                print(f"Meilleure combinaison trouvée: sigma={sigma}, kernel={kernel_size}, score={score}")
                 best_params = (sigma, kernel_size)
         return best_params
 
