@@ -1,7 +1,6 @@
 import base64
 import configparser
 import os
-import sys
 import numpy as np
 import cv2
 from itertools import product
@@ -175,9 +174,6 @@ class PhenoHiveStation:
         Automatically calibrate sigma and kernel_size for optimal segmentation.
         """
         print("Bonjour, ceci est un message dans l'invite de commande.")
-        os.system('echo "Message envoyé au terminal local" > /dev/tty1')
-        os.system('echo "Message affiché via la commande system"')
-        sys.stdout.write("Message affiché sans saut de ligne automatique\n")
 
         best_params = None
         best_score = -np.inf
@@ -185,11 +181,12 @@ class PhenoHiveStation:
         kernel_values = range(kernel*calib_test_num, kernel//calib_test_num + 1, 10)
         
         for sigma, kernel_size in product(sigma_values, kernel_values):
+            print(f"sigma:{sigma}, kernel:{kernel_size}")
             try:
                 path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except KeyError:
                 path_lengths = []
-                
+            print(path_lengths)
             num_segments = len(path_lengths)
             dsc, num_branches, intersections = self.evaluate_skeleton(self.image_path + "/skeleton.jpg", self.image_path + "data/skeleton_ref.jpg")
     
