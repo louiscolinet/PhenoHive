@@ -241,6 +241,8 @@ class PhenoHiveStation:
         num_branches = np.sum(skeleton)
         segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
         _ = pcv.morphology.segment_path_length(segmented_img=segmented_img, objects=obj, label="default")"""
+
+        num_branches = 4
         
         return (dsc, num_branches)
         
