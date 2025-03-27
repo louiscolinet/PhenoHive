@@ -190,7 +190,10 @@ class PhenoHiveStation:
                 path_lengths = []
                 
             num_segments = len(path_lengths)
-            dsc, num_branches = self.evaluate_skeleton(self.image_path + "skeleton.jpg", self.image_path + "skeleton_ref.jpg")
+            try:
+                dsc, num_branches = self.evaluate_skeleton(self.image_path + "skeleton.jpg", self.image_path + "skeleton_ref.jpg")
+            except KeyError:
+                dsc, num_branches = (0,0)
     
             if num_segments < num_branches - 1/2* num_branches and num_segments > num_branches + 1/2* num_branches:
                 score = 0
