@@ -202,7 +202,7 @@ class PhenoHiveStation:
             """if abs(num_segments - num_branches) > (num_branches / 2):
                 score = 0
             else:"""
-                score = dsc
+            score = dsc
 
             print(f"Score calculé: {score}")
                 
