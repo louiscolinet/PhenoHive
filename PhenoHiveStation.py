@@ -189,6 +189,8 @@ class PhenoHiveStation:
             except KeyError:
                 print("Erreur: get_segment_list a échoué (KeyError)")
                 path_lengths = []
+
+            print(f"                              path_lengths:{path_lengths}")
                 
             num_segments = len(path_lengths)
             try:
