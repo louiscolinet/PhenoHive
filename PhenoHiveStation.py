@@ -229,15 +229,15 @@ class PhenoHiveStation:
         ref_skel = pcv.crop(ref_skel, 5, 5, height - 10, width - 10)
         
         # Convertir en format binaire (0 et 1)
-        """gen_skel_bin = gen_skel // 255
-        ref_skel_bin = ref_skel // 255"""
+        gen_skel_bin = gen_skel // 255
+        ref_skel_bin = ref_skel // 255
         
         # Calcul du Dice Similarity Coefficient (DSC)
-        intersection = np.sum(gen_skel * ref_skel)
-        dsc = (2.0 * intersection) / (np.sum(gen_skel) + np.sum(ref_skel))
+        intersection = np.sum(gen_skel_bin * ref_skel_bin)
+        dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
         
         # Comptage des branches avec l'opération de squelette
-        skeleton = pcv.morphology.skeletonize(mask=gen_skel)
+        skeleton = pcv.morphology.skeletonize(mask=gen_skel_bin)
         num_branches = np.sum(skeleton)
         segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
         _ = pcv.morphology.segment_path_length(segmented_img=segmented_img, objects=obj, label="default")
