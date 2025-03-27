@@ -139,8 +139,10 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
                 inc += 1
                 time.sleep(1)
             else:
-                station.disp.show_img_param_menu(sigma, kernel_size, inc-1)
                 image_path = station.save_photo(img_name = 'skeleton')
+                station.disp.show_photo_taken(inc-1)
+                time.sleep(1)
+                station.disp.show_img_param_menu(sigma, kernel_size, inc-1)
                 inc += 1
 
 
