@@ -1,6 +1,7 @@
 import base64
 import configparser
 import os
+import sys
 import numpy as np
 import cv2
 from itertools import product
@@ -173,6 +174,11 @@ class PhenoHiveStation:
         """
         Automatically calibrate sigma and kernel_size for optimal segmentation.
         """
+        print("Bonjour, ceci est un message dans l'invite de commande.")
+        os.system('echo "Message envoyé au terminal local" > /dev/tty1')
+        os.system('echo "Message affiché via la commande system"')
+        sys.stdout.write("Message affiché sans saut de ligne automatique\n")
+
         best_params = None
         best_score = -np.inf
         sigma_values = np.linspace(sigma*calib_test_num/30, sigma*30/calib_test_num, num=10)
@@ -192,7 +198,6 @@ class PhenoHiveStation:
             else:
                 score = dsc
             
-            os.system('echo "Message envoyé au terminal local" > /dev/tty1')
             
             if score > best_score:
                 best_score = score
