@@ -179,9 +179,9 @@ class PhenoHiveStation:
         best_score = -np.inf
         sigma_values = np.linspace(sigma*calib_test_num/30, sigma*30/calib_test_num, num=10)
         kernel_values = range(kernel*calib_test_num, kernel//calib_test_num + 1, 10)
-        
+        print(f"AVANT sigma:{sigma}, kernel:{kernel_size}")
         for sigma, kernel_size in product(sigma_values, kernel_values):
-            print(f"sigma:{sigma}, kernel:{kernel_size}")
+            print(f"APRES sigma:{sigma}, kernel:{kernel_size}")
             try:
                 path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except KeyError:
