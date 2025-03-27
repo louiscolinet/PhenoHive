@@ -173,7 +173,7 @@ class PhenoHiveStation:
         """
         Automatically calibrate sigma and kernel_size for optimal segmentation.
         """
-        print("Bonjour, ceci est un message dans l'invite de commande.")
+        print("entrée calib_img_param")
 
         best_params = None
         best_score = -np.inf
