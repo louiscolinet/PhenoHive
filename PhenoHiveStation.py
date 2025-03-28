@@ -179,7 +179,7 @@ class PhenoHiveStation:
         best_params = None
         best_score = -np.inf
         sigma_values = np.linspace(sigma*calib_test_num/10, sigma*10/calib_test_num, num=10)
-        kernel_values = np.arange(kernel//calib_test_num, kernel*calib_test_num, step=((kernel*calib_test_num)-(kernel//calib_test_num))/10, dtype=int )
+        kernel_values = np.arange(kernel-5, kernel+5, step=1, dtype=int )
         
         print(f"sigma:{sigma_values}, kernel:{kernel_values}")
         for sigma, kernel_size in product(sigma_values, kernel_values):
