@@ -453,6 +453,7 @@ class PhenoHiveStation:
          # Measurement finished, display the humidity
             self.disp.show_collecting_data(f"Humidity : {humidity}")
             time.sleep(2)
+            
         except Exception as e:
             self.register_error(type(e)(f"Error while getting the humidity: {e}"))
             self.disp.show_collecting_data("Error while getting the humidity")
@@ -525,7 +526,7 @@ class PhenoHiveStation:
 
     def humidity_pipeline(self):
         self.disp.show_collecting_data("Measuring humidity")
-        
+        time.sleep(1)
         return GPIO.input(self.HUM)
 
 class DebugHx711(hx711.HX711):
