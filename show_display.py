@@ -87,7 +87,7 @@ class Display:
 
         font = ImageFont.truetype(FONT, 10)
         draw.text((5, 60), str(time_now), font=font, fill=(0, 0, 0))
-        draw.text((0, 50), "Next : " + str(time_next_measure), font=font, fill=(0, 0, 0))
+        draw.text((0, 70), "Next : " + str(time_next_measure), font=font, fill=(0, 0, 0))
         draw.text((0, 90), "Weight : " + str(weight), font=font, fill=(0, 0, 0))
         draw.text((0, 100), "Growth : " + str(growth), font=font, fill=(0, 0, 0))
         draw.text((0, 110), "Humidity : " + str(humidity), font=font, fill=(0, 0, 0))
