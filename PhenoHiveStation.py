@@ -526,7 +526,7 @@ class PhenoHiveStation:
 
     def humidity_pipeline(self):
         self.disp.show_collecting_data("Measuring humidity")
-        time.sleep(1)
+        time.sleep(0.5)
         return GPIO.input(self.HUM)
 
 class DebugHx711(hx711.HX711):
