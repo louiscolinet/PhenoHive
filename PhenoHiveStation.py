@@ -407,7 +407,7 @@ class PhenoHiveStation:
         self.cam.stop()
         return path_img
 
-    def measurement_pipeline(self) -> tuple[int, float]:
+    def measurement_pipeline(self) -> tuple[int, float, int]:
         """
         Measurement pipeline
         :return: a tuple with the growth value and the weight
@@ -427,7 +427,7 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while taking the photo: {e}"))
             self.disp.show_collecting_data("Error while taking the photo")
             time.sleep(5)
-            return 0, 0
+            return 0, 0, 0
 
         # Get weight
         try:
@@ -443,7 +443,7 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while getting the weight: {e}"))
             self.disp.show_collecting_data("Error while getting the weight")
             time.sleep(5)
-            return 0, 0
+            return growth_value, 0, 0
 
         # Get humidity
         try:
@@ -458,7 +458,7 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while getting the humidity: {e}"))
             self.disp.show_collecting_data("Error while getting the humidity")
             time.sleep(5)
-            return 0, 0
+            return growth_value, weight, 0
 
         # Send data to the DB
         try:
@@ -475,13 +475,13 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while sending data to the DB: {e}"))
             self.disp.show_collecting_data("Error while sending data to the DB")
             time.sleep(5)
-            return 0, 0
+            return growth_value, weight, humidity
 
         LOGGER.info("Measurement pipeline finished")
         self.disp.show_collecting_data("Measurement pipeline finished")
         time.sleep(1)
         self.status = 0
-        return growth_value, weight
+        return growth_value, weight, humidity
 
     def picture_pipeline(self) -> tuple[str, int]:
         """
