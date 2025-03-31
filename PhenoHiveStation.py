@@ -46,6 +46,7 @@ class PhenoHiveStation:
     LED = -1
     BUT_LEFT = -1
     BUT_RIGHT = -1
+    HUM = -1
 
     # Station variables
     parser = None
@@ -104,6 +105,7 @@ class PhenoHiveStation:
             threading.Thread(target=self.init_load),
             threading.Thread(target=self.init_button),
             threading.Thread(target=self.init_data)
+            threading.Thread(target=self.init_humidity)
         ]
         
         for thread in threads:
@@ -153,6 +155,9 @@ class PhenoHiveStation:
         else:
             LOGGER.debug("HX711 reset")
 
+    def init_humidity(self):
+        GPIO.setup(self.HUM, GPIO.IN) 
+
     def init_button(self):
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -166,9 +171,10 @@ class PhenoHiveStation:
             "weight": -1.0,  # plant's (measured) weight
             "weight_g": -1.0,  # plant's (measured) weight in grams (if calibrated)
             "standard_deviation": -1.0,  # measured weight standard deviation
-            "picture": ""  # last picture as a base-64 string
+            "picture": "",  # last picture as a base-64 string
+            "humidity": -1.0 # soil humidity
         }
-        self.to_save = ["growth", "weight", "weight_g", "standard_deviation"]
+        self.to_save = ["growth", "weight", "weight_g", "standard_deviation", "humidity"]
 
     def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float=1, kernel: int=20, calib_test_num: int=1):
         """
@@ -291,6 +297,7 @@ class PhenoHiveStation:
         self.LED = int(self.parser["Camera"]["led"])
         self.BUT_LEFT = int(self.parser["Buttons"]["left"])
         self.BUT_RIGHT = int(self.parser["Buttons"]["right"])
+        self.HUM = int(self.parser["Humidity"]["humidity_port"]
 
     def register_error(self, exception: Exception) -> None:
         """
@@ -438,6 +445,20 @@ class PhenoHiveStation:
             time.sleep(5)
             return 0, 0
 
+        # Get humidity
+        try:
+            humidity = self.humidity_pipeline()
+            self.data["humidity"] = humidity
+
+         # Measurement finished, display the humidity
+            self.disp.show_collecting_data(f"Humidity : {humidity}")
+            time.sleep(2)
+        except Exception as e:
+            self.register_error(type(e)(f"Error while getting the humidity: {e}"))
+            self.disp.show_collecting_data("Error while getting the humidity")
+            time.sleep(5)
+            return 0, 0
+
         # Send data to the DB
         try:
             self.disp.show_collecting_data("Sending data to the DB")
@@ -502,6 +523,10 @@ class PhenoHiveStation:
         LOGGER.debug(f"Weight: {median_weight} in {elapsed}s (with standard deviation: {std_dev}")
         return median_weight, std_dev
 
+    def humidity_pipeline(self):
+        self.disp.show_collecting_data("Measuring humidity")
+        
+        return GPIO.input(self.HUM)
 
 class DebugHx711(hx711.HX711):
     """
