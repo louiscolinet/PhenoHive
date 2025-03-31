@@ -297,7 +297,7 @@ class PhenoHiveStation:
         self.LED = int(self.parser["Camera"]["led"])
         self.BUT_LEFT = int(self.parser["Buttons"]["left"])
         self.BUT_RIGHT = int(self.parser["Buttons"]["right"])
-        self.HUM = int(self.parser["Humidity"]["humidity_port"]
+        self.HUM = int(self.parser["Humidity"]["humidity_port"])
 
     def register_error(self, exception: Exception) -> None:
         """
