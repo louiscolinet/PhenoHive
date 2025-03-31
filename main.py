@@ -224,6 +224,7 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
     LOGGER.debug("Entering measurement loop")
     growth_value = 0.0
     weight = 0.0
+    humidity = 0
     time_delta = datetime.timedelta(seconds=station.time_interval)
     time_now = datetime.datetime.now()
     time_nxt_measure = time_now + time_delta
@@ -231,13 +232,13 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
     while continue_measurements:
         time_now = datetime.datetime.now()
         station.disp.show_measuring_menu(round(weight*station.load_cell_cal, 2), round(growth_value, 2),
-                                         time_now.strftime("%Y/%m/%d %H:%M:%S"),
+                                         humidity, time_now.strftime("%Y/%m/%d %H:%M:%S"),
                                          time_nxt_measure.strftime("%H:%M:%S"), n_round)
 
         if time_now >= time_nxt_measure:
             LOGGER.info("Measuring time reached, starting measurement")
             station.disp.show_collecting_data("")
-            growth_value, weight = station.measurement_pipeline()
+            growth_value, weight, humidity = station.measurement_pipeline()
             time_nxt_measure = datetime.datetime.now() + time_delta
             n_round += 1
 
