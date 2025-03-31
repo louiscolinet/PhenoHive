@@ -87,11 +87,11 @@ class Display:
 
         font = ImageFont.truetype(FONT, 10)
         draw.text((5, 60), str(time_now), font=font, fill=(0, 0, 0))
-        draw.text((0, 70), "Next : " + str(time_next_measure), font=font, fill=(0, 0, 0))
-        draw.text((0, 90), "Weight : " + str(weight), font=font, fill=(0, 0, 0))
-        draw.text((0, 100), "Growth : " + str(growth), font=font, fill=(0, 0, 0))
-        draw.text((0, 110), "Humidity : " + str(humidity), font=font, fill=(0, 0, 0))
-        draw.text((0, 120), "Measurement n°" + str(n_rounds), font=font, fill=(0, 0, 0))
+        draw.text((5, 70), "Next : " + str(time_next_measure), font=font, fill=(0, 0, 0))
+        draw.text((5, 90), "Weight : " + str(weight), font=font, fill=(0, 0, 0))
+        draw.text((5, 100), "Growth : " + str(growth), font=font, fill=(0, 0, 0))
+        draw.text((5, 110), "Humidity : " + str(humidity), font=font, fill=(0, 0, 0))
+        draw.text((5, 120), "Measurement n°" + str(n_rounds), font=font, fill=(0, 0, 0))
         draw.text((0, 130), "<-- Status", font=font, fill=(0, 0, 0))
         draw.text((80, 130), "Stop -->", font=font, fill=(0, 0, 0))
 
