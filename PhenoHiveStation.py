@@ -104,7 +104,7 @@ class PhenoHiveStation:
             threading.Thread(target=self.init_camera_button),
             threading.Thread(target=self.init_load),
             threading.Thread(target=self.init_button),
-            threading.Thread(target=self.init_data)
+            threading.Thread(target=self.init_data),
             threading.Thread(target=self.init_humidity)
         ]
         
