@@ -73,7 +73,7 @@ class Display:
         image = image.rotate(0).resize(self.SIZE)
         self.SCREEN.display(image)
 
-    def show_measuring_menu(self, weight: float, growth: int, time_now: str, time_next_measure: str,
+    def show_measuring_menu(self, weight: float, growth: int, humidity: int, time_now: str, time_next_measure: str,
                             n_rounds: int) -> None:
         """
         Show the measuring menu
@@ -86,11 +86,12 @@ class Display:
         img, draw = self.create_image(logo=True)
 
         font = ImageFont.truetype(FONT, 10)
-        draw.text((5, 70), str(time_now), font=font, fill=(0, 0, 0))
-        draw.text((0, 90), "Next : " + str(time_next_measure), font=font, fill=(0, 0, 0))
+        draw.text((5, 60), str(time_now), font=font, fill=(0, 0, 0))
+        draw.text((0, 50), "Next : " + str(time_next_measure), font=font, fill=(0, 0, 0))
+        draw.text((0, 90), "Weight : " + str(weight), font=font, fill=(0, 0, 0))
+        draw.text((0, 100), "Growth : " + str(growth), font=font, fill=(0, 0, 0))
+        draw.text((0, 110), "Humidity : " + str(humidity), font=font, fill=(0, 0, 0))
         draw.text((0, 120), "Measurement n°" + str(n_rounds), font=font, fill=(0, 0, 0))
-        draw.text((0, 100), "Weight : " + str(weight), font=font, fill=(0, 0, 0))
-        draw.text((0, 110), "Growth : " + str(growth), font=font, fill=(0, 0, 0))
         draw.text((0, 130), "<-- Status", font=font, fill=(0, 0, 0))
         draw.text((80, 130), "Stop -->", font=font, fill=(0, 0, 0))
 
