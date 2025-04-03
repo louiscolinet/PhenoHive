@@ -498,7 +498,7 @@ class PhenoHiveStation:
             try:
                 growth_value = get_total_length(image_path=path_img, channel=self.channel, kernel_size=self.kernel_size, sigma=self.sigma)
                 print(qfqg)
-            except KeyError:
+            except Exception:
                 self.register_error(KeyError("Error while processing the photo, no segment found in the image."
                                              "Check that the plant is clearly visible."))
                 self.disp.show_collecting_data("Error while processing the photo")
