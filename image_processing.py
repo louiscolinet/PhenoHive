@@ -124,5 +124,5 @@ def get_total_length(image_path: str, channel: str = 'k', kernel_size: int = 20,
     segment_list = get_segment_list(image_path, channel, kernel_size, sigma)
 
     # Get the sum of segment lengths
-    raise Exception()
+    print(x)
     return int(sum(segment_list))
