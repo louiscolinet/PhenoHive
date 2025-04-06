@@ -20,7 +20,7 @@ from picamera2 import Picamera2, Preview
 from image_processing import get_total_length, get_segment_list
 from utils import save_to_csv
 from show_display import Display
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 CONFIG_FILE = "config.ini"
 LOGGER = logging.getLogger("PhenoHiveStation")
