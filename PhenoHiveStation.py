@@ -177,26 +177,8 @@ class PhenoHiveStation:
             "humidity": -1.0 # soil humidity
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation", "humidity"]
-
-    def _evaluate_params(image_path, channel, sigma, kernel_size, evaluate_skeleton_fn):
-        try:
-            path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
-        except KeyError:
-            print("Erreur: get_segment_list a échoué (KeyError)")
-            return None
     
-        if path_lengths is None:
-            return None
-    
-        try:
-            dsc, num_branches = evaluate_skeleton_fn(image_path + "skeleton.jpg", image_path + "skeleton_ref.jpg")
-        except KeyError:
-            print("Erreur: evaluate_skeleton a échoué (KeyError)")
-            dsc = 0
-    
-        return (sigma, kernel_size, dsc)
-    
-    def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float=1, kernel: int=20, calib_test_num: int=1):
+    def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float = 1, kernel: int = 20, calib_test_num: int = 1):
         """
         Automatically calibrate sigma and kernel_size for optimal segmentation.
         """
@@ -206,29 +188,39 @@ class PhenoHiveStation:
         kernel_values = np.arange(kernel - 5, kernel + 5, step=1, dtype=int)
     
         print(f"best score : {best_score}")
-        print(f"sigma:{sigma_values}, kernel:{kernel_values}")
+        print(f"sigma: {sigma_values}, kernel: {kernel_values}")
     
-        # Préparer toutes les combinaisons
-        param_grid = list(product(sigma_values, kernel_values))
+        param_combinations = list(product(sigma_values, kernel_values))
     
-        with ProcessPoolExecutor() as executor:
-            # Submettre toutes les tâches en parallèle
-            futures = [executor.submit(self._evaluate_params, image_path, channel, sigma, kernel_size, self.evaluate_skeleton)
-                       for sigma, kernel_size in param_grid]
+        def worker(sigma_kernel_pair):
+            sigma, kernel_size = sigma_kernel_pair
+            try:
+                path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
+            except KeyError:
+                print("Erreur: get_segment_list a échoué (KeyError)")
+                return (0, None, None)
+    
+            if path_lengths is None:
+                return (0, None, None)
+    
+            try:
+                dsc, num_branches = self.evaluate_skeleton(self.image_path + "skeleton.jpg",
+                                                           self.image_path + "skeleton_ref.jpg")
+            except KeyError:
+                print("Erreur: evaluate_skeleton a échoué (KeyError)")
+                dsc = 0
+    
+            return (dsc, sigma, kernel_size)
+    
+        with ThreadPoolExecutor() as executor:
+            futures = [executor.submit(worker, pair) for pair in param_combinations]
     
             for future in as_completed(futures):
-                result = future.result()
-                if result is None:
-                    continue
-    
-                sigma_val, kernel_val, score = result
+                score, sigma, kernel_size = future.result()
                 if score > best_score:
                     best_score = score
-                    print(f"Meilleure combinaison trouvée: sigma={sigma_val}, kernel={kernel_val}, score={score}")
-                    best_params = (sigma_val, kernel_val)
-                
-        if best_params == None:
-            return (sigma, kernel_size)
+                    best_params = (sigma, kernel_size)
+                    print(f"Meilleure combinaison trouvée: sigma={sigma}, kernel={kernel_size}, score={score}")
             
         self.best_score = best_score
         self.parser["image_arg"]["best_score"] = str(best_score)
