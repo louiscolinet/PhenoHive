@@ -181,40 +181,6 @@ class PhenoHiveStation:
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation", "humidity"]
 
-    def _evaluate_combo_multiproc(args):
-        """
-        Évalue une combinaison (sigma, kernel) dans un dossier temporaire.
-        """
-        sigma_val, kernel_val, image_path, channel, base_temp_dir, image_dir = args
-    
-        # Créer un dossier temporaire unique pour ce processus
-        job_id = f"job_{uuid.uuid4().hex[:8]}"
-        job_dir = os.path.join(base_temp_dir, job_id)
-        os.makedirs(job_dir, exist_ok=True)
-    
-        # Copier l’image d’origine dans ce dossier
-        local_image_path = os.path.join(job_dir, "input.jpg")
-        shutil.copy(image_path, local_image_path)
-    
-        # Lancer le traitement
-        try:
-            path_lengths = get_segment_list(local_image_path, channel, kernel_val, sigma_val)
-        except KeyError:
-            return None, None, 0
-    
-        if path_lengths is None:
-            return None, None, 0
-    
-        # Copier les skeletons générés dans un chemin temporaire
-        skeleton_path = os.path.join(job_dir, "skeleton.jpg")
-        reference_path = os.path.join(image_dir, "skeleton_ref.jpg")  # assumé constant
-    
-        try:
-            dsc = MyEvaluator.evaluate_skeleton_static(skeleton_path, reference_path)
-        except:
-            dsc = 0
-    
-        return sigma_val, kernel_val, dsc
     
     
     def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float = 1, kernel: int = 20, calib_test_num: int = 1):
@@ -236,7 +202,7 @@ class PhenoHiveStation:
             pool_args = [(s, k, image_path, channel, base_temp_dir, image_dir) for s, k in product(sigma_values, kernel_values)]
     
             with Pool(processes=cpu_count()) as pool:
-                results = pool.map(self._evaluate_combo_multiproc, pool_args)
+                results = pool.map(_evaluate_combo_multiproc, pool_args)
     
             for sigma_val, kernel_val, score in results:
                 if score > best_score:
@@ -571,3 +537,38 @@ class DebugHx711(hx711.HX711):
                 data_list.append(data)
             count += 1
         return data_list
+
+def _evaluate_combo_multiproc(args):
+        """
+        Évalue une combinaison (sigma, kernel) dans un dossier temporaire.
+        """
+        sigma_val, kernel_val, image_path, channel, base_temp_dir, image_dir = args
+    
+        # Créer un dossier temporaire unique pour ce processus
+        job_id = f"job_{uuid.uuid4().hex[:8]}"
+        job_dir = os.path.join(base_temp_dir, job_id)
+        os.makedirs(job_dir, exist_ok=True)
+    
+        # Copier l’image d’origine dans ce dossier
+        local_image_path = os.path.join(job_dir, "input.jpg")
+        shutil.copy(image_path, local_image_path)
+    
+        # Lancer le traitement
+        try:
+            path_lengths = get_segment_list(local_image_path, channel, kernel_val, sigma_val)
+        except KeyError:
+            return None, None, 0
+    
+        if path_lengths is None:
+            return None, None, 0
+    
+        # Copier les skeletons générés dans un chemin temporaire
+        skeleton_path = os.path.join(job_dir, "skeleton.jpg")
+        reference_path = os.path.join(image_dir, "skeleton_ref.jpg")  # assumé constant
+    
+        try:
+            dsc = MyEvaluator.evaluate_skeleton_static(skeleton_path, reference_path)
+        except:
+            dsc = 0
+    
+        return sigma_val, kernel_val, dsc
