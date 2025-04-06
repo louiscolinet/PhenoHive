@@ -202,9 +202,9 @@ class PhenoHiveStation:
                 
             num_segments = len(path_lengths)
             try:
-                dsc, num_branches = self.evaluate_skeleton(self.image_path + "skeleton.jpg", self.image_path + "skeleton_ref.jpg")
+                dsc = self.evaluate_skeleton(self.image_path + "skeleton.jpg", self.image_path + "skeleton_ref.jpg")
             except KeyError:
-                dsc, num_branches = (0,0)
+                dsc = 0
                 print("Erreur: evaluate_skeleton a échoué (KeyError)")
                 
             score = dsc
@@ -228,7 +228,7 @@ class PhenoHiveStation:
         
         :param generated_skeleton_path: Chemin de l'image du squelette généré
         :param reference_skeleton_path: Chemin de l'image du squelette de référence
-        :return: Dictionnaire contenant le nombre de branches, intersections et DSC
+        :return: DSC
         """
         # Charger les images en niveaux de gris
         gen_skel = cv2.imread(generated_skeleton_path)
@@ -246,15 +246,7 @@ class PhenoHiveStation:
         intersection = np.sum(gen_skel_bin * ref_skel_bin)
         dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
         
-        # Comptage des branches avec l'opération de squelette
-        """skeleton = pcv.morphology.skeletonize(mask=gen_skel_bin)
-        num_branches = np.sum(skeleton)
-        segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
-        _ = pcv.morphology.segment_path_length(segmented_img=segmented_img, objects=obj, label="default")"""
-
-        num_branches = 4
-        
-        return (dsc, num_branches)
+        return dsc
         
 
     def parse_config_file(self, path: str) -> None:
