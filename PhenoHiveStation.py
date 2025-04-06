@@ -186,7 +186,7 @@ class PhenoHiveStation:
         best_score = self.best_score
         sigma_values = np.linspace(sigma*calib_test_num/10, sigma*10/calib_test_num, num=10)
         kernel_values = np.arange(kernel-5, kernel+5, step=1, dtype=int )
-        print(f"best score : {best_score})
+        print(f"best score : {best_score}")
         print(f"sigma:{sigma_values}, kernel:{kernel_values}")
         for sigma, kernel_size in product(sigma_values, kernel_values):
             #print(f"Test avec sigma={sigma}, kernel={kernel_size}")
