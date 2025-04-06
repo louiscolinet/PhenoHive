@@ -227,7 +227,7 @@ class PhenoHiveStation:
                     print(f"Meilleure combinaison trouvée: sigma={sigma_val}, kernel={kernel_val}, score={score}")
                     best_params = (sigma_val, kernel_val)
                 
-        if best_params = None:
+        if best_params == None:
             return (sigma, kernel_size)
             
         self.best_score = best_score
