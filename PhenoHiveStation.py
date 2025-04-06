@@ -213,7 +213,7 @@ class PhenoHiveStation:
                 print(f"Meilleure combinaison trouvée: sigma={sigma}, kernel={kernel_size}, score={score}")
                 best_params = (sigma, kernel_size)
         self.best_score = best_score
-        self.parser["image_arg"]["best_score"] = best_score
+        self.parser["image_arg"]["best_score"] = str(best_score)
 
         return best_params
 
