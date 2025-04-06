@@ -20,6 +20,10 @@ from picamera2 import Picamera2, Preview
 from image_processing import get_total_length, get_segment_list
 from utils import save_to_csv
 from show_display import Display
+import shutil
+import tempfile
+import uuid
+from multiprocessing import Pool, cpu_count
 
 CONFIG_FILE = "config.ini"
 LOGGER = logging.getLogger("PhenoHiveStation")
@@ -177,76 +181,96 @@ class PhenoHiveStation:
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation", "humidity"]
 
-    def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float=1, kernel: int=20, calib_test_num: int=1):
+    def _evaluate_combo_multiproc(args):
         """
-        Automatically calibrate sigma and kernel_size for optimal segmentation.
+        Évalue une combinaison (sigma, kernel) dans un dossier temporaire.
         """
-
-        best_params = None
+        sigma_val, kernel_val, image_path, channel, base_temp_dir, image_dir = args
+    
+        # Créer un dossier temporaire unique pour ce processus
+        job_id = f"job_{uuid.uuid4().hex[:8]}"
+        job_dir = os.path.join(base_temp_dir, job_id)
+        os.makedirs(job_dir, exist_ok=True)
+    
+        # Copier l’image d’origine dans ce dossier
+        local_image_path = os.path.join(job_dir, "input.jpg")
+        shutil.copy(image_path, local_image_path)
+    
+        # Lancer le traitement
+        try:
+            path_lengths = get_segment_list(local_image_path, channel, kernel_val, sigma_val)
+        except KeyError:
+            return None, None, 0
+    
+        if path_lengths is None:
+            return None, None, 0
+    
+        # Copier les skeletons générés dans un chemin temporaire
+        skeleton_path = os.path.join(job_dir, "skeleton.jpg")
+        reference_path = os.path.join(image_dir, "skeleton_ref.jpg")  # assumé constant
+    
+        try:
+            dsc = MyEvaluator.evaluate_skeleton_static(skeleton_path, reference_path)
+        except:
+            dsc = 0
+    
+        return sigma_val, kernel_val, dsc
+    
+    
+    def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float = 1, kernel: int = 20, calib_test_num: int = 1):
         best_score = self.best_score
-        sigma_values = np.linspace(sigma*calib_test_num/7, sigma*7/calib_test_num, num=10)
-        kernel_values = np.arange(kernel-5, kernel+5, step=1, dtype=int )
-        
-        print(f"best score : {best_score}")
-        print(f"sigma:{sigma_values}, kernel:{kernel_values}")
-        
-        for sigma, kernel_size in product(sigma_values, kernel_values):
-            try:
-                path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
-            except KeyError:
-                print("Erreur: get_segment_list a échoué (KeyError)")
-                path_lengths = []
+        best_params = None
+    
+        sigma_values = np.linspace(sigma * calib_test_num / 7, sigma * 7 / calib_test_num, num=10)
+        kernel_values = np.arange(kernel - 5, kernel + 5, step=1, dtype=int)
+    
+        print(f"Sigma: {sigma_values}, Kernel: {kernel_values}")
+    
+        # Créer un répertoire temporaire de base
+        base_temp_dir = tempfile.mkdtemp(prefix="calib_")
+        print(f"Répertoire temporaire : {base_temp_dir}")
+    
+        image_dir = self.image_path  # dossier où se trouve skeleton_ref.jpg
+    
+        try:
+            pool_args = [(s, k, image_path, channel, base_temp_dir, image_dir) for s, k in product(sigma_values, kernel_values)]
+    
+            with Pool(processes=cpu_count()) as pool:
+                results = pool.map(_evaluate_combo_multiproc, pool_args)
+    
+            for sigma_val, kernel_val, score in results:
+                if score > best_score:
+                    best_score = score
+                    best_params = (sigma_val, kernel_val)
+                    print(f"Meilleure combinaison: sigma={sigma_val}, kernel={kernel_val}, score={score}")
+    
+            if best_params is None:
+                return sigma, kernel
+    
+            self.best_score = best_score
+            self.parser["image_arg"]["best_score"] = str(best_score)
+            return best_params
+    
+        finally:
+            # Nettoyer tous les dossiers temporaires
+            shutil.rmtree(base_temp_dir, ignore_errors=True)
 
-            if path_lengths == None:
-                continue
-                
-            num_segments = len(path_lengths)
-            try:
-                dsc = self.evaluate_skeleton(self.image_path + "skeleton.jpg", self.image_path + "skeleton_ref.jpg")
-            except KeyError:
-                dsc = 0
-                print("Erreur: evaluate_skeleton a échoué (KeyError)")
-                
-            score = dsc
-                
-            if score > best_score:
-                best_score = score
-                print(f"Meilleure combinaison trouvée: sigma={sigma}, kernel={kernel_size}, score={score}")
-                best_params = (sigma, kernel_size)
-
-        if best_params == None:
-            return (sigma, kernel_size)
-            
-        self.best_score = best_score
-        self.parser["image_arg"]["best_score"] = str(best_score)
-
-        return best_params
-
-    def evaluate_skeleton(self, generated_skeleton_path: str, reference_skeleton_path: str) -> dict:
-        """
-        Compare un squelette généré avec un squelette de référence.
-        
-        :param generated_skeleton_path: Chemin de l'image du squelette généré
-        :param reference_skeleton_path: Chemin de l'image du squelette de référence
-        :return: DSC
-        """
-        # Charger les images en niveaux de gris
+    @staticmethod
+    def evaluate_skeleton_static(generated_skeleton_path: str, reference_skeleton_path: str) -> float:
         gen_skel = cv2.imread(generated_skeleton_path)
         ref_skel = cv2.imread(reference_skeleton_path)
-
-        # Crop image edges
+    
         height, width = ref_skel.shape[0], ref_skel.shape[1]
         ref_skel = pcv.crop(ref_skel, 5, 5, height - 10, width - 10)
-        
-        # Convertir en format binaire (0 et 1)
+    
         gen_skel_bin = gen_skel // 255
         ref_skel_bin = ref_skel // 255
-        
-        # Calcul du Dice Similarity Coefficient (DSC)
+    
         intersection = np.sum(gen_skel_bin * ref_skel_bin)
         dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
-        
+    
         return dsc
+
         
 
     def parse_config_file(self, path: str) -> None:
