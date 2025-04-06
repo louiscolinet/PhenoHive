@@ -184,12 +184,13 @@ class PhenoHiveStation:
 
         best_params = None
         best_score = self.best_score
-        sigma_values = np.linspace(sigma*calib_test_num/10, sigma*10/calib_test_num, num=10)
+        sigma_values = np.linspace(sigma*calib_test_num/7, sigma*7/calib_test_num, num=10)
         kernel_values = np.arange(kernel-5, kernel+5, step=1, dtype=int )
+        
         print(f"best score : {best_score}")
         print(f"sigma:{sigma_values}, kernel:{kernel_values}")
+        
         for sigma, kernel_size in product(sigma_values, kernel_values):
-            #print(f"Test avec sigma={sigma}, kernel={kernel_size}")
             try:
                 path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except KeyError:
@@ -212,6 +213,10 @@ class PhenoHiveStation:
                 best_score = score
                 print(f"Meilleure combinaison trouvée: sigma={sigma}, kernel={kernel_size}, score={score}")
                 best_params = (sigma, kernel_size)
+
+        if best_params == None:
+            return (sigma, kernel_size)
+            
         self.best_score = best_score
         self.parser["image_arg"]["best_score"] = str(best_score)
 
