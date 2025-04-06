@@ -213,7 +213,7 @@ class PhenoHiveStation:
     
         with ProcessPoolExecutor() as executor:
             # Submettre toutes les tâches en parallèle
-            futures = [executor.submit(_evaluate_params, image_path, channel, sigma, kernel_size, self.evaluate_skeleton)
+            futures = [executor.submit(self._evaluate_params, image_path, channel, sigma, kernel_size, self.evaluate_skeleton)
                        for sigma, kernel_size in param_grid]
     
             for future in as_completed(futures):
