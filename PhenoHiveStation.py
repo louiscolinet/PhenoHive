@@ -236,7 +236,7 @@ class PhenoHiveStation:
             pool_args = [(s, k, image_path, channel, base_temp_dir, image_dir) for s, k in product(sigma_values, kernel_values)]
     
             with Pool(processes=cpu_count()) as pool:
-                results = pool.map(_evaluate_combo_multiproc, pool_args)
+                results = pool.map(self._evaluate_combo_multiproc, pool_args)
     
             for sigma_val, kernel_val, score in results:
                 if score > best_score:
