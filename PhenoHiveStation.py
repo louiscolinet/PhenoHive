@@ -181,8 +181,7 @@ class PhenoHiveStation:
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation", "humidity"]
 
-    
-    
+        
     def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float = 1, kernel: int = 20, calib_test_num: int = 1):
         best_score = self.best_score
         best_params = None
