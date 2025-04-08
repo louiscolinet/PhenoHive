@@ -191,7 +191,7 @@ class PhenoHiveStation:
     
         print(f"Sigma: {sigma_values}, Kernel: {kernel_values}")
     
-        # Créer un répertoire temporaire de base
+        # Create a base temporary directory
         base_temp_dir = tempfile.mkdtemp(prefix="calib_")
         print(f"Répertoire temporaire : {base_temp_dir}")
     
@@ -201,13 +201,12 @@ class PhenoHiveStation:
             pool_args = [(s, k, image_path, channel, base_temp_dir, image_dir) for s, k in product(sigma_values, kernel_values)]
     
             with Pool(processes=cpu_count()) as pool:
-                results = pool.map(_evaluate_combo_multiproc, pool_args)
+                results = pool.map(evaluate_comb, pool_args)
     
             for sigma_val, kernel_val, score in results:
                 if score > best_score:
                     best_score = score
                     best_params = (sigma_val, kernel_val)
-                    print(f"Meilleure combinaison: sigma={sigma_val}, kernel={kernel_val}, score={score}")
     
             if best_params is None:
                 return sigma, kernel
@@ -217,7 +216,7 @@ class PhenoHiveStation:
             return best_params
     
         finally:
-            # Nettoyer tous les dossiers temporaires
+            # Clean all temporary folders
             shutil.rmtree(base_temp_dir, ignore_errors=True)
 
     def parse_config_file(self, path: str) -> None:
@@ -519,26 +518,23 @@ class DebugHx711(hx711.HX711):
             count += 1
         return data_list
 
-def _evaluate_combo_multiproc(args):
+def evaluate_comb(args):
     """
-    Évalue une combinaison (sigma, kernel) dans un dossier temporaire.
+    Evaluates a combination (sigma, kernel) in a temporary folder.
     """
     sigma_val, kernel_val, image_path, channel, base_temp_dir, image_dir = args
 
-    # Créer un dossier temporaire unique pour ce processus
+    # Create a unique temporary folder for this process
     job_id = f"job_{uuid.uuid4().hex[:8]}"
     job_dir = os.path.join(base_temp_dir, job_id)
     os.makedirs(job_dir, exist_ok=True)
 
-    # Copier l’image d’origine dans ce dossier
+    # Copy the original image and skeleton_ref into this folder
     local_image_path = os.path.join(job_dir, "input.jpg")
     shutil.copy(image_path, local_image_path)
-
-    # Copier skeleton_ref
     local_image_path = os.path.join(job_dir, "skeleton_ref.jpg")
     shutil.copy(image_dir + "skeleton_ref.jpg", local_image_path)
 
-    # Lancer le traitement
     try:
         path_lengths = get_segment_list(local_image_path, channel, kernel_val, sigma_val, output_dir=job_dir)
     except KeyError:
@@ -547,25 +543,23 @@ def _evaluate_combo_multiproc(args):
     if path_lengths is None:
         return None, None, 0
 
-    # Copier les skeletons générés dans un chemin temporaire
+    # Copy generated skeletons to a temporary path
     skeleton_path = os.path.join(job_dir, "skeleton.jpg")
     reference_path = os.path.join(job_dir, "skeleton_ref.jpg")
 
     try:
-        dsc = evaluate_skeleton_static(skeleton_path, reference_path)
+        dsc = compare_skeletons(skeleton_path, reference_path)
     except:
         dsc = 0
-    print(f"[{os.getpid()}] sigma={sigma_val}, kernel={kernel_val}, score={dsc}")
 
     return sigma_val, kernel_val, dsc
 
-def evaluate_skeleton_static(generated_skeleton_path: str, reference_skeleton_path: str) -> float:
+def compare_skeletons(generated_skeleton_path: str, reference_skeleton_path: str) -> float:
+    """
+    Compares two input skeletons and returns their similarity index (or Sorensen index).
+    """
     gen_skel = cv2.imread(generated_skeleton_path)
     ref_skel = cv2.imread(reference_skeleton_path)
-    cv2.imwrite("data/gen.jpg", gen_skel)
-    cv2.imwrite("data/ref.jpg", ref_skel)
-
-    print(f"[{os.getpid()}] Skeleton sizes: gen={None if gen_skel is None else gen_skel.shape}, ref={None if ref_skel is None else ref_skel.shape}")
 
     height, width = ref_skel.shape[0], ref_skel.shape[1]
     ref_skel = pcv.crop(ref_skel, 5, 5, height - 10, width - 10)
