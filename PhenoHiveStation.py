@@ -571,7 +571,7 @@ def _evaluate_combo_multiproc(args):
 
     try:
         print("juste avant evaluate")
-        dsc = MyEvaluator.evaluate_skeleton_static(skeleton_path, reference_path)
+        dsc = evaluate_skeleton_static(skeleton_path, reference_path)
     except:
         dsc = 0
     print(f"[{os.getpid()}] sigma={sigma_val}, kernel={kernel_val}, score={dsc}")
