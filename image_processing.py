@@ -5,6 +5,7 @@ from plantcv import plantcv as pcv
 import numpy as np
 import datetime
 import cv2
+import os
 
 
 def get_height_pix(image_path: str, pot_limit: int, channel: str = 'k', kernel_size: int = 3,
@@ -42,7 +43,7 @@ def get_height_pix(image_path: str, pot_limit: int, channel: str = 'k', kernel_s
     return plant_height_pix
 
 
-def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20, sigma: float = 2) -> list[int]:
+def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20, sigma: float = 2, output_dir: str = "data") -> list[int]:
     """
     Get the list of segments lengths from the plant skeleton
     :param image_path: path to the image
@@ -95,9 +96,12 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     pcv.params.line_thickness = 3
     skeleton = pcv.morphology.skeletonize(mask=result)
     segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
-    cv2.imwrite("data/images/skeleton.jpg", skeleton)
     cv2.imwrite("data/skeleton.jpg", skeleton)
     cv2.imwrite("data/segmented_img.jpg", segmented_img)
+
+    #récupérer le squelette pour la calibration
+    skeleton_path = os.path.join(output_dir, "skeleton.jpg")
+    cv2.imwrite(skeleton_path, skeleton)
 
     #if pcv.params.debug is not None:
         # The labelled image is only useful for debugging purposes
