@@ -531,8 +531,12 @@ def _evaluate_combo_multiproc(args):
     os.makedirs(job_dir, exist_ok=True)
 
     # Copier l’image d’origine dans ce dossier
-    local_image_path = os.path.join(job_dir, "skeleton_ref.jpg")
+    local_image_path = os.path.join(job_dir, "input.jpg")
     shutil.copy(image_path, local_image_path)
+
+    # Copier skeleton_ref
+    local_image_path = os.path.join(job_dir, "skeleton_ref.jpg")
+    shutil.copy(image_dir + "skeleton_ref", local_image_path)
 
     # Lancer le traitement
     try:
@@ -545,7 +549,7 @@ def _evaluate_combo_multiproc(args):
 
     # Copier les skeletons générés dans un chemin temporaire
     skeleton_path = os.path.join(job_dir, "skeleton.jpg")
-    reference_path = os.path.join(job_dir, "skeleton_ref.jpg")  # assumé constant
+    reference_path = os.path.join(job_dir, "skeleton_ref.jpg")
 
     try:
         dsc = evaluate_skeleton_static(skeleton_path, reference_path)
