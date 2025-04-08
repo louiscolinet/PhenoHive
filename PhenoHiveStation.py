@@ -201,7 +201,6 @@ class PhenoHiveStation:
             pool_args = [(s, k, image_path, channel, base_temp_dir, image_dir) for s, k in product(sigma_values, kernel_values)]
     
             with Pool(processes=cpu_count()) as pool:
-                print(f"Score initial (self.best_score): {self.best_score}")
                 results = pool.map(_evaluate_combo_multiproc, pool_args)
     
             for sigma_val, kernel_val, score in results:
@@ -520,6 +519,42 @@ class DebugHx711(hx711.HX711):
             count += 1
         return data_list
 
+def _evaluate_combo_multiproc(args):
+    """
+    Évalue une combinaison (sigma, kernel) dans un dossier temporaire.
+    """
+    sigma_val, kernel_val, image_path, channel, base_temp_dir, image_dir = args
+
+    # Créer un dossier temporaire unique pour ce processus
+    job_id = f"job_{uuid.uuid4().hex[:8]}"
+    job_dir = os.path.join(base_temp_dir, job_id)
+    os.makedirs(job_dir, exist_ok=True)
+
+    # Copier l’image d’origine dans ce dossier
+    local_image_path = os.path.join(job_dir, "skeleton_ref.jpg")
+    shutil.copy(image_path, local_image_path)
+
+    # Lancer le traitement
+    try:
+        path_lengths = get_segment_list(local_image_path, channel, kernel_val, sigma_val, output_dir=job_dir)
+    except KeyError:
+        return None, None, 0
+
+    if path_lengths is None:
+        return None, None, 0
+
+    # Copier les skeletons générés dans un chemin temporaire
+    skeleton_path = os.path.join(job_dir, "skeleton.jpg")
+    reference_path = os.path.join(job_dir, "skeleton_ref.jpg")  # assumé constant
+
+    try:
+        dsc = evaluate_skeleton_static(skeleton_path, reference_path)
+    except:
+        dsc = 0
+    print(f"[{os.getpid()}] sigma={sigma_val}, kernel={kernel_val}, score={dsc}")
+
+    return sigma_val, kernel_val, dsc
+
 def evaluate_skeleton_static(generated_skeleton_path: str, reference_skeleton_path: str) -> float:
     print("entrée dans evaluate")
     gen_skel = cv2.imread(generated_skeleton_path)
@@ -537,40 +572,3 @@ def evaluate_skeleton_static(generated_skeleton_path: str, reference_skeleton_pa
     dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
 
     return dsc
-
-def _evaluate_combo_multiproc(args):
-    """
-    Évalue une combinaison (sigma, kernel) dans un dossier temporaire.
-    """
-    sigma_val, kernel_val, image_path, channel, base_temp_dir, image_dir = args
-
-    # Créer un dossier temporaire unique pour ce processus
-    job_id = f"job_{uuid.uuid4().hex[:8]}"
-    job_dir = os.path.join(base_temp_dir, job_id)
-    os.makedirs(job_dir, exist_ok=True)
-
-    # Copier l’image d’origine dans ce dossier
-    local_image_path = os.path.join(job_dir, "input.jpg")
-    shutil.copy(image_path, local_image_path)
-
-    # Lancer le traitement
-    try:
-        path_lengths = get_segment_list(local_image_path, channel, kernel_val, sigma_val, output_dir=job_dir)
-    except KeyError:
-        return None, None, 0
-
-    if path_lengths is None:
-        return None, None, 0
-
-    # Copier les skeletons générés dans un chemin temporaire
-    skeleton_path = os.path.join(job_dir, "skeleton.jpg")
-    reference_path = os.path.join(job_dir, "skeleton_ref.jpg")  # assumé constant
-
-    try:
-        print("juste avant evaluate")
-        dsc = evaluate_skeleton_static(skeleton_path, reference_path)
-    except:
-        dsc = 0
-    print(f"[{os.getpid()}] sigma={sigma_val}, kernel={kernel_val}, score={dsc}")
-
-    return sigma_val, kernel_val, dsc
