@@ -192,7 +192,7 @@ class PhenoHiveStation:
             #print(f"Test avec sigma={sigma}, kernel={kernel_size}")             
             try:
                 if kernel_size <= 0:
-                    path_lenght = []
+                    path_lenghts = []
                 else:
                     path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except KeyError:
