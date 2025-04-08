@@ -223,6 +223,7 @@ class PhenoHiveStation:
 
     @staticmethod
     def evaluate_skeleton_static(generated_skeleton_path: str, reference_skeleton_path: str) -> float:
+        print("entrée dans evaluate")
         gen_skel = cv2.imread(generated_skeleton_path)
         ref_skel = cv2.imread(reference_skeleton_path)
 
@@ -569,6 +570,7 @@ def _evaluate_combo_multiproc(args):
     reference_path = os.path.join(job_dir, "skeleton_ref.jpg")  # assumé constant
 
     try:
+        print("juste avant evaluate")
         dsc = MyEvaluator.evaluate_skeleton_static(skeleton_path, reference_path)
     except:
         dsc = 0
