@@ -564,7 +564,7 @@ def _evaluate_combo_multiproc(args):
 
     # Copier les skeletons générés dans un chemin temporaire
     skeleton_path = os.path.join(job_dir, "skeleton.jpg")
-    reference_path = os.path.join(image_dir, "skeleton_ref.jpg")  # assumé constant
+    reference_path = os.path.join(job_dir, "skeleton_ref.jpg")  # assumé constant
 
     try:
         dsc = MyEvaluator.evaluate_skeleton_static(skeleton_path, reference_path)
