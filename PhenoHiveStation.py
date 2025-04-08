@@ -536,7 +536,7 @@ def _evaluate_combo_multiproc(args):
 
     # Copier skeleton_ref
     local_image_path = os.path.join(job_dir, "skeleton_ref.jpg")
-    shutil.copy(image_dir + "skeleton_ref", local_image_path)
+    shutil.copy(image_dir + "skeleton_ref.jpg", local_image_path)
 
     # Lancer le traitement
     try:
