@@ -207,6 +207,7 @@ class PhenoHiveStation:
                 if score > best_score:
                     best_score = score
                     best_params = (sigma_val, kernel_val)
+                    print(f"Meilleure combinaison: sigma={sigma_val}, kernel={kernel_val}, score={score}")
     
             if best_params is None:
                 return sigma, kernel
@@ -535,6 +536,9 @@ def evaluate_comb(args):
     local_image_path = os.path.join(job_dir, "skeleton_ref.jpg")
     shutil.copy(image_dir + "skeleton_ref.jpg", local_image_path)
 
+    if kernel_val <= 0:
+        return None, None, 0
+
     try:
         path_lengths = get_segment_list(local_image_path, channel, kernel_val, sigma_val, output_dir=job_dir)
     except KeyError:
@@ -552,6 +556,7 @@ def evaluate_comb(args):
     except:
         dsc = 0
 
+    print(f"[{os.getpid()}] sigma={sigma_val}, kernel={kernel_val}, score={dsc}")
     return sigma_val, kernel_val, dsc
 
 def compare_skeletons(generated_skeleton_path: str, reference_skeleton_path: str) -> float:
