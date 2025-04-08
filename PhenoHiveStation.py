@@ -221,27 +221,6 @@ class PhenoHiveStation:
             # Nettoyer tous les dossiers temporaires
             shutil.rmtree(base_temp_dir, ignore_errors=True)
 
-    @staticmethod
-    def evaluate_skeleton_static(generated_skeleton_path: str, reference_skeleton_path: str) -> float:
-        print("entrée dans evaluate")
-        gen_skel = cv2.imread(generated_skeleton_path)
-        ref_skel = cv2.imread(reference_skeleton_path)
-
-        print(f"[{os.getpid()}] Skeleton sizes: gen={None if gen_skel is None else gen_skel.shape}, ref={None if ref_skel is None else ref_skel.shape}")
-    
-        height, width = ref_skel.shape[0], ref_skel.shape[1]
-        ref_skel = pcv.crop(ref_skel, 5, 5, height - 10, width - 10)
-    
-        gen_skel_bin = gen_skel // 255
-        ref_skel_bin = ref_skel // 255
-    
-        intersection = np.sum(gen_skel_bin * ref_skel_bin)
-        dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
-    
-        return dsc
-
-        
-
     def parse_config_file(self, path: str) -> None:
         """
         Parse the config file at the given path and initialise the station's variables with the values
@@ -540,6 +519,24 @@ class DebugHx711(hx711.HX711):
                 data_list.append(data)
             count += 1
         return data_list
+
+def evaluate_skeleton_static(generated_skeleton_path: str, reference_skeleton_path: str) -> float:
+    print("entrée dans evaluate")
+    gen_skel = cv2.imread(generated_skeleton_path)
+    ref_skel = cv2.imread(reference_skeleton_path)
+
+    print(f"[{os.getpid()}] Skeleton sizes: gen={None if gen_skel is None else gen_skel.shape}, ref={None if ref_skel is None else ref_skel.shape}")
+
+    height, width = ref_skel.shape[0], ref_skel.shape[1]
+    ref_skel = pcv.crop(ref_skel, 5, 5, height - 10, width - 10)
+
+    gen_skel_bin = gen_skel // 255
+    ref_skel_bin = ref_skel // 255
+
+    intersection = np.sum(gen_skel_bin * ref_skel_bin)
+    dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
+
+    return dsc
 
 def _evaluate_combo_multiproc(args):
     """
