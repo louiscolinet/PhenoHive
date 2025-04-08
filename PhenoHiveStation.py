@@ -225,6 +225,8 @@ class PhenoHiveStation:
     def evaluate_skeleton_static(generated_skeleton_path: str, reference_skeleton_path: str) -> float:
         gen_skel = cv2.imread(generated_skeleton_path)
         ref_skel = cv2.imread(reference_skeleton_path)
+
+        print(f"[{os.getpid()}] Skeleton sizes: gen={None if gen_skel is None else gen_skel.shape}, ref={None if ref_skel is None else ref_skel.shape}")
     
         height, width = ref_skel.shape[0], ref_skel.shape[1]
         ref_skel = pcv.crop(ref_skel, 5, 5, height - 10, width - 10)
