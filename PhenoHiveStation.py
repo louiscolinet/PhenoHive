@@ -556,9 +556,10 @@ def _evaluate_combo_multiproc(args):
     return sigma_val, kernel_val, dsc
 
 def evaluate_skeleton_static(generated_skeleton_path: str, reference_skeleton_path: str) -> float:
-    print("entrée dans evaluate")
     gen_skel = cv2.imread(generated_skeleton_path)
     ref_skel = cv2.imread(reference_skeleton_path)
+    cv2.imwrite("data/gen.jpg", gen_skel)
+    cv2.imwrite("data/ref.jpg", ref_skel)
 
     print(f"[{os.getpid()}] Skeleton sizes: gen={None if gen_skel is None else gen_skel.shape}, ref={None if ref_skel is None else ref_skel.shape}")
 
