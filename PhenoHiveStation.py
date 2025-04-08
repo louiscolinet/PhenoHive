@@ -221,42 +221,42 @@ class PhenoHiveStation:
             # Nettoyer tous les dossiers temporaires
             shutil.rmtree(base_temp_dir, ignore_errors=True)
 
-def _evaluate_combo_multiproc(self, args):
-    """
-    Évalue une combinaison (sigma, kernel) dans un dossier temporaire.
-    """
-    sigma_val, kernel_val, image_path, channel, base_temp_dir, image_dir = args
-
-    # Créer un dossier temporaire unique pour ce processus
-    job_id = f"job_{uuid.uuid4().hex[:8]}"
-    job_dir = os.path.join(base_temp_dir, job_id)
-    os.makedirs(job_dir, exist_ok=True)
-
-    # Copier l’image d’origine dans ce dossier
-    local_image_path = os.path.join(job_dir, "input.jpg")
-    shutil.copy(image_path, local_image_path)
-
-    # Lancer le traitement
-    try:
-        path_lengths = get_segment_list(local_image_path, channel, kernel_val, sigma_val, output_dir=job_dir)
-    except KeyError:
-        return None, None, 0
-
-    if path_lengths is None:
-        return None, None, 0
-
-    # Copier les skeletons générés dans un chemin temporaire
-    skeleton_path = os.path.join(job_dir, "skeleton.jpg")
-    reference_path = os.path.join(job_dir, "skeleton_ref.jpg")  # assumé constant
-
-    try:
-        print("juste avant evaluate")
-        dsc = self.evaluate_skeleton_static(skeleton_path, reference_path)
-    except:
-        dsc = 0
-    print(f"[{os.getpid()}] sigma={sigma_val}, kernel={kernel_val}, score={dsc}")
-
-    return sigma_val, kernel_val, dsc
+    def _evaluate_combo_multiproc(self, args):
+        """
+        Évalue une combinaison (sigma, kernel) dans un dossier temporaire.
+        """
+        sigma_val, kernel_val, image_path, channel, base_temp_dir, image_dir = args
+    
+        # Créer un dossier temporaire unique pour ce processus
+        job_id = f"job_{uuid.uuid4().hex[:8]}"
+        job_dir = os.path.join(base_temp_dir, job_id)
+        os.makedirs(job_dir, exist_ok=True)
+    
+        # Copier l’image d’origine dans ce dossier
+        local_image_path = os.path.join(job_dir, "input.jpg")
+        shutil.copy(image_path, local_image_path)
+    
+        # Lancer le traitement
+        try:
+            path_lengths = get_segment_list(local_image_path, channel, kernel_val, sigma_val, output_dir=job_dir)
+        except KeyError:
+            return None, None, 0
+    
+        if path_lengths is None:
+            return None, None, 0
+    
+        # Copier les skeletons générés dans un chemin temporaire
+        skeleton_path = os.path.join(job_dir, "skeleton.jpg")
+        reference_path = os.path.join(job_dir, "skeleton_ref.jpg")  # assumé constant
+    
+        try:
+            print("juste avant evaluate")
+            dsc = self.evaluate_skeleton_static(skeleton_path, reference_path)
+        except:
+            dsc = 0
+        print(f"[{os.getpid()}] sigma={sigma_val}, kernel={kernel_val}, score={dsc}")
+    
+        return sigma_val, kernel_val, dsc
 
     @staticmethod
     def evaluate_skeleton_static(generated_skeleton_path: str, reference_skeleton_path: str) -> float:
