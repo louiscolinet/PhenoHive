@@ -189,10 +189,9 @@ class PhenoHiveStation:
         print(f"best score : {best_score}")
         print(f"sigma:{sigma_values}, kernel:{kernel_values}")
         for sigma, kernel_size in product(sigma_values, kernel_values):
-            #print(f"Test avec sigma={sigma}, kernel={kernel_size}")             
+            #print(f"Test avec sigma={sigma}, kernel={kernel_size}")
             try:
-                if kernel_size > 0:
-                    path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
+                path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except Exception:
                 print("Erreur: get_segment_list a échoué (KeyError)")
                 path_lengths = []
