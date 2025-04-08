@@ -563,6 +563,7 @@ def compare_skeletons(generated_skeleton_path: str, reference_skeleton_path: str
     """
     Compares two input skeletons and returns their similarity index (or Sorensen index).
     """
+    
     gen_skel = cv2.imread(generated_skeleton_path)
     ref_skel = cv2.imread(reference_skeleton_path)
 
