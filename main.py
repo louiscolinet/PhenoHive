@@ -123,6 +123,8 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
     image_path=str(station.image_path)
     time.sleep(1)
     station.disp.show_img_param_menu(sigma, kernel_size, inc)
+    self.best_score = 0.0
+    
     while True:
         if not GPIO.input(station.BUT_RIGHT):
             print("bouton droit")
