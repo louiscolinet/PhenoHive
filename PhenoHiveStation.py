@@ -214,6 +214,7 @@ class PhenoHiveStation:
                 best_params = (sig, ker)
 
         if best_params == None:
+            print("best_params == None")
             return (sigma, kernel)
             
         self.best_score = best_score
