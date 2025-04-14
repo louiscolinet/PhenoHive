@@ -67,7 +67,6 @@ class PhenoHiveStation:
     status = -1
     last_error = ("", "")
     running = 0
-    best_score = -np.inf
 
     @staticmethod
     def get_instance() -> 'PhenoHiveStation':
@@ -181,21 +180,23 @@ class PhenoHiveStation:
         """
         Automatically calibrate sigma and kernel_size for optimal segmentation.
         """
+        print("entrée calib_img_param")
 
         best_params = None
-        best_score = self.best_score
+        best_score = -np.inf
         sigma_values = np.linspace(sigma*calib_test_num/10, sigma*10/calib_test_num, num=10)
         kernel_values = np.arange(kernel-5, kernel+5, step=1, dtype=int )
-        print(f"best score : {best_score}")
+        
         print(f"sigma:{sigma_values}, kernel:{kernel_values}")
         for sigma, kernel_size in product(sigma_values, kernel_values):
-            #print(f"Test avec sigma={sigma}, kernel={kernel_size}")
+            print(f"Test avec sigma={sigma}, kernel={kernel_size}")
             try:
                 path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
             except KeyError:
                 print("Erreur: get_segment_list a échoué (KeyError)")
                 path_lengths = []
 
+            #print(f"                              path_lengths:{path_lengths}")
             if path_lengths == None:
                 continue
                 
@@ -205,16 +206,20 @@ class PhenoHiveStation:
             except KeyError:
                 dsc, num_branches = (0,0)
                 print("Erreur: evaluate_skeleton a échoué (KeyError)")
-                
+
+            print(f"Résultats: num_segments={num_segments}, num_branches={num_branches}, dsc={dsc}")
+    
+            """if abs(num_segments - num_branches) > (num_branches / 2):
+                score = 0
+            else:"""
             score = dsc
+
+            print(f"Score calculé: {score}")
                 
             if score > best_score:
                 best_score = score
                 print(f"Meilleure combinaison trouvée: sigma={sigma}, kernel={kernel_size}, score={score}")
                 best_params = (sigma, kernel_size)
-        self.best_score = best_score
-        self.parser["image_arg"]["best_score"] = str(best_score)
-
         return best_params
 
     def evaluate_skeleton(self, generated_skeleton_path: str, reference_skeleton_path: str) -> dict:
@@ -293,7 +298,6 @@ class PhenoHiveStation:
         self.BUT_LEFT = int(self.parser["Buttons"]["left"])
         self.BUT_RIGHT = int(self.parser["Buttons"]["right"])
         self.HUM = int(self.parser["Humidity"]["humidity_port"])
-        self.best_score = float(self.parser["image_arg"]["best_score"])
 
     def register_error(self, exception: Exception) -> None:
         """
@@ -429,7 +433,6 @@ class PhenoHiveStation:
         try:
             weight, std_dev = self.weight_pipeline()
             self.data["weight"] = weight
-            self.load_cell_cal = float(self.parser["cal_coef"]["load_cell_cal"])
             self.data["weight_g"] = weight * self.load_cell_cal
             self.data["standard_deviation"] = std_dev
 
