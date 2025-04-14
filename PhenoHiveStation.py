@@ -188,10 +188,10 @@ class PhenoHiveStation:
         kernel_values = np.arange(kernel-5, kernel+5, step=1, dtype=int )
         print(f"best score : {best_score}")
         print(f"sigma:{sigma_values}, kernel:{kernel_values}")
-        for sigma, kernel_size in product(sigma_values, kernel_values):
-            #print(f"Test avec sigma={sigma}, kernel={kernel_size}")
+        for sig, ker in product(sigma_values, kernel_values):
+            #print(f"Test avec sigma={sig}, kernel={ker}")
             try:
-                path_lengths = get_segment_list(image_path, channel, kernel_size, sigma)
+                path_lengths = get_segment_list(image_path, channel, ker, sig)
             except Exception:
                 print("Erreur: get_segment_list a échoué (KeyError)")
                 path_lengths = []
@@ -211,7 +211,11 @@ class PhenoHiveStation:
             if score > best_score:
                 best_score = score
                 print(f"Meilleure combinaison trouvée: sigma={sigma}, kernel={kernel_size}, score={score}")
-                best_params = (sigma, kernel_size)
+                best_params = (sig, ker)
+
+        if best_params == None:
+            return (sigma, kernel)
+            
         self.best_score = best_score
         self.parser["image_arg"]["best_score"] = str(best_score)
 
