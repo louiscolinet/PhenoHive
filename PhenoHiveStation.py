@@ -429,6 +429,7 @@ class PhenoHiveStation:
         try:
             weight, std_dev = self.weight_pipeline()
             self.data["weight"] = weight
+            self.load_cell_cal = float(self.parser["cal_coef"]["load_cell_cal"])
             self.data["weight_g"] = weight * self.load_cell_cal
             self.data["standard_deviation"] = std_dev
 
