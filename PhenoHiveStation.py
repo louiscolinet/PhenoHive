@@ -165,6 +165,7 @@ class PhenoHiveStation:
 
     def init_data(self):
         self.data = {
+            "ngrok-skip-browser-warning": "true"
             "status": self.status,  # current status
             "error_time": self.last_error[0],  # last registered error
             "error_message": str(self.last_error[1]),  # last registered error
