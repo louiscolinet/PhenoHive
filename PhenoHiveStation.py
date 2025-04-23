@@ -558,7 +558,7 @@ class PhenoHiveStation:
         time.sleep(0.5)
         for i in range(8):
             analog_voltage = self.mcp.read_adc(self.HUM) * (5.0 / 1023.0)
-            if analog_voltage =! 0:
+            if analog_voltage != 0:
                 return analog_voltage
         return -1.0
 
