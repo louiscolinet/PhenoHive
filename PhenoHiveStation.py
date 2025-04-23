@@ -11,7 +11,8 @@ import threading
 import Adafruit_GPIO.SPI as SPI
 import ST7735 as TFT
 import hx711
-import Adafruit_MCP3008
+import adafruit_mcp3xxx.mcp3008 as Adafruit_MCP3008
+from adafruit_mcp3xxx.analog_in import AnalogIn
 import RPi.GPIO as GPIO
 import logging
 from datetime import datetime
@@ -556,11 +557,14 @@ class PhenoHiveStation:
     def humidity_pipeline(self):
         self.disp.show_collecting_data("Measuring humidity")
         time.sleep(0.5)
-        for i in range(8):
-            analog_voltage = self.mcp.read_adc(self.HUM) * (5.0 / 1023.0)
-            if analog_voltage != 0:
-                return analog_voltage
-        return -1.0
+        
+            #analog_voltage = self.mcp.read_adc(self.HUM) * (5.0 / 1023.0)
+        analog_voltage = max(AnalogIn(mcp, MCP.P0), AnalogIn(mcp, MCP.P1),
+                              AnalogIn(mcp, MCP.P2), AnalogIn(mcp, MCP.P3), 
+                              AnalogIn(mcp, MCP.P4), AnalogIn(mcp, MCP.P5), 
+                              AnalogIn(mcp, MCP.P6), AnalogIn(mcp, MCP.P7), 
+        return analog_voltage
+
 
     def light_pipeline(self):
         self.disp.show_collecting_data("Measuring light")
