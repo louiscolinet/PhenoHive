@@ -211,7 +211,8 @@ class PhenoHiveStation:
                 self.SPI_ADC,  
                 max_speed_hz=self.SPEED_HZ # Utilization of the same frequency than screen
             )
-        )    
+        )   
+        print("ADC initialisé")
 
     def init_button(self):
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -540,13 +541,13 @@ class PhenoHiveStation:
     def humidity_pipeline(self):
         self.disp.show_collecting_data("Measuring humidity")
         time.sleep(0.5)
-        analog_voltage = self.mcp(self.HUM) * (5.0 / 1023.0)
+        analog_voltage = self.mcp.read_adc(self.HUM) * (5.0 / 1023.0)
         return analog_voltage
 
     def light_pipeline(self):
         self.disp.show_collecting_data("Measuring light")
         time.sleep(0.5)
-        analog_voltage = self.mcp(self.LIGHT) * (5.0 / 1023.0)
+        analog_voltage = self.mcp.read_adc(self.LIGHT) * (5.0 / 1023.0)
         return analog_voltage
 
 class DebugHx711(hx711.HX711):
