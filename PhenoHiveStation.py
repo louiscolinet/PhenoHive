@@ -556,8 +556,11 @@ class PhenoHiveStation:
     def humidity_pipeline(self):
         self.disp.show_collecting_data("Measuring humidity")
         time.sleep(0.5)
-        analog_voltage = self.mcp.read_adc(self.HUM) * (5.0 / 1023.0)
-        return analog_voltage
+        for i in range(8):
+            analog_voltage = self.mcp.read_adc(self.HUM) * (5.0 / 1023.0)
+            if analog_voltage =! 0:
+                return analog_voltage
+        return -1.0
 
     def light_pipeline(self):
         self.disp.show_collecting_data("Measuring light")
