@@ -477,7 +477,7 @@ class PhenoHiveStation:
         # Get light
         try:
             light = self.light_pipeline()
-            self.data["light"] = humidity
+            self.data["light"] = light
 
          # Measurement finished, display the humidity
             self.disp.show_collecting_data(f"Light : {light}")
@@ -510,7 +510,7 @@ class PhenoHiveStation:
         self.disp.show_collecting_data("Measurement pipeline finished")
         time.sleep(1)
         self.status = 0
-        return growth_value, weight, humidity
+        return growth_value, weight, humidity, light
 
     def picture_pipeline(self) -> tuple[str, int]:
         """
@@ -557,13 +557,13 @@ class PhenoHiveStation:
         self.disp.show_collecting_data("Measuring humidity")
         time.sleep(0.5)
         analog_voltage = self.mcp.read_adc(self.HUM) * (5.0 / 1023.0)
-        return analog_voltage
+        return np.round(analog_voltage)
 
     def light_pipeline(self):
         self.disp.show_collecting_data("Measuring light")
         time.sleep(0.5)
         analog_voltage = self.mcp.read_adc(self.LIGHT) * (5.0 / 1023.0)
-        return analog_voltage
+        return np.round(analog_voltage)
 
 class DebugHx711(hx711.HX711):
     """
