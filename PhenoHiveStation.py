@@ -228,7 +228,7 @@ class PhenoHiveStation:
             "weight_g": -1.0,  # plant's (measured) weight in grams (if calibrated)
             "standard_deviation": -1.0,  # measured weight standard deviation
             "picture": "",  # last picture as a base-64 string
-            "humidity": -1.0 # soil humidity
+            "humidity": -1.0, # soil humidity
             "light": -1.0
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation", "humidity", "light"]
