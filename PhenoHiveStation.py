@@ -563,7 +563,7 @@ class PhenoHiveStation:
         self.disp.show_collecting_data("Measuring light")
         time.sleep(0.5)
         analog_voltage = self.mcp.read_adc(self.LIGHT) * (5.0 / 1023.0)
-        return np.roundanalog_voltage
+        return analog_voltage
 
 class DebugHx711(hx711.HX711):
     """
