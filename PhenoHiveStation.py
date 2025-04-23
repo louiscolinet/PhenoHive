@@ -562,7 +562,8 @@ class PhenoHiveStation:
         analog_voltage = max(AnalogIn(mcp, MCP.P0), AnalogIn(mcp, MCP.P1),
                               AnalogIn(mcp, MCP.P2), AnalogIn(mcp, MCP.P3), 
                               AnalogIn(mcp, MCP.P4), AnalogIn(mcp, MCP.P5), 
-                              AnalogIn(mcp, MCP.P6), AnalogIn(mcp, MCP.P7), 
+                              AnalogIn(mcp, MCP.P6), AnalogIn(mcp, MCP.P7)
+                            )
         return analog_voltage
 
 
