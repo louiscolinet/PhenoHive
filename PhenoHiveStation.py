@@ -11,6 +11,7 @@ import threading
 import Adafruit_GPIO.SPI as SPI
 import ST7735 as TFT
 import hx711
+import Adafruit_MCP3008
 import RPi.GPIO as GPIO
 import logging
 from datetime import datetime
@@ -106,13 +107,58 @@ class PhenoHiveStation:
             threading.Thread(target=self.init_load),
             threading.Thread(target=self.init_button),
             threading.Thread(target=self.init_data),
-            threading.Thread(target=self.init_humidity)
+            threading.Thread(target=self.init_adc)
         ]
         
         for thread in threads:
             thread.start()
         for thread in threads:
             thread.join()
+
+    def parse_config_file(self, path: str) -> None:
+        """
+        Parse the config file at the given path and initialise the station's variables with the values
+        :param path: the path to the config file
+        :raises RuntimeError: If the config file could not be parsed
+        """
+        if self.parser is None:
+            self.parser = configparser.ConfigParser()
+            
+        try:
+            self.parser.read(path)
+        except configparser.ParsingError as e:
+            LOGGER.error(f"Failed to parse config file: {type(e).__name__}: {e}")
+            raise RuntimeError(f"Failed to parse config file {e}")
+
+        self.token = str(self.parser["InfluxDB"]["token"])
+        self.org = str(self.parser["InfluxDB"]["org"])
+        self.bucket = str(self.parser["InfluxDB"]["bucket"])
+        self.url = str(self.parser["InfluxDB"]["url"])
+        self.station_id = str(self.parser["Station"]["ID"])
+        self.image_path = str(self.parser["Paths"]["image_folder"])
+        self.csv_path = str(self.parser["Paths"]["csv_path"])
+        self.pot_limit = int(self.parser["image_arg"]["pot_limit"])
+        self.channel = str(self.parser["image_arg"]["channel"])
+        self.kernel_size = int(self.parser["image_arg"]["kernel_size"])
+        self.sigma = float(self.parser["image_arg"]["sigma"])
+        self.fill_size = int(self.parser["image_arg"]["fill_size"])
+        self.time_interval = int(self.parser["time_interval"]["time_interval"])
+        self.WIDTH = int(self.parser["Display"]["width"])
+        self.HEIGHT = int(self.parser["Display"]["height"])
+        self.SPEED_HZ = int(self.parser["Display"]["speed_hz"])
+        self.DC = int(self.parser["Display"]["dc"])
+        self.RST = int(self.parser["Display"]["rst"])
+        self.SPI_PORT = int(self.parser["Display"]["spi_port"])
+        self.SPI_DISPLAY = int(self.parser["Display"]["spi_display"])
+        self.SPI_ADC = int(self.parser["ADC"]["spi_adc"])
+        self.load_cell_cal = float(self.parser["cal_coef"]["load_cell_cal"])
+        self.tare = float(self.parser["cal_coef"]["tare"])
+        self.LED = int(self.parser["Camera"]["led"])
+        self.BUT_LEFT = int(self.parser["Buttons"]["left"])
+        self.BUT_RIGHT = int(self.parser["Buttons"]["right"])
+        self.HUM = int(self.parser["Humidity"]["humidity_channel"])
+        self.LIGHT = int(self.parser["Light"]["light_channel"])
+        self.best_score = float(self.parser["image_arg"]["best_score"])
 
     def init_display(self):
         # Screen initialisation
@@ -122,7 +168,7 @@ class PhenoHiveStation:
             rst=self.RST,
             spi=SPI.SpiDev(
                 self.SPI_PORT,
-                self.SPI_DEVICE,
+                self.SPI_DISPLAY,
                 max_speed_hz=self.SPEED_HZ
             )
         )
@@ -155,9 +201,17 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while resetting HX711 : {e}"))
         else:
             LOGGER.debug("HX711 reset")
-
-    def init_humidity(self):
-        GPIO.setup(self.HUM, GPIO.IN) 
+        
+    def init_adc(self):
+        # MCP3008
+        
+        self.mcp = Adafruit_MCP3008.MCP3008(
+            spi=SPI.SpiDev(
+                self.SPI_PORT,  # Utilization of the same port than screen
+                self.SPI_ADC,  
+                max_speed_hz=self.SPEED_HZ # Utilization of the same frequency than screen
+            )
+        )    
 
     def init_button(self):
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -175,8 +229,9 @@ class PhenoHiveStation:
             "standard_deviation": -1.0,  # measured weight standard deviation
             "picture": "",  # last picture as a base-64 string
             "humidity": -1.0 # soil humidity
+            "light": -1.0
         }
-        self.to_save = ["growth", "weight", "weight_g", "standard_deviation", "humidity"]
+        self.to_save = ["growth", "weight", "weight_g", "standard_deviation", "humidity", "light"]
 
     def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float=1, kernel: int=20, calib_test_num: int=1):
         """
@@ -255,50 +310,6 @@ class PhenoHiveStation:
         num_branches = 4
         
         return (dsc, num_branches)
-        
-
-    def parse_config_file(self, path: str) -> None:
-        """
-        Parse the config file at the given path and initialise the station's variables with the values
-        :param path: the path to the config file
-        :raises RuntimeError: If the config file could not be parsed
-        """
-        if self.parser is None:
-            self.parser = configparser.ConfigParser()
-            
-        try:
-            self.parser.read(path)
-        except configparser.ParsingError as e:
-            LOGGER.error(f"Failed to parse config file: {type(e).__name__}: {e}")
-            raise RuntimeError(f"Failed to parse config file {e}")
-
-        self.token = str(self.parser["InfluxDB"]["token"])
-        self.org = str(self.parser["InfluxDB"]["org"])
-        self.bucket = str(self.parser["InfluxDB"]["bucket"])
-        self.url = str(self.parser["InfluxDB"]["url"])
-        self.station_id = str(self.parser["Station"]["ID"])
-        self.image_path = str(self.parser["Paths"]["image_folder"])
-        self.csv_path = str(self.parser["Paths"]["csv_path"])
-        self.pot_limit = int(self.parser["image_arg"]["pot_limit"])
-        self.channel = str(self.parser["image_arg"]["channel"])
-        self.kernel_size = int(self.parser["image_arg"]["kernel_size"])
-        self.sigma = float(self.parser["image_arg"]["sigma"])
-        self.fill_size = int(self.parser["image_arg"]["fill_size"])
-        self.time_interval = int(self.parser["time_interval"]["time_interval"])
-        self.WIDTH = int(self.parser["Display"]["width"])
-        self.HEIGHT = int(self.parser["Display"]["height"])
-        self.SPEED_HZ = int(self.parser["Display"]["speed_hz"])
-        self.DC = int(self.parser["Display"]["dc"])
-        self.RST = int(self.parser["Display"]["rst"])
-        self.SPI_PORT = int(self.parser["Display"]["spi_port"])
-        self.SPI_DEVICE = int(self.parser["Display"]["spi_device"])
-        self.load_cell_cal = float(self.parser["cal_coef"]["load_cell_cal"])
-        self.tare = float(self.parser["cal_coef"]["tare"])
-        self.LED = int(self.parser["Camera"]["led"])
-        self.BUT_LEFT = int(self.parser["Buttons"]["left"])
-        self.BUT_RIGHT = int(self.parser["Buttons"]["right"])
-        self.HUM = int(self.parser["Humidity"]["humidity_port"])
-        self.best_score = float(self.parser["image_arg"]["best_score"])
 
     def register_error(self, exception: Exception) -> None:
         """
@@ -529,7 +540,14 @@ class PhenoHiveStation:
     def humidity_pipeline(self):
         self.disp.show_collecting_data("Measuring humidity")
         time.sleep(0.5)
-        return GPIO.input(self.HUM)
+        analog_voltage = self.mcp(self.HUM) * (5.0 / 1023.0)
+        return analog_voltage
+
+    def light_pipeline(self):
+        self.disp.show_collecting_data("Measuring light")
+        time.sleep(0.5)
+        analog_voltage = self.mcp(self.LIGHT) * (5.0 / 1023.0)
+        return analog_voltage
 
 class DebugHx711(hx711.HX711):
     """
