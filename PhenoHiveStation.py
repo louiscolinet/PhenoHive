@@ -440,7 +440,7 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while taking the photo: {e}"))
             self.disp.show_collecting_data("Error while taking the photo")
             time.sleep(5)
-            return 0, 0, 0
+            return 0, 0, 0, 0
 
         # Get weight
         try:
@@ -457,7 +457,7 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while getting the weight: {e}"))
             self.disp.show_collecting_data("Error while getting the weight")
             time.sleep(5)
-            return growth_value, 0, 0
+            return growth_value, 0, 0, 0
 
         # Get humidity
         try:
@@ -472,7 +472,22 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while getting the humidity: {e}"))
             self.disp.show_collecting_data("Error while getting the humidity")
             time.sleep(5)
-            return growth_value, weight, 0
+            return growth_value, weight, 0, 0
+
+        # Get light
+        try:
+            light = self.light_pipeline()
+            self.data["light"] = humidity
+
+         # Measurement finished, display the humidity
+            self.disp.show_collecting_data(f"Light : {light}")
+            time.sleep(2)
+            
+        except Exception as e:
+            self.register_error(type(e)(f"Error while getting the light: {e}"))
+            self.disp.show_collecting_data("Error while getting the light")
+            time.sleep(5)
+            return growth_value, weight, humidity, 0
 
         # Send data to the DB
         try:
@@ -489,7 +504,7 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while sending data to the DB: {e}"))
             self.disp.show_collecting_data("Error while sending data to the DB")
             time.sleep(5)
-            return growth_value, weight, humidity
+            return growth_value, weight, humidity, light
 
         LOGGER.info("Measurement pipeline finished")
         self.disp.show_collecting_data("Measurement pipeline finished")
