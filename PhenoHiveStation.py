@@ -557,15 +557,13 @@ class PhenoHiveStation:
         self.disp.show_collecting_data("Measuring humidity")
         time.sleep(0.5)
         analog_voltage = self.mcp.read_adc(self.HUM) * (5.0 / 1023.0)
-        return 8.1
-        #return np.round(analog_voltage)
+        return analog_voltage
 
     def light_pipeline(self):
         self.disp.show_collecting_data("Measuring light")
         time.sleep(0.5)
         analog_voltage = self.mcp.read_adc(self.LIGHT) * (5.0 / 1023.0)
-        return 5.5
-        #return np.round(analog_voltage)
+        return np.roundanalog_voltage
 
 class DebugHx711(hx711.HX711):
     """
