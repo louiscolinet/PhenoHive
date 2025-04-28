@@ -205,7 +205,7 @@ class Display:
         if action:
             text_width = draw.textlength(action, font=font_action)
     
-            if text_width <= self.WiDTH - 10:
+            if text_width <= self.WIDTH - 10:
                 draw.text((5, 100), action, font=font_action, fill=(0, 0, 0))
             else:
                 words = action.split()
@@ -213,7 +213,7 @@ class Display:
                 line2 = ""
                 for word in words:
                     test_line = (line1 + " " + word).strip()
-                    if draw.textlength(test_line, font=font_action) <= self.WiDTH - 10:
+                    if draw.textlength(test_line, font=font_action) <= self.WIDTH - 10:
                         line1 = test_line
                     else:
                         break
