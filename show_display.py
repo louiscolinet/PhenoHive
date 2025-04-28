@@ -149,9 +149,9 @@ class Display:
         img, draw = self.create_image(logo=True)
         # Menu
         font = ImageFont.truetype(FONT, 10)
-        draw.text((0, 80), f"Tare value: {tare}", font=font, fill=(0, 0, 0))
-        draw.text((0, 95), f"Raw value: {raw_weight}", font=font, fill=(0, 0, 0))
-        draw.text((0, 110), f"Weight: {weight_g}", font=font, fill=(0, 0, 0))
+        draw.text((5, 80), f"Tare value: {tare}", font=font, fill=(0, 0, 0))
+        draw.text((5, 95), f"Raw value: {raw_weight}", font=font, fill=(0, 0, 0))
+        draw.text((5, 110), f"Weight: {weight_g}", font=font, fill=(0, 0, 0))
         # Button
         font = ImageFont.truetype(FONT, 10)
         if calib_or_test < 3:
@@ -170,8 +170,8 @@ class Display:
         img, draw = self.create_image(logo=True)
         # Button
         font = ImageFont.truetype(FONT, 10)
-        draw.text((0, 80), f"Sigma value: {sigma}", font=font, fill=(0, 0, 0))
-        draw.text((0, 95), f"Kernel size value: {kernel_size}", font=font, fill=(0, 0, 0))
+        draw.text((5, 80), f"Sigma value: {sigma}", font=font, fill=(0, 0, 0))
+        draw.text((5, 95), f"Kernel size value: {kernel_size}", font=font, fill=(0, 0, 0))
         if inc%2 == 0:
             draw.text((0, 130), f"<-- Calib {inc+1}       Back -->", font=font, fill=(0, 0, 0))
             self.SCREEN.display(img)
