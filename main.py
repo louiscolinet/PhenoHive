@@ -170,7 +170,7 @@ def handle_weight_calibration_menu(station: PhenoHiveStation) -> None:
     weight_g = 0
     calib_or_test = 0
     while True:
-        station.disp.show_weight_cal_menu(raw_weight, weight_g, station.tare, calib_or_test)
+        station.disp.show_weight_cal_menu(raw_weight, np.round(weight_g, 2), station.tare, calib_or_test)
         if not GPIO.input(station.BUT_RIGHT):
             break
         if not GPIO.input(station.BUT_LEFT):
