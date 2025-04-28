@@ -440,7 +440,7 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while taking the photo: {e}"))
             self.disp.show_collecting_data("Error while taking the photo")
             time.sleep(5)
-            return 0, 0, 0, 0
+            growth_value = 0
 
         # Get weight
         try:
@@ -457,7 +457,7 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while getting the weight: {e}"))
             self.disp.show_collecting_data("Error while getting the weight")
             time.sleep(5)
-            return growth_value, 0, 0, 0
+            weight = 0
 
         # Get humidity
         try:
@@ -472,7 +472,7 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while getting the humidity: {e}"))
             self.disp.show_collecting_data("Error while getting the humidity")
             time.sleep(5)
-            return growth_value, weight, 0, 0
+            humidity = 0
 
         # Get light
         try:
@@ -487,7 +487,7 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while getting the light: {e}"))
             self.disp.show_collecting_data("Error while getting the light")
             time.sleep(5)
-            return growth_value, weight, humidity, 0
+            light = 0
 
         # Send data to the DB
         try:
@@ -506,10 +506,10 @@ class PhenoHiveStation:
             time.sleep(5)
             return growth_value, weight, humidity, light
 
+        self.status = self.data["status"]
         LOGGER.info("Measurement pipeline finished")
         self.disp.show_collecting_data("Measurement pipeline finished")
         time.sleep(1)
-        self.status = 0
         return growth_value, weight, humidity, light
 
     def picture_pipeline(self) -> tuple[str, int]:
@@ -527,7 +527,6 @@ class PhenoHiveStation:
             try:
                 growth_value = get_total_length(image_path=path_img, channel=self.channel, kernel_size=self.kernel_size, sigma=self.sigma)
             except Exception as e:
-                self.register_error(type(e)(f"Error while processing the photo: {e}"))
                 self.register_error(KeyError("Error while processing the photo, no segment found in the image."
                                              "Check that the plant is clearly visible."))
                 self.disp.show_collecting_data("Error while processing the photo")
