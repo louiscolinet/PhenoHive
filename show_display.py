@@ -198,13 +198,33 @@ class Display:
         :param action: Current action performed by the station (ex: "Taking photo...")
         """
         img, draw = self.create_image(logo=True)
-        # Menu
-        font = ImageFont.truetype(FONT, 12)
-        draw.text((5, 85), "Collecting data...", font=font, fill=(0, 0, 0))
-        if action != "":
-            font = ImageFont.truetype(FONT, 8)
-            draw.text((5, 100), action, font=font, fill=(0, 0, 0))
+        font_title = ImageFont.truetype(FONT, 12)
+        draw.text((5, 85), "Collecting data...", font=font_title, fill=(0, 0, 0))
+        
+        font_action = ImageFont.truetype(FONT, 8)
+        if action:
+            text_width = draw.textlength(action, font=font_action)
+    
+            if text_width <= self.WiDTH - 10:
+                draw.text((5, 100), action, font=font_action, fill=(0, 0, 0))
+            else:
+                words = action.split()
+                line1 = ""
+                line2 = ""
+                for word in words:
+                    test_line = (line1 + " " + word).strip()
+                    if draw.textlength(test_line, font=font_action) <= self.WiDTH - 10:
+                        line1 = test_line
+                    else:
+                        break
+                idx = len(line1.split())
+                line2 = " ".join(words[idx:])
+    
+                draw.text((5, 100), line1, font=font_action, fill=(0, 0, 0))
+                draw.text((5, 112), line2, font=font_action, fill=(0, 0, 0))
+    
         self.SCREEN.display(img)
+
 
     def show_status(self) -> None:
         """
