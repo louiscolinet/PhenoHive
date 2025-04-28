@@ -221,7 +221,7 @@ class Display:
                 line2 = " ".join(words[idx:])
     
                 draw.text((5, 100), line1, font=font_action, fill=(0, 0, 0))
-                draw.text((5, 112), line2, font=font_action, fill=(0, 0, 0))
+                draw.text((5, 110), line2, font=font_action, fill=(0, 0, 0))
     
         self.SCREEN.display(img)
 
