@@ -151,7 +151,7 @@ class Display:
         font = ImageFont.truetype(FONT, 10)
         draw.text((0, 80), f"Tare value: {tare}", font=font, fill=(0, 0, 0))
         draw.text((0, 95), f"Raw value: {raw_weight}", font=font, fill=(0, 0, 0))
-        draw.text((0, 110), f"Weight in grams: {weight_g}", font=font, fill=(0, 0, 0))
+        draw.text((0, 110), f"Weight: {weight_g}", font=font, fill=(0, 0, 0))
         # Button
         font = ImageFont.truetype(FONT, 10)
         if calib_or_test < 3:
