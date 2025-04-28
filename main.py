@@ -235,7 +235,7 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
     while continue_measurements:
         time_now = datetime.datetime.now()
         station.disp.show_measuring_menu(round(weight*station.load_cell_cal, 2), round(growth_value, 2),
-                                         humidity, time_now.strftime("%Y/%m/%d %H:%M:%S"),
+                                         round(humidity, 2), time_now.strftime("%Y/%m/%d %H:%M:%S"),
                                          time_nxt_measure.strftime("%H:%M:%S"), n_round)
 
         if time_now >= time_nxt_measure:
