@@ -188,6 +188,7 @@ class PhenoHiveStation:
             }
             response = requests.get(f"{self.url}/ping", headers=headers, timeout=5, verify=False)
             self.connected = response.status_code == 204  # InfluxDB v2 renvoie 204 pour un ping réussi
+            print("connected")
         except Exception as e:
             LOGGER.warning(f"InfluxDB connection check failed: {e}")
             self.connected = False
