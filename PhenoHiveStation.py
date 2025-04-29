@@ -3,6 +3,8 @@ import configparser
 import os
 import numpy as np
 from plantcv import plantcv as pcv
+import requests
+from requests.auth import HTTPBasicAuth
 import cv2
 from itertools import product
 import statistics
@@ -175,20 +177,27 @@ class PhenoHiveStation:
         self.disp = Display(self)
         self.disp.show_image("assets/logo_elia.jpg")
 
-    def init_influxdb(self):
-        # InfluxDB client initialization
-        self.client = InfluxDBClient(
-            url=self.url, 
-            token=self.token, 
-            org=self.org,
-            username='PhenoHive',
-            password='phenohive'
+def init_influxdb(self):
+    
+    self.username = 'PhenoHive'
+    self.password = 'phenohive'
+
+    # Vérification de la connexion à InfluxDB via une requête ping
+    try:
+        response = requests.get(
+            f"{self.url}/ping",
+            auth=HTTPBasicAuth(self.username, self.password),
+            timeout=5,
+            verify=False
         )
-        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
-        self.connected = self.client.ping()
-        self.last_connection = datetime.now().strftime(DATE_FORMAT)
-        LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
-                     f", Ping returned : {self.connected}")
+        self.connected = response.status_code == 204  # InfluxDB v2 renvoie 204 pour un ping réussi
+    except Exception as e:
+        LOGGER.warning(f"InfluxDB connection check failed: {e}")
+        self.connected = False
+
+    self.last_connection = datetime.now().strftime(DATE_FORMAT)
+    LOGGER.debug(f"InfluxDB manual connection check: connected={self.connected}, url={self.url}")
+
 
     def init_camera_button(self):
         # Camera and LED init
@@ -338,7 +347,17 @@ class PhenoHiveStation:
         :return True if the data was sent to the DB, False otherwise
         """
         # Check connection with the database
-        self.connected = self.client.ping()
+        try:
+            response = requests.get(
+                f"{self.url}/ping",
+                auth=HTTPBasicAuth(self.username, self.password),
+                timeout=5,
+                verify=False
+            )
+            self.connected = response.status_code == 204
+        except Exception as e:
+            LOGGER.warning(f"InfluxDB ping failed: {e}")
+            self.connected = False
         timestamp = datetime.now().strftime(DATE_FORMAT)
 
         # If the csv file does not exist, create it with the headers
@@ -349,20 +368,39 @@ class PhenoHiveStation:
         measurements_list = [timestamp]
         for key in self.to_save:
             measurements_list.append(self.data[key])
-        save_to_csv(measurements_list, "data/measurements.csv")
+        save_to_csv(measurements_list, self.csv_path)
 
+        # If not connected, skip sending
         if not self.connected:
+            LOGGER.warning("Skipping InfluxDB write: not connected.")
             return False
 
-        points = []
-        for field, value in self.data.items():
-            p = Point(f"station_{self.station_id}").field(field, value)
-            points.append(p)
-
-        # Send data to the DB
-        LOGGER.debug(f"Sending data to the DB: {str(points)}")
-        self.write_api.write(bucket=self.bucket, org=self.org, record=points)
-        return True
+        # Send data via HTTP POST
+        try:
+            payload = ""
+            for field, value in self.data.items():
+                line = f"station_{self.station_id} {field}={value}\n"
+                payload += line
+    
+            response = requests.post(
+                f"{self.url}/api/v2/write?org={self.org}&bucket={self.bucket}&precision=s",
+                data=payload,
+                auth=HTTPBasicAuth(self.username, self.password),
+                headers={"Content-Type": "text/plain"},
+                timeout=5,
+                verify=False
+            )
+    
+            if response.status_code == 204:
+                LOGGER.debug("Data successfully written to InfluxDB.")
+                return True
+            else:
+                LOGGER.error(f"InfluxDB write failed: {response.status_code} - {response.text}")
+                return False
+    
+        except Exception as e:
+            LOGGER.error(f"Exception during InfluxDB write: {e}")
+            return False
 
     def get_weight(self, n: int = 15) -> tuple[float, float]:
         """
