@@ -380,9 +380,9 @@ class PhenoHiveStation:
         # Construire le payload (les données sous forme de JSON ou d'un autre format accepté)
         payload = "\n".join(str(p) for p in points)
     
-        # Send data to InfluxDB v2
+        # Send data to InfluxDB v3
         try:
-            response = requests.post(f"{self.url}/api/v2/write?bucket={self.bucket}&org={self.org}",
+            response = requests.post(f"{self.url}/api/v3/write?bucket={self.bucket}&org={self.org}",
                                      headers=headers, data=payload, timeout=5, verify=False)
             if response.status_code == 204:
                 return True
