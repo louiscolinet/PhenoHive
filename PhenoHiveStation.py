@@ -180,9 +180,9 @@ class PhenoHiveStation:
         self.client = InfluxDBClient(
             url=self.url, 
             token=self.token, 
-            org=self.org
+            org=self.org,
             username=PhenoHive,
-            password=phenohive,
+            password=phenohive
         )
         self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
         self.connected = self.client.ping()
