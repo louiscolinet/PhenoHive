@@ -370,14 +370,11 @@ class PhenoHiveStation:
             'Authorization': f'Token {self.token}'
         }
 
-        # Preparer les points à envoyer
-        points = []
+        lines = []
         for field, value in self.data.items():
-            p = Point(f"station_{self.station_id}").field(field, value)
-            points.append(p)
-    
-        # Construire le payload (les données sous forme de JSON ou d'un autre format accepté)
-        payload = "\n".join(str(p) for p in points)
+            # Ajoute un timestamp si nécessaire, ici on laisse InfluxDB le gérer
+            lines.append(f"station_{self.station_id} {field}={value}")
+        payload = "\n".join(lines)
     
         # Send data to InfluxDB v3
         try:
