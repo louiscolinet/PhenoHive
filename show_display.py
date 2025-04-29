@@ -250,7 +250,7 @@ class Display:
         elif status == "red":
             font = ImageFont.truetype(FONT, 7)
             timestamp = self.STATION.last_error[0]
-            dt = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+            dt = datetime.fromisoformat(timestamp.replace("Z", ""))
             formatted_time = dt.strftime("%d %b, %H:%M")
             draw.text((3, 95), f"Error at {formatted_time}", font=font, fill=(0, 0, 0))
         
