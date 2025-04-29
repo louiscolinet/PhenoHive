@@ -255,7 +255,7 @@ class Display:
             draw.text((3, 95), f"Error at {formatted_time}", font=font, fill=(0, 0, 0))
         
             # Wrap error message
-            error_text = self.STATION.last_error[1]
+            error_text = str(self.STATION.last_error[1])
             wrapped_lines = self.wrap_text(error_text, font, max_width=self.WIDTH - 10, draw=draw)
             y = 110
             for line in wrapped_lines:
