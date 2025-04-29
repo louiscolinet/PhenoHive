@@ -1,4 +1,4 @@
-from datetime import datetime
+ffrom datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -192,7 +192,7 @@ class Display:
         draw.text((0, 130), f"<-- Calib {inc+1}       Back -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
-    def wrap_text(text, font, max_width):
+    def wrap_text(self, text, font, max_width):
         """
         Wrap text so it fits within the given width.
         """
