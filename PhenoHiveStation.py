@@ -367,8 +367,7 @@ class PhenoHiveStation:
         save_to_csv(measurements_list, self.csv_path)
 
         headers = {
-            'Authorization': f'Token {self.token}',
-            'Content-Type': 'application/json',
+            'Authorization': f'Token {self.token}'
         }
 
         # Preparer les points à envoyer
@@ -382,7 +381,7 @@ class PhenoHiveStation:
     
         # Send data to InfluxDB v3
         try:
-            response = requests.post(f"{self.url}/api/v3/write?bucket={self.bucket}&org={self.org}",
+            response = requests.post(f"{self.url}/api/v2/write?bucket={self.bucket}&org={self.org}",
                                      headers=headers, data=payload, timeout=5, verify=False)
             if response.status_code == 204:
                 return True
