@@ -224,7 +224,7 @@ class Display:
     
         font_action = ImageFont.truetype(FONT, 8)
         if action:
-            wrapped_lines = wrap_text(action, font_action, max_width=self.WIDTH - 10)
+            wrapped_lines = self.wrap_text(action, font_action, max_width=self.WIDTH - 10)
             y = 100
             for line in wrapped_lines:
                 draw.text((5, y), line, font=font_action, fill=(0, 0, 0))
@@ -256,7 +256,7 @@ class Display:
         
             # Wrap error message
             error_text = self.STATION.last_error[1]
-            wrapped_lines = wrap_text(error_text, font, max_width=self.WIDTH - 10)
+            wrapped_lines = self.wrap_text(error_text, font, max_width=self.WIDTH - 10)
             y = 110
             for line in wrapped_lines:
                 draw.text((3, y), line, font=font, fill=(0, 0, 0))
