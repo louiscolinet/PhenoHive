@@ -192,6 +192,27 @@ class Display:
         draw.text((0, 130), f"<-- Calib {inc+1}       Back -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
+    def wrap_text(text, font, max_width):
+        """
+        Wrap text so it fits within the given width.
+        """
+        lines = []
+        words = text.split()
+        current_line = ""
+    
+        for word in words:
+            test_line = current_line + (" " if current_line else "") + word
+            width, _ = draw.textsize(test_line, font=font)
+            if width <= max_width:
+                current_line = test_line
+            else:
+                lines.append(current_line)
+                current_line = word
+        if current_line:
+            lines.append(current_line)
+        return lines
+
+
     def show_collecting_data(self, action):
         """
         Show the collecting data menu
@@ -200,31 +221,16 @@ class Display:
         img, draw = self.create_image(logo=True)
         font_title = ImageFont.truetype(FONT, 12)
         draw.text((5, 85), "Collecting data...", font=font_title, fill=(0, 0, 0))
-        
+    
         font_action = ImageFont.truetype(FONT, 8)
         if action:
-            text_width = draw.textlength(action, font=font_action)
-    
-            if text_width <= self.WIDTH - 10:
-                draw.text((5, 100), action, font=font_action, fill=(0, 0, 0))
-            else:
-                words = action.split()
-                line1 = ""
-                line2 = ""
-                for word in words:
-                    test_line = (line1 + " " + word).strip()
-                    if draw.textlength(test_line, font=font_action) <= self.WIDTH - 10:
-                        line1 = test_line
-                    else:
-                        break
-                idx = len(line1.split())
-                line2 = " ".join(words[idx:])
-    
-                draw.text((5, 100), line1, font=font_action, fill=(0, 0, 0))
-                draw.text((5, 110), line2, font=font_action, fill=(0, 0, 0))
+            wrapped_lines = wrap_text(action, font_action, max_width=self.WIDTH - 10)
+            y = 100
+            for line in wrapped_lines:
+                draw.text((5, y), line, font=font_action, fill=(0, 0, 0))
+                y += 10
     
         self.SCREEN.display(img)
-
 
     def show_status(self) -> None:
         """
@@ -247,7 +253,14 @@ class Display:
             dt = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
             formatted_time = dt.strftime("%d %b, %H:%M")
             draw.text((3, 95), f"Error at {formatted_time}", font=font, fill=(0, 0, 0))
-            draw.text((3, 110), f"{self.STATION.last_error[1]}", font=font, fill=(0, 0, 0))
+        
+            # Wrap error message
+            error_text = self.STATION.last_error[1]
+            wrapped_lines = wrap_text(error_text, font, max_width=self.WIDTH - 10)
+            y = 110
+            for line in wrapped_lines:
+                draw.text((3, y), line, font=font, fill=(0, 0, 0))
+                y += 10  # espacement vertical entre les lignes
 
         # Button
         font = ImageFont.truetype(FONT, 10)
