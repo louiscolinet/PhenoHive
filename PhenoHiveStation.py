@@ -181,8 +181,8 @@ class PhenoHiveStation:
             url=self.url, 
             token=self.token, 
             org=self.org,
-            username=PhenoHive,
-            password=phenohive
+            username='PhenoHive',
+            password='phenohive'
         )
         self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
         self.connected = self.client.ping()
