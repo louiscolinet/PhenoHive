@@ -178,18 +178,15 @@ class PhenoHiveStation:
         self.disp.show_image("assets/logo_elia.jpg")
 
     def init_influxdb(self):
-        
-        self.username = 'PhenoHive'
-        self.password = 'phenohive'
+        self.token = 'ton_token_influxdb'  # Remplace par ton token InfluxDB
+        self.url = 'http://127.0.0.1:8086'  # URL de ton InfluxDB
     
         # Vérification de la connexion à InfluxDB via une requête ping
         try:
-            response = requests.get(
-                f"{self.url}/ping",
-                auth=HTTPBasicAuth(self.username, self.password),
-                timeout=5,
-                verify=False
-            )
+            headers = {
+                'Authorization': f'Token {self.token}',
+            }
+            response = requests.get(f"{self.url}/ping", headers=headers, timeout=5, verify=False)
             self.connected = response.status_code == 204  # InfluxDB v2 renvoie 204 pour un ping réussi
         except Exception as e:
             LOGGER.warning(f"InfluxDB connection check failed: {e}")
@@ -348,15 +345,13 @@ class PhenoHiveStation:
         """
         # Vérifie si on est encore connecté (ping rapide)
         try:
-            response = requests.get(
-                f"{self.url}/ping",
-                auth=HTTPBasicAuth(self.username, self.password),
-                timeout=5,
-                verify=False
-            )
-            self.connected = response.status_code == 204
+            headers = {
+                'Authorization': f'Token {self.token}',
+            }
+            response = requests.get(f"{self.url}/ping", headers=headers, timeout=5, verify=False)
+            self.connected = response.status_code == 204  # InfluxDB v2 renvoie 204 pour un ping réussi
         except Exception as e:
-            LOGGER.warning(f"InfluxDB ping failed during send: {e}")
+            LOGGER.warning(f"InfluxDB connection check failed: {e}")
             self.connected = False
     
         if not self.connected:
@@ -369,40 +364,32 @@ class PhenoHiveStation:
             save_to_csv(["time"] + self.to_save, self.csv_path)
         measurements_list = [timestamp] + [self.data[k] for k in self.to_save]
         save_to_csv(measurements_list, self.csv_path)
-    
-        # Prépare les points InfluxDB en ligne-protocol
-        lines = []
+
+        headers = {
+            'Authorization': f'Token {self.token}',
+            'Content-Type': 'application/json',
+        }
+
+        # Preparer les points à envoyer
+        points = []
         for field, value in self.data.items():
-            line = f"station_{self.station_id} {field}={value}"
-            lines.append(line)
+            p = Point(f"station_{self.station_id}").field(field, value)
+            points.append(p)
     
-        # Envoie via POST HTTP vers l'endpoint /api/v2/write
+        # Construire le payload (les données sous forme de JSON ou d'un autre format accepté)
+        payload = "\n".join(str(p) for p in points)
+    
+        # Send data to InfluxDB v2
         try:
-            write_url = f"{self.url}/api/v2/write"
-            params = {
-                "bucket": self.bucket,
-                "org": self.org,
-                "precision": "s"
-            }
-    
-            response = requests.post(
-                write_url,
-                params=params,
-                data="\n".join(lines),
-                auth=HTTPBasicAuth(self.username, self.password),
-                headers={"Content-Type": "text/plain", "Authorization": f"Token {self.token}"},
-                timeout=5,
-                verify=False
-            )
-    
-            if response.status_code != 204:
+            response = requests.post(f"{self.url}/api/v2/write?bucket={self.bucket}&org={self.org}",
+                                     headers=headers, data=payload, timeout=5, verify=False)
+            if response.status_code == 204:
+                return True
+            else:
                 LOGGER.error(f"InfluxDB write failed: {response.status_code} - {response.text}")
                 return False
-    
-            return True
-    
         except Exception as e:
-            LOGGER.warning(f"Exception during InfluxDB write: {e}")
+            LOGGER.error(f"Failed to send data to InfluxDB: {e}")
             return False
 
 
