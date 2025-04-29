@@ -1,4 +1,4 @@
-import math
+from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
