@@ -177,26 +177,26 @@ class PhenoHiveStation:
         self.disp = Display(self)
         self.disp.show_image("assets/logo_elia.jpg")
 
-def init_influxdb(self):
+    def init_influxdb(self):
+        
+        self.username = 'PhenoHive'
+        self.password = 'phenohive'
     
-    self.username = 'PhenoHive'
-    self.password = 'phenohive'
-
-    # Vérification de la connexion à InfluxDB via une requête ping
-    try:
-        response = requests.get(
-            f"{self.url}/ping",
-            auth=HTTPBasicAuth(self.username, self.password),
-            timeout=5,
-            verify=False
-        )
-        self.connected = response.status_code == 204  # InfluxDB v2 renvoie 204 pour un ping réussi
-    except Exception as e:
-        LOGGER.warning(f"InfluxDB connection check failed: {e}")
-        self.connected = False
-
-    self.last_connection = datetime.now().strftime(DATE_FORMAT)
-    LOGGER.debug(f"InfluxDB manual connection check: connected={self.connected}, url={self.url}")
+        # Vérification de la connexion à InfluxDB via une requête ping
+        try:
+            response = requests.get(
+                f"{self.url}/ping",
+                auth=HTTPBasicAuth(self.username, self.password),
+                timeout=5,
+                verify=False
+            )
+            self.connected = response.status_code == 204  # InfluxDB v2 renvoie 204 pour un ping réussi
+        except Exception as e:
+            LOGGER.warning(f"InfluxDB connection check failed: {e}")
+            self.connected = False
+    
+        self.last_connection = datetime.now().strftime(DATE_FORMAT)
+        LOGGER.debug(f"InfluxDB manual connection check: connected={self.connected}, url={self.url}")
 
 
     def init_camera_button(self):
