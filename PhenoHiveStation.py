@@ -346,7 +346,7 @@ class PhenoHiveStation:
         Uses `PhenoHiveStation.measurements` dictionary containing the measurements and their values.
         :return True if the data was sent to the DB, False otherwise
         """
-        # Check connection with the database
+        # Vérifie si on est encore connecté (ping rapide)
         try:
             response = requests.get(
                 f"{self.url}/ping",
@@ -356,51 +356,55 @@ class PhenoHiveStation:
             )
             self.connected = response.status_code == 204
         except Exception as e:
-            LOGGER.warning(f"InfluxDB ping failed: {e}")
+            LOGGER.warning(f"InfluxDB ping failed during send: {e}")
             self.connected = False
+    
+        if not self.connected:
+            LOGGER.warning("Could not send data to the DB, no connection")
+            return False
+    
+        # Enregistre aussi dans le CSV local
         timestamp = datetime.now().strftime(DATE_FORMAT)
-
-        # If the csv file does not exist, create it with the headers
         if not os.path.exists(self.csv_path):
             save_to_csv(["time"] + self.to_save, self.csv_path)
-
-        # Save data to the corresponding csv file
-        measurements_list = [timestamp]
-        for key in self.to_save:
-            measurements_list.append(self.data[key])
+        measurements_list = [timestamp] + [self.data[k] for k in self.to_save]
         save_to_csv(measurements_list, self.csv_path)
-
-        # If not connected, skip sending
-        if not self.connected:
-            LOGGER.warning("Skipping InfluxDB write: not connected.")
-            return False
-
-        # Send data via HTTP POST
+    
+        # Prépare les points InfluxDB en ligne-protocol
+        lines = []
+        for field, value in self.data.items():
+            line = f"station_{self.station_id} {field}={value}"
+            lines.append(line)
+    
+        # Envoie via POST HTTP vers l'endpoint /api/v2/write
         try:
-            payload = ""
-            for field, value in self.data.items():
-                line = f"station_{self.station_id} {field}={value}\n"
-                payload += line
+            write_url = f"{self.url}/api/v2/write"
+            params = {
+                "bucket": self.bucket,
+                "org": self.org,
+                "precision": "s"
+            }
     
             response = requests.post(
-                f"{self.url}/api/v2/write?org={self.org}&bucket={self.bucket}&precision=s",
-                data=payload,
+                write_url,
+                params=params,
+                data="\n".join(lines),
                 auth=HTTPBasicAuth(self.username, self.password),
-                headers={"Content-Type": "text/plain"},
+                headers={"Content-Type": "text/plain", "Authorization": f"Token {self.token}"},
                 timeout=5,
                 verify=False
             )
     
-            if response.status_code == 204:
-                LOGGER.debug("Data successfully written to InfluxDB.")
-                return True
-            else:
+            if response.status_code != 204:
                 LOGGER.error(f"InfluxDB write failed: {response.status_code} - {response.text}")
                 return False
     
+            return True
+    
         except Exception as e:
-            LOGGER.error(f"Exception during InfluxDB write: {e}")
+            LOGGER.warning(f"Exception during InfluxDB write: {e}")
             return False
+
 
     def get_weight(self, n: int = 15) -> tuple[float, float]:
         """
