@@ -192,7 +192,7 @@ class Display:
         draw.text((0, 130), f"<-- Calib {inc+1}       Back -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
-    def wrap_text(self, text, font, max_width):
+    def wrap_text(self, text, font, max_width, draw):
         """
         Wrap text so it fits within the given width.
         """
@@ -224,7 +224,7 @@ class Display:
     
         font_action = ImageFont.truetype(FONT, 8)
         if action:
-            wrapped_lines = self.wrap_text(action, font_action, max_width=self.WIDTH - 10)
+            wrapped_lines = self.wrap_text(action, font_action, max_width=self.WIDTH - 10, draw=draw)
             y = 100
             for line in wrapped_lines:
                 draw.text((5, y), line, font=font_action, fill=(0, 0, 0))
@@ -256,7 +256,7 @@ class Display:
         
             # Wrap error message
             error_text = self.STATION.last_error[1]
-            wrapped_lines = self.wrap_text(error_text, font, max_width=self.WIDTH - 10)
+            wrapped_lines = self.wrap_text(error_text, font, max_width=self.WIDTH - 10, draw=draw)
             y = 110
             for line in wrapped_lines:
                 draw.text((3, y), line, font=font, fill=(0, 0, 0))
