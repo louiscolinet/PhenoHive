@@ -249,7 +249,7 @@ class Display:
             if not self.STATION.connected:
                 font = ImageFont.truetype(FONT, 8)
                 draw.text((5, 40), "Not connected to the DB", font=font, fill=(0, 0, 0))
-            else":
+            else:
                 font = ImageFont.truetype(FONT, 8)
                 timestamp = self.STATION.last_error[0]
                 dt = datetime.fromisoformat(timestamp.replace("Z", ""))
