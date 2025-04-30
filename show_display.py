@@ -37,7 +37,7 @@ class Display:
             return "red"
         elif self.STATION.status == 1:
             # Processing
-            return "pink" #yellow
+            return "red" #yellow
         elif self.STATION.status == 0:
             if self.STATION.connected:
                 # OK and connected to the DB
