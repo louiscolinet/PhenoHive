@@ -31,13 +31,13 @@ class Display:
                 red = error
         :raises: ValueError: If the station's status incorrect (not -1, 0, or 1)
         """
-        print(self.STATION.status)
+        #print(self.STATION.status)
         if self.STATION.status == -1:
             # Error
             return "red"
         elif self.STATION.status == 1:
             # Processing
-            return (255, 255, 0) #yellow
+            return "pink" #yellow
         elif self.STATION.status == 0:
             if self.STATION.connected:
                 # OK and connected to the DB
