@@ -507,7 +507,7 @@ class PhenoHiveStation:
             time.sleep(5)
             return growth_value, weight, humidity, light
 
-        if self.status = 1:
+        if self.status == 1:
             self.status = 0
             self.data["status"] = self.status
             
