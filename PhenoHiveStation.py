@@ -385,7 +385,7 @@ class PhenoHiveStation:
                 p = Point(f"station_{self.station_id}").time(row_time)
                 p.field(field, float(row[i+1]))
                 pts.append(p)
-            points.insert(0, p)  # on insère en tête pour préserver l'ordre
+            points.insert(0, pts)  # on insère en tête pour préserver l'ordre
             
             if found_last_sent:
                 break
