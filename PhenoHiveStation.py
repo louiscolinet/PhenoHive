@@ -4,6 +4,7 @@ import os
 import numpy as np
 from plantcv import plantcv as pcv
 import cv2
+import csv
 from itertools import product
 import statistics
 import time
