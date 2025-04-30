@@ -213,8 +213,7 @@ class PhenoHiveStation:
                 self.SPI_ADC,  
                 max_speed_hz=self.SPEED_HZ # Utilization of the same frequency than screen
             )
-        )   
-        print("ADC initialisé")
+        )  
 
     def init_button(self):
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -367,7 +366,8 @@ class PhenoHiveStation:
             # Si aucune donnée envoyée ou on a trouvé la dernière, on ajoute
             p = Point(f"station_{self.station_id}").time(row_time)
             for i, field in enumerate(self.to_save):
-                p = p.field(field, float(row[i + 1]))
+                if field == 'time':
+                    p = p.field(field, float(row[i]))
             points.insert(0, p)  # on insère en tête pour préserver l'ordre
     
         if points:
