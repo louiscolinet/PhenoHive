@@ -371,6 +371,7 @@ class PhenoHiveStation:
             self.data
             for i, field in enumerate(self.to_save):
                 if field != 'time':
+                    print(f"field: {field}, value: {row[i]})
                     p = Point(f"station_{self.station_id}").time(row_time)
                     p.field(field, float(row[i]))
                     pts.append(p)
