@@ -356,7 +356,10 @@ class PhenoHiveStation:
     
         points = []
         pts = []
-        found_last_sent = self.last_data_send_time is None
+        
+        if self.last_data_send_time == None:
+            found_last_sent = False
+            self.last_data_send_time = timestamp
     
         for row in reversed(rows):  # depuis la fin
             row_time = row[0]
