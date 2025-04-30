@@ -1,11 +1,11 @@
 
 import base64
 import configparser
-import os
-import numpy as np
-from plantcv import plantcv as pcv
+import csv
 import cv2
-from itertools import product
+import numpy as np
+import os
+from plantcv import plantcv as pcv
 import statistics
 import time
 import threading
@@ -15,6 +15,7 @@ import hx711
 import Adafruit_MCP3008
 import RPi.GPIO as GPIO
 import logging
+from itertools import product
 from datetime import datetime
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -328,36 +329,63 @@ class PhenoHiveStation:
 
     def send_to_db(self) -> bool:
         """
-        Saves the measurements to the csv file, then sends it to InfluxDB (if connected)
-        Uses `PhenoHiveStation.measurements` dictionary containing the measurements and their values.
-        :return True if the data was sent to the DB, False otherwise
-        """
-        # Check connection with the database
+        Saves the measurements to the csv file, then sends it to InfluxDB (if connected).
+        If disconnected previously, it attempts to re-send missing entries.
+        """    
         self.connected = self.client.ping()
         timestamp = datetime.now().strftime(DATE_FORMAT)
-
-        # If the csv file does not exist, create it with the headers
+    
+        # Crée le fichier CSV si besoin
         if not os.path.exists(self.csv_path):
             save_to_csv(["time"] + self.to_save, self.csv_path)
-
-        # Save data to the corresponding csv file
-        measurements_list = [timestamp]
-        for key in self.to_save:
-            measurements_list.append(self.data[key])
-        save_to_csv(measurements_list, "data/measurements.csv")
-
+    
+        # Sauvegarde de la nouvelle mesure dans le CSV
+        current_measurement = [timestamp] + [self.data[key] for key in self.to_save]
+        save_to_csv(current_measurement, self.csv_path)
+    
         if not self.connected:
             return False
-
-        points = []
-        for field, value in self.data.items():
-            p = Point(f"station_{self.station_id}").field(field, value)
-            points.append(p)
-
-        # Send data to the DB
-        LOGGER.debug(f"Sending data to the DB: {str(points)}")
-        self.write_api.write(bucket=self.bucket, org=self.org, record=points)
+    
+        # Lecture de toutes les lignes du CSV
+        with open(self.csv_path, "r", newline="") as f:
+            reader = list(csv.reader(f))
+            headers = reader[0]
+            data_rows = reader[1:]
+    
+        # Récupération du dernier point envoyé (via InfluxDB)
+        query = f'''
+        from(bucket: "{self.bucket}")
+          |> range(start: -30d)
+          |> filter(fn: (r) => r._measurement == "station_{self.station_id}")
+          |> last()
+        '''
+        try:
+            result = self.query_api.query(org=self.org, query=query)
+            if result and result[0].records:
+                last_db_time = result[0].records[0].get_time().strftime(DATE_FORMAT)
+            else:
+                last_db_time = None
+        except Exception as e:
+            LOGGER.warning(f"Failed to query InfluxDB: {e}")
+            last_db_time = None
+    
+        # Si la dernière ligne de la DB n'est pas celle juste avant la mesure actuelle, réenvoi des lignes manquantes
+        to_send = []
+        for row in data_rows:
+            row_time = row[0]
+            if last_db_time is None or row_time > last_db_time:
+                fields = dict(zip(self.to_save, row[1:]))
+                point = Point(f"station_{self.station_id}").time(row_time)
+                for field, value in fields.items():
+                    point = point.field(field, float(value))
+                to_send.append(point)
+    
+        if to_send:
+            LOGGER.debug(f"Sending {len(to_send)} missing data points to the DB.")
+            self.write_api.write(bucket=self.bucket, org=self.org, record=to_send)
+    
         return True
+
 
     def get_weight(self, n: int = 15) -> tuple[float, float]:
         """
