@@ -34,17 +34,17 @@ class Display:
         #print(self.STATION.status)
         if self.STATION.status == -1:
             # Error
-            return "red"
+            return (255, 0, 0)  # red
         elif self.STATION.status == 1:
             # Processing
-            return "red" #yellow
+            return (255, 255, 0)  # yellow
         elif self.STATION.status == 0:
             if self.STATION.connected:
                 # OK and connected to the DB
-                return "green"
+                return (0, 128, 0)  # green
             else:
                 # OK but not connected to the DB
-                return "blue"
+                return (0, 0, 139)  # dark blue
         else:
             # Station status is not valid
             raise ValueError(f'Station status is incorrect, should be -1, 0, or 1. Got: {self.STATION.status}')
@@ -242,26 +242,27 @@ class Display:
         draw.text((40, 15), "Status", font=font, fill=(0, 0, 0))
         # Status
         status = self.get_status()
-        if status == "green":
+        if self.STATION.status == 0:
             font = ImageFont.truetype(FONT, 8)
             draw.text((5, 40), "OK", font=font, fill=(0, 0, 0))
-        elif status == "blue":
-            font = ImageFont.truetype(FONT, 8)
-            draw.text((5, 40), "Not connected to the DB", font=font, fill=(0, 0, 0))
-        elif status == "red":
-            font = ImageFont.truetype(FONT, 8)
-            timestamp = self.STATION.last_error[0]
-            dt = datetime.fromisoformat(timestamp.replace("Z", ""))
-            formatted_time = dt.strftime("%d %b, %H:%M")
-            draw.text((3, 40), f"Error at {formatted_time}", font=font, fill=(0, 0, 0))
-        
-            # Wrap error message
-            error_text = str(self.STATION.last_error[1])
-            wrapped_lines = self.wrap_text(error_text, font, max_width=self.WIDTH - 10, draw=draw)
-            y = 50
-            for line in wrapped_lines:
-                draw.text((3, y), line, font=font, fill=(0, 0, 0))
-                y += 10  # espacement vertical entre les lignes
+        if self.STATION.status == -1:
+            if not self.STATION.connected:
+                font = ImageFont.truetype(FONT, 8)
+                draw.text((5, 40), "Not connected to the DB", font=font, fill=(0, 0, 0))
+            else":
+                font = ImageFont.truetype(FONT, 8)
+                timestamp = self.STATION.last_error[0]
+                dt = datetime.fromisoformat(timestamp.replace("Z", ""))
+                formatted_time = dt.strftime("%d %b, %H:%M")
+                draw.text((3, 40), f"Error at {formatted_time}", font=font, fill=(0, 0, 0))
+            
+                # Wrap error message
+                error_text = str(self.STATION.last_error[1])
+                wrapped_lines = self.wrap_text(error_text, font, max_width=self.WIDTH - 10, draw=draw)
+                y = 50
+                for line in wrapped_lines:
+                    draw.text((3, y), line, font=font, fill=(0, 0, 0))
+                    y += 10  # espacement vertical entre les lignes
 
         # Button
         font = ImageFont.truetype(FONT, 10)
