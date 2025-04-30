@@ -348,18 +348,28 @@ class PhenoHiveStation:
     
         if not self.connected:
             return False
-    
+
+        #envoie la donné de maintenant
+        points = []
+        for field, value in self.data.items():
+            p = Point(f"station_{self.station_id}").field(field, value)
+            points.append(p)
+        self.write_api.write(bucket=self.bucket, org=self.org, record=points)
+
+        if self.last_data_send_time == None:
+            LOGGER.debug(f"Sending data to the DB: {str(points)}")
+            self.last_data_send_time = timestamp
+            return True
+
+        #cherche s'il faut envoyer des données perdues
         # Lire le fichier et trouver les lignes non encore envoyées
         with open(self.csv_path, "r", newline="") as f:
             reader = list(csv.reader(f))
             rows = reader[1:]  # skip header
-    
+
+        found_last_sent = False
         points = []
         pts = []
-        
-        if self.last_data_send_time == None:
-            found_last_sent = False
-            self.last_data_send_time = timestamp
     
         for row in reversed(rows):  # depuis la fin
             print(f"row: {row}")
@@ -374,7 +384,7 @@ class PhenoHiveStation:
                 print(f"i: {i}")
                 print(f"field: {field}, value: {row[i+1]}")
                 p = Point(f"station_{self.station_id}").time(row_time)
-                p.field(field, float(row[i]))
+                p.field(field, float(row[i+1]))
                 pts.append(p)
             points.insert(0, p)  # on insère en tête pour préserver l'ordre
 
