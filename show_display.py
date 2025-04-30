@@ -34,17 +34,17 @@ class Display:
         #print(self.STATION.status)
         if self.STATION.status == -1:
             # Error
-            return (255, 0, 0)  # red
+            return (0, 0, 255)  # red
         elif self.STATION.status == 1:
             # Processing
-            return (255, 255, 0)  # yellow
+            return (0, 255, 255)  # yellow
         elif self.STATION.status == 0:
             if self.STATION.connected:
                 # OK and connected to the DB
                 return (0, 128, 0)  # green
             else:
                 # OK but not connected to the DB
-                return (0, 0, 139)  # dark blue
+                return (139, 0, 0)  # dark blue
         else:
             # Station status is not valid
             raise ValueError(f'Station status is incorrect, should be -1, 0, or 1. Got: {self.STATION.status}')
