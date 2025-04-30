@@ -371,13 +371,13 @@ class PhenoHiveStation:
             self.data
             for i, field in enumerate(self.to_save):
                 if field != 'time':
-                    print(f"field: {field}, value: {row[i]})
+                    print(f"field: {field}, value: {row[i]}")
                     p = Point(f"station_{self.station_id}").time(row_time)
                     p.field(field, float(row[i]))
                     pts.append(p)
             points.insert(0, p)  # on insère en tête pour préserver l'ordre
 
-        print(points)
+        #print(points)
     
         if points:
             LOGGER.debug(f"Sending {len(points)} points to the DB")
