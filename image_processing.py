@@ -110,7 +110,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     return path_lengths
 
 
-def get_total_length(image_path: str, channel: str = 'k', kernel_size: int = 20, sigma: float = 1) -> int:
+def get_total_length(image_path: str, channel: str = 'k', kernel_size: int = 20, sigma: float = 1) -> float:
     """
     Get the total length of the plant skeleton
     :param image_path: path to the image
@@ -124,4 +124,4 @@ def get_total_length(image_path: str, channel: str = 'k', kernel_size: int = 20,
     segment_list = get_segment_list(image_path, channel, kernel_size, sigma)
 
     # Get the sum of segment lengths
-    return int(sum(segment_list))
+    return float(sum(segment_list))
