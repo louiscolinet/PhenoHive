@@ -479,7 +479,7 @@ class PhenoHiveStation:
             self.disp.show_collecting_data("Taking photo")
             pic, growth_value = self.picture_pipeline()
             self.data["picture"] = pic
-            self.data["growth"] = growth_value
+            self.data["growth"] = float(growth_value)
         except Exception as e:
             self.register_error(type(e)(f"Error while taking the photo: {e}"))
             self.disp.show_collecting_data("Error while taking the photo")
@@ -559,7 +559,7 @@ class PhenoHiveStation:
         time.sleep(1)
         return growth_value, weight, humidity, light
 
-    def picture_pipeline(self) -> tuple[str, int]:
+    def picture_pipeline(self) -> tuple[str, float]:
         """
         Picture processing pipeline
         :return: the picture and the growth value
