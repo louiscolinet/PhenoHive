@@ -1,5 +1,3 @@
-
-
 import base64
 import configparser
 import os
@@ -71,6 +69,7 @@ class PhenoHiveStation:
     last_error = ("", "")
     running = 0
     best_score = -np.inf
+    last_data_send_time = None
 
     @staticmethod
     def get_instance() -> 'PhenoHiveStation':
@@ -333,32 +332,52 @@ class PhenoHiveStation:
         Uses `PhenoHiveStation.measurements` dictionary containing the measurements and their values.
         :return True if the data was sent to the DB, False otherwise
         """
-        # Check connection with the database
-        self.connected = self.client.ping()
-        timestamp = datetime.now().strftime(DATE_FORMAT)
 
-        # If the csv file does not exist, create it with the headers
-        if not os.path.exists(self.csv_path):
-            save_to_csv(["time"] + self.to_save, self.csv_path)
+    # Ping the DB
+    self.connected = self.client.ping()
+    now = datetime.now()
+    timestamp = now.strftime(DATE_FORMAT)
 
-        # Save data to the corresponding csv file
-        measurements_list = [timestamp]
-        for key in self.to_save:
-            measurements_list.append(self.data[key])
-        save_to_csv(measurements_list, "data/measurements.csv")
+    # Créer CSV s'il n'existe pas
+    if not os.path.exists(self.csv_path):
+        save_to_csv(["time"] + self.to_save, self.csv_path)
 
-        if not self.connected:
-            return False
+    # Sauvegarde la mesure actuelle
+    current_row = [timestamp] + [self.data[key] for key in self.to_save]
+    save_to_csv(current_row, self.csv_path)
 
-        points = []
-        for field, value in self.data.items():
-            p = Point(f"station_{self.station_id}").field(field, value)
-            points.append(p)
+    if not self.connected:
+        return False
 
-        # Send data to the DB
-        LOGGER.debug(f"Sending data to the DB: {str(points)}")
+    # Lire le fichier et trouver les lignes non encore envoyées
+    with open(self.csv_path, "r", newline="") as f:
+        reader = list(csv.reader(f))
+        rows = reader[1:]  # skip header
+
+    points = []
+    found_last_sent = self.last_data_send_time is None
+
+    for row in reversed(rows):  # depuis la fin
+        row_time = row[0]
+        if not found_last_sent:
+            if row_time == self.last_data_send_time:
+                found_last_sent = True
+            continue
+        # Si aucune donnée envoyée ou on a trouvé la dernière, on ajoute
+        p = Point(f"station_{self.station_id}").time(row_time)
+        for i, field in enumerate(self.to_save):
+            p = p.field(field, float(row[i + 1]))
+        points.insert(0, p)  # on insère en tête pour préserver l'ordre
+
+    if points:
+        LOGGER.debug(f"Sending {len(points)} points to the DB")
         self.write_api.write(bucket=self.bucket, org=self.org, record=points)
+        self.last_data_send_time = timestamp  # MAJ après envoi
         return True
+
+    LOGGER.debug("No new data to send")
+    return False
+
 
     def get_weight(self, n: int = 15) -> tuple[float, float]:
         """
