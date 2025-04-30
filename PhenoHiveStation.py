@@ -355,6 +355,7 @@ class PhenoHiveStation:
             rows = reader[1:]  # skip header
     
         points = []
+        pts = []
         found_last_sent = self.last_data_send_time is None
     
         for row in reversed(rows):  # depuis la fin
@@ -367,7 +368,8 @@ class PhenoHiveStation:
             p = Point(f"station_{self.station_id}").time(row_time)
             for i, field in enumerate(self.to_save):
                 if field != 'time':
-                    p = p.field(field, row[i])
+                    p.field(field, row[i])
+                    pts.append(p)
             points.insert(0, p)  # on insère en tête pour préserver l'ordre
     
         if points:
