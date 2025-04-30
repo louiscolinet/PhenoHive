@@ -31,6 +31,7 @@ class Display:
                 red = error
         :raises: ValueError: If the station's status incorrect (not -1, 0, or 1)
         """
+        print(self.STATION.status)
         if self.STATION.status == -1:
             # Error
             return "red"
