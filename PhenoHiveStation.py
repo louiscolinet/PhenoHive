@@ -366,7 +366,7 @@ class PhenoHiveStation:
             # Si aucune donnée envoyée ou on a trouvé la dernière, on ajoute
             p = Point(f"station_{self.station_id}").time(row_time)
             for i, field in enumerate(self.to_save):
-                if field == 'time':
+                if field != 'time':
                     p = p.field(field, float(row[i]))
             points.insert(0, p)  # on insère en tête pour préserver l'ordre
     
