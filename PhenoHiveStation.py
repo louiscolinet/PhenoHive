@@ -1,10 +1,9 @@
+
 import base64
 import configparser
 import os
 import numpy as np
 from plantcv import plantcv as pcv
-import requests
-from requests.auth import HTTPBasicAuth
 import cv2
 from itertools import product
 import statistics
@@ -178,24 +177,13 @@ class PhenoHiveStation:
         self.disp.show_image("assets/logo_elia.jpg")
 
     def init_influxdb(self):
-        self.token = 'ton_token_influxdb'  # Remplace par ton token InfluxDB
-        self.url = 'http://127.0.0.1:8086'  # URL de ton InfluxDB
-    
-        # Vérification de la connexion à InfluxDB via une requête ping
-        try:
-            headers = {
-                'Authorization': f'Token {self.token}',
-            }
-            response = requests.get(f"{self.url}/ping", headers=headers, timeout=5, verify=False)
-            self.connected = response.status_code == 204  # InfluxDB v2 renvoie 204 pour un ping réussi
-            print("connected")
-        except Exception as e:
-            LOGGER.warning(f"InfluxDB connection check failed: {e}")
-            self.connected = False
-    
+        # InfluxDB client initialization
+        self.client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
+        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
+        self.connected = self.client.ping()
         self.last_connection = datetime.now().strftime(DATE_FORMAT)
-        LOGGER.debug(f"InfluxDB manual connection check: connected={self.connected}, url={self.url}")
-
+        LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
+                     f", Ping returned : {self.connected}")
 
     def init_camera_button(self):
         # Camera and LED init
@@ -344,51 +332,32 @@ class PhenoHiveStation:
         Uses `PhenoHiveStation.measurements` dictionary containing the measurements and their values.
         :return True if the data was sent to the DB, False otherwise
         """
-        # Vérifie si on est encore connecté (ping rapide)
-        try:
-            headers = {
-                'Authorization': f'Token {self.token}',
-            }
-            response = requests.get(f"{self.url}/ping", headers=headers, timeout=5, verify=False)
-            self.connected = response.status_code == 204  # InfluxDB v2 renvoie 204 pour un ping réussi
-        except Exception as e:
-            LOGGER.warning(f"InfluxDB connection check failed: {e}")
-            self.connected = False
-    
-        if not self.connected:
-            LOGGER.warning("Could not send data to the DB, no connection")
-            return False
-    
-        # Enregistre aussi dans le CSV local
+        # Check connection with the database
+        self.connected = self.client.ping()
         timestamp = datetime.now().strftime(DATE_FORMAT)
+
+        # If the csv file does not exist, create it with the headers
         if not os.path.exists(self.csv_path):
             save_to_csv(["time"] + self.to_save, self.csv_path)
-        measurements_list = [timestamp] + [self.data[k] for k in self.to_save]
-        save_to_csv(measurements_list, self.csv_path)
 
-        headers = {
-            'Authorization': f'Token {self.token}'
-        }
+        # Save data to the corresponding csv file
+        measurements_list = [timestamp]
+        for key in self.to_save:
+            measurements_list.append(self.data[key])
+        save_to_csv(measurements_list, "data/measurements.csv")
 
-        lines = []
-        for field, value in self.data.items():
-            # Ajoute un timestamp si nécessaire, ici on laisse InfluxDB le gérer
-            lines.append(f"station_{self.station_id} {field}={value}")
-        payload = "\n".join(lines)
-    
-        # Send data to InfluxDB v3
-        try:
-            response = requests.post(f"{self.url}/api/v2/write?bucket={self.bucket}&org={self.org}",
-                                     headers=headers, data=payload, timeout=5, verify=False)
-            if response.status_code == 204:
-                return True
-            else:
-                LOGGER.error(f"InfluxDB write failed: {response.status_code} - {response.text}")
-                return False
-        except Exception as e:
-            LOGGER.error(f"Failed to send data to InfluxDB: {e}")
+        if not self.connected:
             return False
 
+        points = []
+        for field, value in self.data.items():
+            p = Point(f"station_{self.station_id}").field(field, value)
+            points.append(p)
+
+        # Send data to the DB
+        LOGGER.debug(f"Sending data to the DB: {str(points)}")
+        self.write_api.write(bucket=self.bucket, org=self.org, record=points)
+        return True
 
     def get_weight(self, n: int = 15) -> tuple[float, float]:
         """
