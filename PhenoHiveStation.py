@@ -367,7 +367,7 @@ class PhenoHiveStation:
             p = Point(f"station_{self.station_id}").time(row_time)
             for i, field in enumerate(self.to_save):
                 if field != 'time':
-                    p = p.field(field, float(row[i]))
+                    p = p.field(field, row[i])
             points.insert(0, p)  # on insère en tête pour préserver l'ordre
     
         if points:
