@@ -362,7 +362,7 @@ class PhenoHiveStation:
             self.last_data_send_time = timestamp
     
         for row in reversed(rows):  # depuis la fin
-            row_time = row[0]
+            row_time = row[0].replace('\x00', '').strip()
             if not found_last_sent:
                 if row_time == self.last_data_send_time:
                     found_last_sent = True
