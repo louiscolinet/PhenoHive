@@ -371,6 +371,8 @@ class PhenoHiveStation:
                     p.field(field, row[i])
                     pts.append(p)
             points.insert(0, p)  # on insère en tête pour préserver l'ordre
+
+        print(points)
     
         if points:
             LOGGER.debug(f"Sending {len(points)} points to the DB")
