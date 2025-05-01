@@ -393,7 +393,7 @@ class PhenoHiveStation:
     
         if points:
             LOGGER.debug(f"Sending {len(points)} points to the DB")
-            self.write_api.write(bucket=self.bucket, org=self.org, record=points)
+            self.write_api.write(bucket=self.bucket, org=self.org, record=pts)
             self.last_data_send_time = timestamp  # MAJ après envoi
             return True
     
