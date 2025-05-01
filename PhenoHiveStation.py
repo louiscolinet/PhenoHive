@@ -15,7 +15,7 @@ import hx711
 import Adafruit_MCP3008
 import RPi.GPIO as GPIO
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from picamera2 import Picamera2, Preview
