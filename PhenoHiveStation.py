@@ -371,7 +371,7 @@ class PhenoHiveStation:
         points = []
         pts = []
     
-        for row in reversed(rows)[1::]:  # depuis la fin
+        for row in list(reversed(rows))[1:]:  # depuis la fin sans celui de maintenant
             print(f"row: {row}")
             row_time = row[0].replace('\x00', '').strip()
             if not found_last_sent:
