@@ -484,7 +484,7 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while taking the photo: {e}"))
             self.disp.show_collecting_data("Error while taking the photo")
             time.sleep(5)
-            growth_value = 0
+            growth_value = 0.0
 
         # Get weight
         try:
