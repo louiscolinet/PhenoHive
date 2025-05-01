@@ -371,13 +371,14 @@ class PhenoHiveStation:
         points = []
         pts = []
     
-        for row in reversed(rows):  # depuis la fin
+        for row in reversed(rows)[1::]:  # depuis la fin
             print(f"row: {row}")
             row_time = row[0].replace('\x00', '').strip()
             if not found_last_sent:
                 print(f"row_time: {row_time}, last time: {self.last_data_send_time}")
                 if row_time == self.last_data_send_time:
                     found_last_sent = True
+                    continue
             # Si aucune donnée envoyée ou on a trouvé la dernière, on ajoute
             for i, field in enumerate(self.to_save):
                 print(f"i: {i}")
@@ -387,8 +388,8 @@ class PhenoHiveStation:
                 pts.append(p)
             points.insert(0, pts)  # on insère en tête pour préserver l'ordre
             
-            if found_last_sent:
-                break
+            """if found_last_sent:
+                break"""
 
         #print(points)
     
