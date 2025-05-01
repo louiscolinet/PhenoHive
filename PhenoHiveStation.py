@@ -369,7 +369,7 @@ class PhenoHiveStation:
 
         found_last_sent = False
         points = []
-        pts = []
+        
     
         for row in list(reversed(rows))[1:]:  # depuis la fin sans celui de maintenant
             print(f"row: {row}")
@@ -380,19 +380,20 @@ class PhenoHiveStation:
                     found_last_sent = True
                     break
             # Si aucune donnée envoyée ou on a trouvé la dernière, on ajoute
+            pts = []
             for i, field in enumerate(self.to_save):
                 print(f"i: {i}")
                 print(f"field: {field}, value: {row[i+1]}")
-                p = Point(f"station_{self.station_id}").time(row_time)
-                p.field(field, float(row[i+1]))
+                p = Point(f"station_{self.station_id}").field(field, float(row[i+1]))
+                p = p.time(row_time)
                 pts.append(p)
                 #print(f"pts: {pts}")
+            self.write_api.write(bucket=self.bucket, org=self.org, record=pts)
             #points.insert(0, pts)  # on insère en tête pour préserver l'ordre
        
-        print(f"points: {pts}")
+        #print(f"points: {pts}")
     
         LOGGER.debug(f"Sending {len(points)} points to the DB")
-        self.write_api.write(bucket=self.bucket, org=self.org, record=pts)
         self.last_data_send_time = timestamp  # MAJ après envoi
         return True
 
