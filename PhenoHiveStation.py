@@ -389,16 +389,12 @@ class PhenoHiveStation:
                 print(f"pts: {pts}")
             points.insert(0, pts)  # on insère en tête pour préserver l'ordre
        
-        print(f"points: {points}")
+        #print(f"points: {points}")
     
-        if points:
-            LOGGER.debug(f"Sending {len(points)} points to the DB")
-            self.write_api.write(bucket=self.bucket, org=self.org, record=pts)
-            self.last_data_send_time = timestamp  # MAJ après envoi
-            return True
-    
-        LOGGER.debug("No new data to send")
-        return False
+        LOGGER.debug(f"Sending {len(points)} points to the DB")
+        self.write_api.write(bucket=self.bucket, org=self.org, record=pts)
+        self.last_data_send_time = timestamp  # MAJ après envoi
+        return True
 
 
     def get_weight(self, n: int = 15) -> tuple[float, float]:
