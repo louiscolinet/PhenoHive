@@ -378,7 +378,7 @@ class PhenoHiveStation:
                 print(f"row_time: {row_time}, last time: {self.last_data_send_time}")
                 if row_time == self.last_data_send_time:
                     found_last_sent = True
-                    continue
+                    break
             # Si aucune donnée envoyée ou on a trouvé la dernière, on ajoute
             for i, field in enumerate(self.to_save):
                 print(f"i: {i}")
