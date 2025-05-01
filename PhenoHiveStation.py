@@ -379,18 +379,24 @@ class PhenoHiveStation:
                 if row_time == self.last_data_send_time:
                     found_last_sent = True
                     break
-            # Si aucune donnée envoyée ou on a trouvé la dernière, on ajoute
+                    
+            # adaptation du temps à celui de la database
+            dt_input = datetime.strptime(row_time, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+
+            local_now = datetime.now(timezone.utc).astimezone()   # heure locale
+            utc_now = datetime.now().replace(tzinfo=timezone.utc) # heure UTC
+            time_offset = local_now.utcoffset() or timedelta(0)
+            
+            dt_corrected = dt_input - time_offset
+            timestamp_ns = int(dt_corrected.timestamp())
+
+            #envoi
             pts = []
             for i, field in enumerate(self.to_save):
-                print(f"field: {field}, value: {row[i+1]}")
-                p = Point(f"station_{self.station_id}").field(field, float(row[i+1]))
-                p = p.time(row_time)
+                #print(f"field: {field}, value: {row[i+1]}")
+                p = Point(f"station_{self.station_id}").field(field, float(row[i+1])).time(timestamp_ns, write_precision='s')
                 pts.append(p)
-                #print(f"pts: {pts}")
             self.write_api.write(bucket=self.bucket, org=self.org, record=pts)
-            #points.insert(0, pts)  # on insère en tête pour préserver l'ordre
-       
-        #print(f"points: {pts}")
     
         LOGGER.debug(f"Sending {len(points)} points to the DB")
         self.last_data_send_time = timestamp  # MAJ après envoi
