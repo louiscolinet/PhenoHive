@@ -338,18 +338,18 @@ class PhenoHiveStation:
         now = datetime.now()
         timestamp = now.strftime(DATE_FORMAT)
     
-        # Créer CSV s'il n'existe pas
+        # Create CSV if it doesn't exist
         if not os.path.exists(self.csv_path):
             save_to_csv(["time"] + self.to_save, self.csv_path)
     
-        # Sauvegarde la mesure actuelle
+        # Saves the current measurement
         current_row = [timestamp] + [self.data[key] for key in self.to_save]
         save_to_csv(current_row, self.csv_path)
     
         if not self.connected:
             return False
 
-        #envoie la donné de maintenant
+        # Sends the current data
         points = []
         for field, value in self.data.items():
             p = Point(f"station_{self.station_id}").field(field, value)
@@ -361,26 +361,21 @@ class PhenoHiveStation:
             self.last_data_send_time = timestamp
             return True
 
-        #cherche s'il faut envoyer des données perdues
-        # Lire le fichier et trouver les lignes non encore envoyées
+        # Read the file and find the lines not yet sent
         with open(self.csv_path, "r", newline="") as f:
             reader = list(csv.reader(f))
-            rows = reader[1:]  # skip header
+            rows = reader[1:]
 
         found_last_sent = False
-        points = []
         
-    
-        for row in list(reversed(rows))[1:]:  # depuis la fin sans celui de maintenant
-            print(f"row: {row}")
+        for row in list(reversed(rows))[1:]: 
             row_time = row[0].replace('\x00', '').strip()
             if not found_last_sent:
-                print(f"row_time: {row_time}, last time: {self.last_data_send_time}")
                 if row_time == self.last_data_send_time:
                     found_last_sent = True
                     break
                     
-            # adaptation du temps à celui de la database
+            # Adapting time to that of the database
             dt_input = datetime.strptime(row_time, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
 
             local_now = datetime.now(timezone.utc).astimezone()   # heure locale
@@ -390,16 +385,15 @@ class PhenoHiveStation:
             dt_corrected = dt_input - time_offset
             timestamp_ns = int(dt_corrected.timestamp())
 
-            #envoi
+            # Sending
             pts = []
             for i, field in enumerate(self.to_save):
-                #print(f"field: {field}, value: {row[i+1]}")
                 p = Point(f"station_{self.station_id}").field(field, float(row[i+1])).time(timestamp_ns, write_precision='s')
                 pts.append(p)
             self.write_api.write(bucket=self.bucket, org=self.org, record=pts)
     
-        LOGGER.debug(f"Sending {len(points)} points to the DB")
-        self.last_data_send_time = timestamp  # MAJ après envoi
+        LOGGER.debug(f"Sending {len(pts)} points to the DB")
+        self.last_data_send_time = timestamp
         return True
 
 
