@@ -1,3 +1,4 @@
+
 import base64
 import configparser
 import os
@@ -345,9 +346,6 @@ class PhenoHiveStation:
         # Saves the current measurement
         current_row = [timestamp] + [self.data[key] for key in self.to_save]
         save_to_csv(current_row, self.csv_path)
-
-        if self.last_data_send_time == None:
-            self.last_data_send_time = timestamp
     
         if not self.connected:
             return False
@@ -358,7 +356,11 @@ class PhenoHiveStation:
             p = Point(f"station_{self.station_id}").field(field, value)
             points.append(p)
         self.write_api.write(bucket=self.bucket, org=self.org, record=points)
-        LOGGER.debug(f"Sending data to the DB: {str(points)}")
+
+        if self.last_data_send_time == None:
+            LOGGER.debug(f"Sending data to the DB: {str(points)}")
+            self.last_data_send_time = timestamp
+            return True
 
         # Read the file and find the lines not yet sent
         with open(self.csv_path, "r", newline="") as f:
@@ -391,8 +393,7 @@ class PhenoHiveStation:
                 pts.append(p)
             self.write_api.write(bucket=self.bucket, org=self.org, record=pts)
             LOGGER.debug(f"Sending {len(pts)} points to the DB")
-
-        
+            
         self.last_data_send_time = timestamp
         return True
 
