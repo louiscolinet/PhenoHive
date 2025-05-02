@@ -346,6 +346,9 @@ class PhenoHiveStation:
         # Saves the current measurement
         current_row = [timestamp] + [self.data[key] for key in self.to_save]
         save_to_csv(current_row, self.csv_path)
+
+        if self.last_data_send_time == None:
+            self.last_data_send_time = timestamp
     
         if not self.connected:
             return False
@@ -357,9 +360,8 @@ class PhenoHiveStation:
             points.append(p)
         self.write_api.write(bucket=self.bucket, org=self.org, record=points)
 
-        if self.last_data_send_time == None:
+        if self.last_data_send_time == timestamp:
             LOGGER.debug(f"Sending data to the DB: {str(points)}")
-            self.last_data_send_time = timestamp
             return True
 
         # Read the file and find the lines not yet sent
