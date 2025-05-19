@@ -10,6 +10,7 @@ import RPi.GPIO as GPIO
 import argparse
 import configparser
 import logging
+import numpy as np
 
 CONFIG_FILE = "config.ini"
 LOGGER = None
