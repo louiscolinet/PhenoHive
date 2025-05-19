@@ -69,12 +69,12 @@ def handle_configuration_menu(station: PhenoHiveStation) -> None:
     :param station: station object
     """
     while True:
-        if not GPIO.iut(station.BUT_RIGHT):
+        if not GPIO.input(station.BUT_RIGHT):
             handle_preview_loop(station)
             time.sleep(1)
             break
 
-        if not GPIO.iut(station.BUT_LEFT):
+        if not GPIO.input(station.BUT_LEFT):
             station.disp.show_calib_menu()
             time.sleep(1)
             handle_calibration_menu(station)
@@ -90,7 +90,7 @@ def handle_preview_loop(station: PhenoHiveStation) -> None:
     while True:
         path_img = station.save_photo(preview=True, time_to_wait=1)
         station.disp.show_image(path_img)
-        if not GPIO.iut(station.BUT_RIGHT):
+        if not GPIO.input(station.BUT_RIGHT):
             break
 
 def handle_calibration_menu(station: PhenoHiveStation) -> None:
@@ -99,12 +99,12 @@ def handle_calibration_menu(station: PhenoHiveStation) -> None:
     :param station: station object
     """
     while True:
-        if not GPIO.iut(station.BUT_RIGHT):
+        if not GPIO.input(station.BUT_RIGHT):
             handle_imag_param_calibration_menu(station)
             time.sleep(1)
             break
 
-        if not GPIO.iut(station.BUT_LEFT):
+        if not GPIO.input(station.BUT_LEFT):
             handle_weight_calibration_menu(station)
             time.sleep(1)
             break
@@ -126,11 +126,11 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
     station.best_score = 0.0
     
     while True:
-        if not GPIO.iut(station.BUT_RIGHT):
+        if not GPIO.input(station.BUT_RIGHT):
             print("bouton droit")
             time.sleep(1)
             break
-        if not GPIO.iut(station.BUT_LEFT):
+        if not GPIO.input(station.BUT_LEFT):
             print("bouton gauche")
             if inc > 20:
                 break
