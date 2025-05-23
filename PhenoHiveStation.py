@@ -222,7 +222,7 @@ class PhenoHiveStation:
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.EN_HUM, GPIO.OUT)
-        GPIO.output(self.LED, GPIO.HIGH)
+        GPIO.output(self.EN_HUM, GPIO.HIGH)
 
     def init_data(self):
         self.data = {
