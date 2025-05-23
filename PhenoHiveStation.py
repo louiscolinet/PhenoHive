@@ -222,7 +222,7 @@ class PhenoHiveStation:
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.BUT_RIGHT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.EN_HUM, GPIO.OUT)
-        GPIO.output(self.EN_HUM, GPIO.HIGH)
+        GPIO.output(self.EN_HUM, GPIO.LOW)
 
     def init_data(self):
         self.data = {
@@ -604,11 +604,11 @@ class PhenoHiveStation:
 
     def humidity_pipeline(self):
         self.disp.show_collecting_data("Measuring humidity")
-        GPIO.output(self.EN_HUM, GPIO.LOW)
+        GPIO.output(self.EN_HUM, GPIO.HIGH)
         time.sleep(0.5)
         
         analog_voltage = self.mcp.read_adc(self.HUM) * (3.3 / 1023.0)
-        GPIO.output(self.EN_HUM, GPIO.HIGH)
+        GPIO.output(self.EN_HUM, GPIO.LOW)
         hum = 1/0.125 * np.tan((2.022-analog_voltage)/0.97) + 4.802
         if hum < 0: hum = 0.0
         return hum
