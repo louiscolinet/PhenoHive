@@ -609,7 +609,7 @@ class PhenoHiveStation:
         
         analog_voltage = self.mcp.read_adc(self.HUM) * (3.3 / 1023.0)
         GPIO.output(self.EN_HUM, GPIO.LOW)
-        hum = 1/0.125 * np.tan((2.022-analog_voltage)/0.97) + 4.802
+        hum = (np.tan((2.041-analog_voltage)/0.994) + 4.515) / 0.119 
         if hum < 0: hum = 0.0
         return hum
 
