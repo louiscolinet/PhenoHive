@@ -197,6 +197,14 @@ class PhenoHiveStation:
         GPIO.setwarnings(False)
         GPIO.setup(self.LED, GPIO.OUT)
         GPIO.output(self.LED, GPIO.LOW)
+        time.sleep(0.7)
+        GPIO.output(self.LED, GPIO.HIGH)
+        time.sleep(0.7)
+        GPIO.output(self.LED, GPIO.LOW)
+        time.sleep(0.7)
+        GPIO.output(self.LED, GPIO.HIGH)
+        time.sleep(0.7)
+        GPIO.output(self.LED, GPIO.LOW)
         
     def init_load(self):
         # Hx711
