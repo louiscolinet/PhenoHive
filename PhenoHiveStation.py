@@ -268,7 +268,7 @@ class PhenoHiveStation:
             image_calib_path = os.path.join(self.image_path, f"img_calib_{index}.jpg")
     
             try:
-                path_lengths = get_segment_list(image_calib_path, channel, ker, sig, skeleton_name=skeleton_filename)
+                path_lengths = get_segment_list(image_calib_path, channel, ker, sig, skeleton_filename)
             except Exception as e:
                 print(f"[Thread {index}] Erreur: get_segment_list a échoué ({e})")
                 return (None, sig, ker)
