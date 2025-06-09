@@ -16,6 +16,7 @@ import hx711
 import Adafruit_MCP3008
 import RPi.GPIO as GPIO
 import logging
+import shutil
 from datetime import datetime, timezone
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -240,49 +241,69 @@ class PhenoHiveStation:
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation", "humidity", "light"]
 
-    def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float=1, kernel: int=20, calib_test_num: int=1):
+    def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float = 1, kernel: int = 20, calib_test_num: int = 1):
         """
-        Automatically calibrate sigma and kernel_size for optimal segmentation.
+        Automatically calibrate sigma and kernel_size for optimal segmentation, using multithreading.
         """
-
         best_params = None
         best_score = self.best_score
-        sigma_values = np.linspace(sigma*calib_test_num/10, sigma*10/calib_test_num, num=10)
-        kernel_values = np.arange(kernel-5, kernel+5, step=1, dtype=int )
-        print(f"best score : {best_score}")
-        print(f"sigma:{sigma_values}, kernel:{kernel_values}")
-        for sig, ker in product(sigma_values, kernel_values):
-            #print(f"Test avec sigma={sig}, kernel={ker}")
+        sigma_values = np.linspace(sigma * calib_test_num / 10, sigma * 10 / calib_test_num, num=10)
+        kernel_values = np.arange(kernel - 5, kernel + 5, step=1, dtype=int)
+        param_grid = list(product(sigma_values, kernel_values))
+    
+        print(f"Best score: {best_score}")
+        print(f"Sigma: {sigma_values}, Kernel: {kernel_values}")
+    
+        # Préparer 4 copies de skeleton_ref.jpg
+        for i in range(4):
+            shutil.copyfile(self.image_path + "skeleton_ref.jpg", self.image_path + f"skeleton_ref_{i}.jpg")
+            shutil.copyfile(self.image_path + "img_calib.jpg", self.image_path + f"img_calib_{i}.jpg")
+    
+        def worker(index, sig, ker):
+            # Nom unique de squelette généré pour chaque thread
+            skeleton_filename = f"skeleton_{index}.jpg"
+            skeleton_path = os.path.join(self.image_path, skeleton_filename)
+            ref_path = os.path.join(self.image_path, f"skeleton_ref_{index}.jpg")
+            image_calib_path = os.path.join(self.image_path, f"img_calib_{index}.jpg")
+    
             try:
-                path_lengths = get_segment_list(image_path, channel, ker, sig)
-            except Exception:
-                print("Erreur: get_segment_list a échoué (KeyError)")
-                path_lengths = []
-
-            if path_lengths == None:
-                continue
-                
-            num_segments = len(path_lengths)
+                path_lengths = get_segment_list(image_calib_path, channel, ker, sig, skeleton_name=skeleton_filename)
+            except Exception as e:
+                print(f"[Thread {index}] Erreur: get_segment_list a échoué ({e})")
+                return (None, sig, ker)
+    
+            if path_lengths is None:
+                return (None, sig, ker)
+    
             try:
-                dsc, num_branches = self.evaluate_skeleton(self.image_path + "skeleton.jpg", self.image_path + "skeleton_ref.jpg")
-            except KeyError:
-                dsc, num_branches = (0,0)
-                print("Erreur: evaluate_skeleton a échoué (KeyError)")
-                
-            score = dsc
-                
-            if score > best_score:
-                best_score = score
-                print(f"Meilleure combinaison trouvée: sigma={sig}, kernel={ker}, score={score}")
-                best_params = (sig, ker)
-
-        # dans le cas où aucun meilleur score n'a été trouvé
-        if best_params == None:
+                dsc, _ = self.evaluate_skeleton(skeleton_path, ref_path)
+            except Exception as e:
+                print(f"[Thread {index}] Erreur: evaluate_skeleton a échoué ({e})")
+                return (None, sig, ker)
+    
+            return (dsc, sig, ker)
+    
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = []
+            for i, (sig, ker) in enumerate(param_grid):
+                thread_id = i % 4
+                futures.append(executor.submit(worker, thread_id, sig, ker))
+    
+            for future in futures:
+                result = future.result()
+                if result is None:
+                    continue
+                score, sig, ker = result
+                if score is not None and score > best_score:
+                    best_score = score
+                    best_params = (sig, ker)
+                    print(f"Nouvelle meilleure combinaison: sigma={sig}, kernel={ker}, score={score}")
+    
+        if best_params is None:
             return (sigma, kernel)
-            
+    
         self.best_score = best_score
         self.parser["image_arg"]["best_score"] = str(best_score)
-
         return best_params
 
     def evaluate_skeleton(self, generated_skeleton_path: str, reference_skeleton_path: str) -> dict:
