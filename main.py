@@ -227,6 +227,8 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
     :param station: station object
     :param n_round: number of measurement rounds done
     """
+    a = station.parser['image_arg']["sigma"]
+    b = station.parser['image_arg']["kernel_size"]
     LOGGER.debug("Entering measurement loop")
     growth_value = 0.0
     weight = 0.0
