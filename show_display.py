@@ -172,10 +172,10 @@ class Display:
         img, draw = self.create_image(logo=True)
         # Button
         font = ImageFont.truetype(FONT, 10)
-        draw.text((5, 80), f"Sigma value: {sigma}", font=font, fill=(0, 0, 0))
+        draw.text((5, 80), f"Sigma value: {round(sigma,3)}", font=font, fill=(0, 0, 0))
         draw.text((5, 95), f"Kernel size value: {kernel_size}", font=font, fill=(0, 0, 0))
         if inc%2 == 0:
-            draw.text((0, 130), f"<-- Calib {inc // 2 + 1}       Back -->", font=font, fill=(0, 0, 0))
+            draw.text((0, 130), f"<-- Calib {inc // 2 + 1}      Back -->", font=font, fill=(0, 0, 0))
             self.SCREEN.display(img)
         else:
             draw.text((0, 130), f"<-- Photo        Back -->", font=font, fill=(0, 0, 0))
@@ -190,7 +190,7 @@ class Display:
         # Button
         font = ImageFont.truetype(FONT, 10)
         draw.text((25, 80), "Photo taken", font=font, fill=(0, 0, 0))
-        draw.text((0, 130), f"<-- Calib {inc+1}       Back -->", font=font, fill=(0, 0, 0))
+        draw.text((0, 130), f"<-- Calib {inc // 2 + 1}      Back -->", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
     def wrap_text(self, text, font, max_width, draw):
