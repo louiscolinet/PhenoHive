@@ -137,12 +137,11 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
             elif inc % 2 == 0:
                 print("calcul")
                 sigma, kernel_size = station.calib_img_param(image_path, channel, sigma, kernel_size, inc)
-                print(f"sortie: sigma = {sigma}, kernel = {kernel_size}")
                 station.parser['image_arg']["sigma"] = str(sigma)
                 station.parser['image_arg']["kernel_size"] = str(kernel_size)
-                a = station.parser['image_arg']["sigma"]
+                """a = station.parser['image_arg']["sigma"]
                 b = station.parser['image_arg']["kernel_size"]
-                print(f"parser: sigma = {a}, kernel = {b}")
+                print(f"parser: sigma = {a}, kernel = {b}")"""
                 station.sigma = sigma
                 station.kernel_size = kernel_size
                 station.disp.show_img_param_menu(sigma, kernel_size, inc-1)
@@ -227,8 +226,6 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
     :param station: station object
     :param n_round: number of measurement rounds done
     """
-    a = station.parser['image_arg']["sigma"]
-    b = station.parser['image_arg']["kernel_size"]
     LOGGER.debug("Entering measurement loop")
     growth_value = 0.0
     weight = 0.0
