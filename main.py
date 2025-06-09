@@ -150,7 +150,9 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
                 time.sleep(1)
             else:
                 print("photo")
+                GPIO.output(self.LED, GPIO.LOW)
                 image_path = station.save_photo(img_name = 'img_calib')
+                GPIO.output(self.LED, GPIO.HIGH)
                 station.disp.show_photo_taken(inc-1)
                 time.sleep(1)
                 station.disp.show_img_param_menu(sigma, kernel_size, inc-1)
