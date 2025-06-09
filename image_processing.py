@@ -42,7 +42,7 @@ def get_height_pix(image_path: str, pot_limit: int, channel: str = 'k', kernel_s
     return plant_height_pix
 
 
-def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20, sigma: float = 2) -> list[int]:
+def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20, sigma: float = 2, skeleton_filename = None) -> list[int]:
     """
     Get the list of segments lengths from the plant skeleton
     :param image_path: path to the image
@@ -70,7 +70,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     edges_crop = pcv.crop(edges, 5, 5, height - 10, width - 10)
     #cv2.imwrite("data/edges_crop.jpg", edges_crop)
     crop = pcv.crop(img, 5, 5, height - 10, width - 10)
-    cv2.imwrite("data/crop.jpg", crop)
+    #cv2.imwrite("data/crop.jpg", crop)
 
     # Close gaps in plant contour
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
@@ -89,15 +89,19 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     # Fill contour to get maize shape
     result = np.zeros_like(closing)
     cv2.drawContours(result, [big_contour], 0, (255, 255, 255), cv2.FILLED)
-    cv2.imwrite("data/result.jpg", result)
+    #cv2.imwrite("data/result.jpg", result)
 
     # Draw plant skeleton and segment
     pcv.params.line_thickness = 3
     skeleton = pcv.morphology.skeletonize(mask=result)
     segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
-    cv2.imwrite("data/images/skeleton.jpg", skeleton)
-    cv2.imwrite("data/skeleton.jpg", skeleton)
-    cv2.imwrite("data/segmented_img.jpg", segmented_img)
+  
+    if skeleton_filename == None : skeleton_path = "data/images/skeleton.jpg"
+    else : skeleton_path = "data/images/" + skeleton_filename + ".jpg"
+    cv2.imwrite(skeleton_path, skeleton)
+  
+    #cv2.imwrite("data/skeleton.jpg", skeleton)
+    #cv2.imwrite("data/segmented_img.jpg", segmented_img)
 
     #if pcv.params.debug is not None:
         # The labelled image is only useful for debugging purposes
