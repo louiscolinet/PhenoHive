@@ -132,7 +132,7 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
             break
         if not GPIO.input(station.BUT_LEFT):
             print("bouton gauche")
-            if inc > 20:
+            if inc > 10:
                 break
             elif inc % 2 == 0:
                 print("calcul")
