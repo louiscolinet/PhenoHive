@@ -88,9 +88,11 @@ def handle_preview_loop(station: PhenoHiveStation) -> None:
     :param station: station object
     """
     while True:
+        GPIO.output(self.LED, GPIO.LOW)
         path_img = station.save_photo(preview=True, time_to_wait=1)
         station.disp.show_image(path_img)
         if not GPIO.input(station.BUT_RIGHT):
+            GPIO.output(self.LED, GPIO.HIGH)
             break
 
 def handle_calibration_menu(station: PhenoHiveStation) -> None:
