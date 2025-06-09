@@ -97,7 +97,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
   
     if skeleton_filename == None : skeleton_path = "data/images/skeleton.jpg"
-    else : skeleton_path = "data/images/" + skeleton_filename + ".jpg"
+    else : skeleton_path = "data/images/" + skeleton_filename
     cv2.imwrite(skeleton_path, skeleton)
   
     #cv2.imwrite("data/skeleton.jpg", skeleton)
