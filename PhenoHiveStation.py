@@ -196,7 +196,7 @@ class PhenoHiveStation:
         self.cam = Picamera2()
         GPIO.setwarnings(False)
         GPIO.setup(self.LED, GPIO.OUT)
-        GPIO.output(self.LED, GPIO.HIGH)
+        GPIO.output(self.LED, GPIO.LOW)
         
     def init_load(self):
         # Hx711
