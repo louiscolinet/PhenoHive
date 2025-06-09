@@ -140,7 +140,9 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
                 print(f"sortie: sigma = {sigma}, kernel = {kernel_size}")
                 station.parser['image_arg']["sigma"] = str(sigma)
                 station.parser['image_arg']["kernel_size"] = str(kernel_size)
-                print(f"parser: sigma = {station.parser['image_arg']["sigma"]}, kernel = {station.parser['image_arg']["kernel_size"]}")
+                a = station.parser['image_arg']["sigma"]
+                b = station.parser['image_arg']["kernel_size"]
+                print(f"parser: sigma = {a}, kernel = {b}")
                 station.sigma = sigma
                 station.kernel_size = kernel_size
                 station.disp.show_img_param_menu(sigma, kernel_size, inc-1)
