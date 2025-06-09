@@ -137,6 +137,7 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
             elif inc % 2 == 0:
                 print("calcul")
                 sigma, kernel_size = station.calib_img_param(image_path, channel, sigma, kernel_size, inc)
+                print(f"sortie: sigma = {sigma}, kernel = {kernel_size}")
                 station.parser['image_arg']["sigma"] = str(sigma)
                 station.parser['image_arg']["kernel_size"] = str(kernel_size)
                 station.sigma = sigma
