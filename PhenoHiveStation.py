@@ -453,10 +453,10 @@ class PhenoHiveStation:
         :return: a tuple with the photo in base64 and the path to the photo
         """
         # Take the photo
-        GPIO.output(self.LED, GPIO.LOW)
+        GPIO.output(self.LED, GPIO.HIGH)
         path_img = self.save_photo(preview=False, time_to_wait=6)
         time.sleep(2)
-        GPIO.output(self.LED, GPIO.HIGH)
+        GPIO.output(self.LED, GPIO.LOW)
         # Display the photo
         if path_img != "":
             LOGGER.debug(f"Photo taken and saved at {path_img}")
