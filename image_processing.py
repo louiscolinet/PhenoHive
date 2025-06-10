@@ -70,7 +70,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     edges_crop = pcv.crop(edges, 5, 5, height - 10, width - 10)
     #cv2.imwrite("data/edges_crop.jpg", edges_crop)
     crop = pcv.crop(img, 5, 5, height - 10, width - 10)
-    #cv2.imwrite("data/crop.jpg", crop)
+    cv2.imwrite("data/crop.jpg", crop)
 
     # Close gaps in plant contour
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
@@ -89,7 +89,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     # Fill contour to get maize shape
     result = np.zeros_like(closing)
     cv2.drawContours(result, [big_contour], 0, (255, 255, 255), cv2.FILLED)
-    #cv2.imwrite("data/result.jpg", result)
+    cv2.imwrite("data/result.jpg", result)
 
     # Draw plant skeleton and segment
     pcv.params.line_thickness = 3
@@ -100,7 +100,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     else : skeleton_path = "data/images/" + skeleton_filename
     cv2.imwrite(skeleton_path, skeleton)
   
-    #cv2.imwrite("data/skeleton.jpg", skeleton)
+    cv2.imwrite("data/skeleton.jpg", skeleton)
     #cv2.imwrite("data/segmented_img.jpg", segmented_img)
 
     #if pcv.params.debug is not None:
