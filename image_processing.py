@@ -55,6 +55,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
 
     # Read image
     img, _, _ = pcv.readimage(image_path)
+    cv2.imwrite("data/img.jpg", img)
 
     # Get image dimension
     height, width = img.shape[0], img.shape[1]
