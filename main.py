@@ -247,8 +247,8 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
         if time_now >= time_nxt_measure:
             LOGGER.info("Measuring time reached, starting measurement")
             station.disp.show_collecting_data("")
-            growth_value, weight, humidity, light = station.measurement_pipeline()
             time_nxt_measure = datetime.datetime.now() + time_delta
+            growth_value, weight, humidity, light = station.measurement_pipeline()
             n_round += 1
 
         if not GPIO.input(station.BUT_RIGHT):
