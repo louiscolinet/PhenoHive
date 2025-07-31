@@ -93,7 +93,7 @@ class Display:
         draw.text((5, 90), "Weight : " + str(weight), font=font, fill=(0, 0, 0))
         draw.text((5, 100), "Growth : " + str(growth), font=font, fill=(0, 0, 0))
         draw.text((5, 110), "Humidity : " + str(humidity), font=font, fill=(0, 0, 0))
-        draw.text((5, 110), "Light : " + str(light), font=font, fill=(0, 0, 0))
+        draw.text((5, 120), "Light : " + str(light), font=font, fill=(0, 0, 0))
         draw.text((5, 130), "Measurement n°" + str(n_rounds), font=font, fill=(0, 0, 0))
         draw.text((0, 140), "<-- Status", font=font, fill=(0, 0, 0))
         draw.text((80, 140), "Stop -->", font=font, fill=(0, 0, 0))
