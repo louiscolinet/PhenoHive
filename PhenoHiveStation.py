@@ -310,6 +310,8 @@ class PhenoHiveStation:
     
         if best_params is None:
             return (sigma, kernel)
+        if best_params[0] > 4: best_params[0] = 4
+        if best_params[1] < 12: best_params[1] = 12    
     
         self.best_score = best_score
         self.parser["image_arg"]["best_score"] = str(best_score)
