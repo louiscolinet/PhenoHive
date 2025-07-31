@@ -95,7 +95,7 @@ def handle_preview_loop(station: PhenoHiveStation) -> None:
             GPIO.output(station.LED, GPIO.LOW)
             break
         if not GPIO.input(station.BUT_LEFT):
-            path_img = station.save_photo(preview=True, time_to_wait=0.3, img_name = "background.jpg")
+            path_img = station.save_photo(preview=True, time_to_wait=0.3, img_name = "background")
 
 def handle_calibration_menu(station: PhenoHiveStation) -> None:
     """
