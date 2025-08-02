@@ -191,7 +191,7 @@ class Display:
         # Button
         font = ImageFont.truetype(FONT, 10)
         draw.text((25, 80), "Photo taken", font=font, fill=(0, 0, 0))
-        draw.text((0, 130), f"<-- Calib {inc // 2 + 1}      Back -->", font=font, fill=(0, 0, 0))
+        draw.text((0, 130), f"         Calib {inc // 2 + 1}", font=font, fill=(0, 0, 0))
         self.SCREEN.display(img)
 
     def wrap_text(self, text, font, max_width, draw):
