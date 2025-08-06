@@ -4,7 +4,7 @@ influxdb-client==1.44.0
 hx711==1.1.2.3
 pandas==2.2.3
 adafruit-gpio==1.0.3
-picamera2==0.3.18
+picamera2==0.3.30
 opencv-python==4.7.0.72
 plantcv==4.6
 mizani==0.9.0
