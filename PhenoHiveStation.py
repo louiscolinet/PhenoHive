@@ -483,8 +483,12 @@ class PhenoHiveStation:
         :param time_to_wait: time to wait before taking the photo (in seconds)
         :return: the path to the photo
         """
-        self.cam.start_preview(Preview.NULL)
-        self.cam.start()
+        try:
+            self.cam.start_preview(Preview.NULL)
+            self.cam.start()
+        except Exception as e:
+            self.register_error(type(e)(f"Error while starting camera: {e}"))
+            return ""
         time.sleep(time_to_wait)
         
         if img_name != None:
@@ -496,7 +500,8 @@ class PhenoHiveStation:
 
         path_img = self.image_path + "/%s.jpg" % name
         try:
-            self.cam.capture_file(file_output=path_img)
+            frame = self.cam.capture_array()
+            cv2.imwrite(path_img, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
         except Exception as e:
             self.register_error(type(e)(f"Error while capturing the photo: {e}"))
             path_img = ""
