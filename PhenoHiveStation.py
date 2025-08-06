@@ -250,14 +250,19 @@ class PhenoHiveStation:
         }
         self.to_save = ["growth", "weight", "weight_g", "standard_deviation", "humidity", "light"]
 
-    def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float = 1, kernel: int = 20, calib_test_num: int = 1):
+    def calib_img_param(self, image_path: str, channel: str = 'k', sigma: float = 2, kernel: int = 20, calib_test_num: int = 1):
         """
         Automatically calibrate sigma and kernel_size for optimal segmentation, using multithreading.
         """
         best_params = None
         best_score = self.best_score
-        sigma_values = np.linspace(sigma * calib_test_num / 10, sigma * 10 / calib_test_num, num=10)
+        spread = sigma / calib_test_num
+        sigma_values = np.linspace(sigma - spread, sigma + spread, num=10)
+        sigma_values = np.clip(sigma_values, 0.05, 5)
+        sigma_values = np.unique(sigma_values)
         kernel_values = np.arange(kernel - 5, kernel + 5, step=1, dtype=int)
+        kernel_values = np.clip(kernel_values, 10, None)
+        kernel_values = np.unique(kernel_values)
         param_grid = list(product(sigma_values, kernel_values))
     
         print(f"Best score: {best_score}")
