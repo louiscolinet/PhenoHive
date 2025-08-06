@@ -483,52 +483,26 @@ class PhenoHiveStation:
         :param time_to_wait: time to wait before taking the photo (in seconds)
         :return: the path to the photo
         """
-        if not hasattr(self, "cam_lock"):
-            self.cam_lock = threading.Lock()
-               
+        self.cam.start_preview(Preview.NULL)
+        self.cam.start()
+        time.sleep(time_to_wait)
+        
         if img_name != None:
             name = img_name
         elif not preview:
             name = datetime.now().strftime(DATE_FORMAT_FILE)
         else:
             name = "preview"
+
         path_img = self.image_path + "/%s.jpg" % name
-        
-        with self.cam_lock:
-            try:
-                self.cam.start_preview(Preview.NULL)
-                self.cam.start()
-            except Exception as e:
-                self.register_error(type(e)(f"Error while starting camera: {e}"))
-                return ""
-
-            try:
-                time.sleep(time_to_wait)
-
-                try:
-                    self.cam.capture_file(file_output=path_img)
-                    return path_img
-                except Exception as e_file:
-                    self.register_error(type(e_file)(f"capture_file failed, falling back to capture_array: {e_file}"))
-        
-                try:
-                    frame = self.cam.capture_array()
-                    if frame is None:
-                        raise RuntimeError("capture_array returned None")
-                    cv2.imwrite(path_img, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-                    return path_img
-                except Exception as e_arr:
-                    self.register_error(type(e_arr)(f"capture_array failed: {e_arr}"))
-                    return ""
-            finally:
-                try:
-                    self.cam.stop_preview()
-                except Exception:
-                    pass
-                try:
-                    self.cam.stop()
-                except Exception:
-                    pass
+        try:
+            self.cam.capture_file(file_output=path_img)
+        except Exception as e:
+            self.register_error(type(e)(f"Error while capturing the photo: {e}"))
+            path_img = ""
+        self.cam.stop_preview()
+        self.cam.stop()
+        return path_img
 
     def measurement_pipeline(self) -> tuple[int, float, int]:
         """
