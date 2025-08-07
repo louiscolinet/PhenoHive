@@ -461,7 +461,7 @@ class PhenoHiveStation:
         """
         # Take the photo
         GPIO.output(self.LED, GPIO.HIGH)
-        path_img = self.save_photo(preview=False, time_to_wait=6)
+        path_img = self.save_photo(preview=False, time_to_wait=8)
         time.sleep(2)
         GPIO.output(self.LED, GPIO.LOW)
         # Display the photo
