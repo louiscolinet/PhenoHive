@@ -4,6 +4,7 @@ This script starts the main loop of the station, and handles the different menus
 """
 from PhenoHiveStation import PhenoHiveStation
 from utils import setup_logger, create_folders
+from picamera2 import Picamera2, Preview
 import time
 import datetime
 import RPi.GPIO as GPIO
