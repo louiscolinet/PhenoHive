@@ -232,6 +232,8 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
     :param n_round: number of measurement rounds done
     """
     LOGGER.debug("Entering measurement loop")
+    station.cam.start_preview(Preview.NULL)
+    station.cam.start()
     growth_value = 0.0
     weight = 0.0
     humidity = 0
@@ -255,6 +257,8 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
 
         if not GPIO.input(station.BUT_RIGHT):
             # Stop the measurements
+            self.cam.stop_preview()
+            self.cam.stop()
             station.parser['Station']['running'] = "0"
             station.running = 0
             with open(CONFIG_FILE, 'w') as configfile:
