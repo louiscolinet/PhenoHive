@@ -23,7 +23,7 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from picamera2 import Picamera2, Preview
 from image_processing import get_total_length, get_segment_list
-from utils import save_to_csv
+from utils import setup_logger, create_folders
 from show_display import Display
 
 CONFIG_FILE = "config.ini"
@@ -105,6 +105,8 @@ class PhenoHiveStation:
         # Parse Config.ini file
         self.parse_config_file(CONFIG_FILE)
         self.status = 0  # 0: idle, 1: measuring, -1: error
+        LOGGER = setup_logger(name="PhenoHive", level=logging.DEBUG,
+                              folder_path=config_parser['Paths']['log_folder'])
 
         threads = [
             threading.Thread(target=self.init_display),
