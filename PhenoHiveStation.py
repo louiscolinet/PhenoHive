@@ -454,14 +454,14 @@ class PhenoHiveStation:
             return -1.0, -1.0
         return statistics.median(measurements), statistics.stdev(measurements)
 
-    def capture_and_display(self, measurement: bool = False) -> tuple[str, str]:
+    def capture_and_display(self) -> tuple[str, str]:
         """
         Take a photo, display it on the screen and return it in base64
         :return: a tuple with the photo in base64 and the path to the photo
         """
         # Take the photo
         GPIO.output(self.LED, GPIO.HIGH)
-        path_img = self.save_photo(preview=False, time_to_wait=8, measurement = measurement)
+        path_img = self.save_photo(preview=False, time_to_wait=6)
         time.sleep(2)
         GPIO.output(self.LED, GPIO.LOW)
         # Display the photo
@@ -476,17 +476,16 @@ class PhenoHiveStation:
         else:
             return "", ""
 
-    def save_photo(self, preview: bool = False, time_to_wait: int = 8, img_name: str = None, measurement: bool = False) -> str:
+    def save_photo(self, preview: bool = False, time_to_wait: int = 8, img_name: str = None) -> str:
         """
         Take a photo and save it
         :param preview: if True the photo will be saved as "img.jpg" (used for the display)
         :param time_to_wait: time to wait before taking the photo (in seconds)
         :return: the path to the photo
         """
-        if measurement == False:
-            self.cam.start_preview(Preview.NULL)
-            self.cam.start()
-            time.sleep(time_to_wait)
+        self.cam.start_preview(Preview.NULL)
+        self.cam.start()
+        time.sleep(time_to_wait)
         
         if img_name != None:
             name = img_name
@@ -501,10 +500,8 @@ class PhenoHiveStation:
         except Exception as e:
             self.register_error(type(e)(f"Error while capturing the photo: {e}"))
             path_img = ""
-            
-        if measurement == False:
-            self.cam.stop_preview()
-            self.cam.stop()
+        self.cam.stop_preview()
+        self.cam.stop()
         return path_img
 
     def measurement_pipeline(self) -> tuple[int, float, int]:
@@ -608,7 +605,7 @@ class PhenoHiveStation:
         :return: the picture and the growth value
         """
         # Take and display the photo
-        pic, path_img = self.capture_and_display(measurement = True)
+        pic, path_img = self.capture_and_display()
         self.disp.show_collecting_data("Processing photo")
         time.sleep(1)
         # Process the segment lengths to get the growth value
