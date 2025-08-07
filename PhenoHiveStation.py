@@ -105,8 +105,8 @@ class PhenoHiveStation:
         # Parse Config.ini file
         self.parse_config_file(CONFIG_FILE)
         self.status = 0  # 0: idle, 1: measuring, -1: error
-        LOGGER = setup_logger(name="PhenoHive", level=logging.DEBUG,
-                              folder_path=config_parser['Paths']['log_folder'])
+        LOGGER = setup_logger(name="PhenoHiveStation", level=logging.DEBUG,
+                              folder_path=self.parser['Paths']['log_folder'])
 
         threads = [
             threading.Thread(target=self.init_display),
