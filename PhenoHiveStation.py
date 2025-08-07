@@ -485,10 +485,13 @@ class PhenoHiveStation:
         :return: the path to the photo
         """
         try:
+            LOGGER.debug("[save_photo] Starting preview")
             self.cam.start_preview(Preview.NULL)
+            LOGGER.debug("[save_photo] Start")
             self.cam.start()
         except Exception as e:
             self.register_error(type(e)(f"[save_photo] Error starting camera: {e}"))
+        LOGGER.debug("[save_photo] Sleeping...")
         time.sleep(time_to_wait)
         
         if img_name != None:
@@ -500,7 +503,9 @@ class PhenoHiveStation:
 
         path_img = self.image_path + "/%s.jpg" % name
         try:
+            LOGGER.debug("[save_photo] Capturing file...")
             self.cam.capture_file(file_output=path_img)
+            LOGGER.debug("[save_photo] Capturing done")
         except Exception as e:
             self.register_error(type(e)(f"Error while capturing the photo: {e}"))
             path_img = ""
