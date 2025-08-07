@@ -461,8 +461,9 @@ class PhenoHiveStation:
         """
         # Take the photo
         GPIO.output(self.LED, GPIO.HIGH)
-        path_img = self.save_photo(preview=False, time_to_wait=8)
-        time.sleep(2)
+        time.sleep(1)
+        path_img = self.save_photo(preview=False, time_to_wait=7)
+        time.sleep(1)
         GPIO.output(self.LED, GPIO.LOW)
         # Display the photo
         if path_img != "":
@@ -483,8 +484,11 @@ class PhenoHiveStation:
         :param time_to_wait: time to wait before taking the photo (in seconds)
         :return: the path to the photo
         """
-        self.cam.start_preview(Preview.NULL)
-        self.cam.start()
+        try:
+            self.cam.start_preview(Preview.NULL)
+            self.cam.start()
+        except Exception as e:
+            self.register_error(type(e)(f"[save_photo] Error starting camera: {e}"))
         time.sleep(time_to_wait)
         
         if img_name != None:
