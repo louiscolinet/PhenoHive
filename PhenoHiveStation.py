@@ -511,7 +511,8 @@ class PhenoHiveStation:
         try:
             LOGGER.debug("[save_photo] Capturing file...")
             self.capture_with_timeout(path_img, time_to_wait=time_to_wait, timeout=12)
-            LOGGER.debug("[save_photo] Capturing done")
+            if path_img != "":
+                LOGGER.debug("[save_photo] Capturing done")
         except Exception as e:
             self.register_error(type(e)(f"Error while capturing the photo: {e}"))
             path_img = ""
@@ -552,7 +553,7 @@ class PhenoHiveStation:
         p.join(timeout+time_to_wait)
     
         if p.is_alive():
-            print("[ERROR] Capture timed out. Terminating process.")
+            LOGGER.error("Capture timed out. Terminating process.")
             p.terminate()
             p.join()
             return ""
@@ -560,7 +561,7 @@ class PhenoHiveStation:
         if return_dict.get("success"):
             return path_img
         else:
-            print(f"[ERROR] Capture failed: {return_dict.get('error')}")
+            LOGGER.error(f"Capture failed: {return_dict.get('error')}")
             return ""
 
     def measurement_pipeline(self) -> tuple[int, float, int]:
