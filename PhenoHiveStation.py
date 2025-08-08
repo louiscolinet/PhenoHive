@@ -710,7 +710,7 @@ class PhenoHiveStation:
         x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value)]
         x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
         
-        if now - datetime.strptime(x_last_dates[0], DATE_FORMAT) < timedelta(minutes=1.5 * self.timeinterval * moy_value):
+        if now - datetime.strptime(x_last_dates[0], DATE_FORMAT) < timedelta(minutes=1.5 * self.time_interval * moy_value):
             moy = sum(x_last_values) / moy_value
             growth_value = growth_value * 0.5 + moy * 0.5
           
