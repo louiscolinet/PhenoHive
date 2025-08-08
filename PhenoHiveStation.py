@@ -112,7 +112,7 @@ class PhenoHiveStation:
         threads = [
             threading.Thread(target=self.init_display),
             threading.Thread(target=self.init_influxdb),
-            #threading.Thread(target=self.init_camera),
+            threading.Thread(target=self.init_camera),
             threading.Thread(target=self.init_load),
             threading.Thread(target=self.init_button),
             threading.Thread(target=self.init_data),
