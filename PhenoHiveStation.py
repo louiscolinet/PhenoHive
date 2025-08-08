@@ -684,7 +684,10 @@ class PhenoHiveStation:
         time.sleep(1)
         # Process the segment lengths to get the growth value
         last_growth_value = get_values_from_csv(self.csv_path, "growth", last_n=1)[0] #takes the last measure in case of error
-        growth_value = last_growth_value
+        if last_growth_value != None:
+            growth_value = last_growth_value
+        else:
+            growth_value = -1
         if pic != "" and path_img != "":
             try:
                 growth_value = get_total_length(image_path=path_img, channel=self.channel, kernel_size=self.kernel_size, sigma=self.sigma)
@@ -709,8 +712,10 @@ class PhenoHiveStation:
         moy_value = 20
         x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value)]
         x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
+        delta_time = now - datetime.strptime(x_last_dates[0], DATE_FORMAT)
+        limit_time = timedelta(minutes=1.5 * self.time_interval * moy_value)
         
-        if now - datetime.strptime(x_last_dates[0], DATE_FORMAT) < timedelta(minutes=1.5 * self.time_interval * moy_value):
+        if delta_time < limit_time and len(x_last_values) == moy_value:
             moy = sum(x_last_values) / moy_value
             growth_value = growth_value * 0.5 + moy * 0.5
           
