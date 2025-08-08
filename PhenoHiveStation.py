@@ -555,13 +555,13 @@ class PhenoHiveStation:
             print("[ERROR] Capture timed out. Terminating process.")
             p.terminate()
             p.join()
-            return None
+            return ""
     
         if return_dict.get("success"):
             return path_img
         else:
             print(f"[ERROR] Capture failed: {return_dict.get('error')}")
-            return None
+            return ""
 
     def measurement_pipeline(self) -> tuple[int, float, int]:
         """
