@@ -700,7 +700,7 @@ class PhenoHiveStation:
             
         # anti grandes valeurs
         last_date = get_values_from_csv(self.csv_path, "date", last_n=1)[0]
-        last_date = datetime.strptime(last_date, DATE_FORMAT_FILE)
+        last_date = datetime.strptime(last_date, DATE_FORMAT)
         now = now = datetime.now()
         if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=4):
             growth_value = last_value
@@ -710,7 +710,7 @@ class PhenoHiveStation:
         x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value)]
         x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
         
-        if now - datetime.strptime(x_last_dates[0], DATE_FORMAT_FILE) < timedelta(minutes=1.5 * self.timeinterval * moy_value):
+        if now - datetime.strptime(x_last_dates[0], DATE_FORMAT) < timedelta(minutes=1.5 * self.timeinterval * moy_value):
             moy = sum(x_last_values) / moy_value
             growth_value = growth_value * 0.5 + moy * 0.5
           
