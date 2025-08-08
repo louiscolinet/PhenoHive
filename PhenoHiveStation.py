@@ -515,7 +515,7 @@ class PhenoHiveStation:
             
         try:
             LOGGER.debug("[save_photo] Capturing file...")
-            result = self.capture_with_timeout(path_img, time_to_wait=time_to_wait, timeout=10)
+            result = self.capture_with_timeout(path_img, time_to_wait=time_to_wait, timeout=16)
             if result != "":
                 LOGGER.debug("Capturing done")
             else:
