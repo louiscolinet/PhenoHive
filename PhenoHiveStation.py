@@ -19,7 +19,7 @@ import RPi.GPIO as GPIO
 import logging
 import shutil
 import multiprocessing as mp
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from picamera2 import Picamera2, Preview
@@ -683,7 +683,8 @@ class PhenoHiveStation:
         self.disp.show_collecting_data("Processing photo")
         time.sleep(1)
         # Process the segment lengths to get the growth value
-        growth_value = get_values_from_csv(self.csv_path, "growth", last_n=1)[0]
+        last_growth_value = get_values_from_csv(self.csv_path, "growth", last_n=1)[0] #takes the last measure in case of error
+        growth_value = last_growth_value
         if pic != "" and path_img != "":
             try:
                 growth_value = get_total_length(image_path=path_img, channel=self.channel, kernel_size=self.kernel_size, sigma=self.sigma)
@@ -696,6 +697,23 @@ class PhenoHiveStation:
             LOGGER.debug(f"Growth value : {growth_value}")
             self.disp.show_collecting_data(f"Growth value : {round(growth_value, 2)}")
             time.sleep(2)
+            
+        # anti grandes valeurs
+        last_date = get_values_from_csv(self.csv_path, "date", last_n=1)[0]
+        last_date = datetime.strptime(last_date, DATE_FORMAT_FILE)
+        now = now = datetime.now()
+        if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=4):
+            growth_value = last_value
+
+        # moyenne pour lissage
+        moy_value = 20
+        x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value)]
+        x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
+        
+        if now - datetime.strptime(x_last_dates[0], DATE_FORMAT_FILE) < timedelta(minutes=1.5 * self.timeinterval * moy_value):
+            moy = sum(x_last_values) / moy_value
+            growth_value = growth_value * 0.5 + moy * 0.5
+          
         return pic, growth_value
 
     def weight_pipeline(self, n=10) -> tuple[float, float]:
