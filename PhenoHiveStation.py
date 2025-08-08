@@ -514,7 +514,7 @@ class PhenoHiveStation:
             if result != "":
                 LOGGER.debug("Capturing done")
             else:
-                self.register_error(type(e)(f"Error while capturing the photo: {e}"))
+                self.register_error(type(e)(f"Error while capturing the photo"))
                 path_img = ""
         except Exception as e:
             self.register_error(type(e)(f"Error while capturing the photo: {e}"))
