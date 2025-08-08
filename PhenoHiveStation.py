@@ -518,10 +518,8 @@ class PhenoHiveStation:
             
         try:
             self.cam = Picamera2()
-            self.cam.configure(self.cam.create_still_configuration())
-            self.cam.start()
         except Exception as e:
-            LOGGER.warning(f"[save_photo] Failed to restart camera: {e}")
+            LOGGER.warning(f"[save_photo] Failed to re init camera: {e}")
 
         return path_img
 
@@ -536,7 +534,6 @@ class PhenoHiveStation:
 
         def capture_worker(path_img, time_to_wait, return_dict):
             cam = Picamera2()
-            cam.configure(cam.create_still_configuration())  # ou ta config personnalisée
             cam.start_preview(Preview.NULL)
             cam.start()
             time.sleep(time_to_wait)  # laisser un petit délai pour initialiser
@@ -565,7 +562,6 @@ class PhenoHiveStation:
         else:
             print(f"[ERROR] Capture failed: {return_dict.get('error')}")
             return None
-
 
     def measurement_pipeline(self) -> tuple[int, float, int]:
         """
