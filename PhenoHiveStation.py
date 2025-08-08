@@ -703,7 +703,7 @@ class PhenoHiveStation:
         last_date = datetime.strptime(last_date, DATE_FORMAT)
         now = now = datetime.now()
         if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=4):
-            growth_value = last_value
+            growth_value = last_growth_value
 
         # moyenne pour lissage
         moy_value = 20
