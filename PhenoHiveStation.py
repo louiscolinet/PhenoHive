@@ -458,6 +458,28 @@ class PhenoHiveStation:
             return -1.0, -1.0
         return statistics.median(measurements), statistics.stdev(measurements)
 
+    def preview(self, time_to_wait: int = 1) -> str:
+        """
+        """
+        try:
+            self.cam.start_preview(Preview.NULL)
+            self.cam.start()
+        except Exception as e:
+            self.register_error(type(e)(f"[save_photo] Error starting camera: {e}"))
+        time.sleep(time_to_wait)
+        
+        name = "preview"
+        path_img = self.image_path + "/%s.jpg" % name
+        
+        try:
+            self.cam.capture_file(file_output=path_img)
+        except Exception as e:
+            self.register_error(type(e)(f"Error while capturing the photo: {e}"))
+            path_img = ""
+        self.cam.stop_preview()
+        self.cam.stop()
+        return path_img
+
     def capture_and_display(self) -> tuple[str, str]:
         """
         Take a photo, display it on the screen and return it in base64
