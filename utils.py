@@ -100,7 +100,6 @@ def get_values_from_csv(
 
     values = []
     for line in selected_lines:
-    for line in selected_lines:
         parts = line.strip('\x00').strip().split(",")
         if len(parts) > col_index:
             val = parts[col_index]
