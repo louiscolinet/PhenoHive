@@ -531,16 +531,20 @@ class PhenoHiveStation:
         manager = mp.Manager()
         return_dict = manager.dict()
 
-        def capture_worker(cam_serialized, path_img, return_dict):
-            cam = Picamera2.deserialize(cam_serialized)
-        
+        def _capture_worker(path_img, return_dict):
+            cam = Picamera2()
+            cam.configure(cam.create_still_configuration())  # ou ta config personnalisée
+            cam.start()
+            time.sleep(2)  # laisser un petit délai pour initialiser
             try:
                 cam.capture_file(path_img)
                 return_dict["success"] = True
             except Exception as e:
                 return_dict["error"] = str(e)
+            cam.close()
+
     
-        p = mp.Process(target=capture_worker, args=(self.cam.serialize(), path_img, return_dict))
+        p = mp.Process(target=capture_worker, args=(path_img, return_dict))
         p.start()
         p.join(timeout)
     
