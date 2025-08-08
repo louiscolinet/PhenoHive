@@ -486,25 +486,28 @@ class PhenoHiveStation:
         :param preview: if True the photo will be saved as "img.jpg" (used for the display)
         :param time_to_wait: time to wait before taking the photo (in seconds)
         :return: the path to the photo
-        """
-        """try:
-            LOGGER.debug("[save_photo] Starting preview")
-            self.cam.start_preview(Preview.NULL)
-            LOGGER.debug("[save_photo] Start")
-            self.cam.start()
-        except Exception as e:
-            self.register_error(type(e)(f"[save_photo] Error starting camera: {e}"))
-        LOGGER.debug("[save_photo] Sleeping...")
-        time.sleep(time_to_wait)"""
-        
+        """        
         if img_name != None:
             name = img_name
         elif not preview:
             name = datetime.now().strftime(DATE_FORMAT_FILE)
         else:
             name = "preview"
-
         path_img = self.image_path + "/%s.jpg" % name
+
+        try:
+            self.cam.stop_preview()
+        except Exception:
+            pass
+        try:
+            self.cam.stop()
+        except Exception:
+            pass
+        try:
+            self.cam.close()
+        except Exception:
+            pass
+            
         try:
             LOGGER.debug("[save_photo] Capturing file...")
             self.capture_with_timeout(path_img, time_to_wait=time_to_wait, timeout=10)
@@ -512,16 +515,16 @@ class PhenoHiveStation:
         except Exception as e:
             self.register_error(type(e)(f"Error while capturing the photo: {e}"))
             path_img = ""
+            
         try:
-            self.cam.stop_preview()
-            self.cam.stop()
+            self.cam = Picamera2()
+            self.cam.configure(self.cam.create_still_configuration())
+            self.cam.start()
         except Exception as e:
-            LOGGER.warning(f"[save_photo] Camera stop error: {e}")
+            LOGGER.warning(f"[save_photo] Failed to restart camera: {e}")
 
         return path_img
 
-
-    
     def capture_with_timeout(self, path_img, time_to_wait=8, timeout=10):
         """
         Try to capture an image with timeout and process isolation.
@@ -544,6 +547,7 @@ class PhenoHiveStation:
                 return_dict["error"] = str(e)
             cam.stop_preview()
             cam.stop()
+            cam.close()
 
     
         p = mp.Process(target=capture_worker, args=(path_img, time_to_wait, return_dict))
