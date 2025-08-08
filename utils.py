@@ -100,7 +100,8 @@ def get_values_from_csv(
 
     values = []
     for line in selected_lines:
-        parts = line.strip().split(",")
+    for line in selected_lines:
+        parts = line.strip('\x00').strip().split(",")
         if len(parts) > col_index:
             val = parts[col_index]
             values.append(val if column_name == "date" else float(val))
