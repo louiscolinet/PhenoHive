@@ -206,9 +206,9 @@ class PhenoHiveStation:
         LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
                      f", Ping returned : {self.connected}")
 
-    """def init_camera(self):
+    def init_camera(self):
         # Camera and LED init
-        self.cam = Picamera2()"""
+        self.cam = Picamera2()
         
     def init_load(self):
         # Hx711
@@ -548,10 +548,10 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while capturing the photo: {e}"))
             path_img = ""
             
-        """try:
+        try:
             self.cam = Picamera2()
         except Exception as e:
-            LOGGER.warning(f"Failed to re init camera: {e}")"""
+            LOGGER.warning(f"Failed to re init camera: {e}")
 
         return path_img
 
