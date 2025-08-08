@@ -510,7 +510,7 @@ class PhenoHiveStation:
             
         try:
             LOGGER.debug("[save_photo] Capturing file...")
-            self.capture_with_timeout(path_img, time_to_wait=time_to_wait, timeout=6)
+            self.capture_with_timeout(path_img, time_to_wait=time_to_wait, timeout=12)
             LOGGER.debug("[save_photo] Capturing done")
         except Exception as e:
             self.register_error(type(e)(f"Error while capturing the photo: {e}"))
@@ -523,7 +523,7 @@ class PhenoHiveStation:
 
         return path_img
 
-    def capture_with_timeout(self, path_img, time_to_wait=8, timeout=6):
+    def capture_with_timeout(self, path_img, time_to_wait=8, timeout=12):
         """
         Try to capture an image with timeout and process isolation.
         """
