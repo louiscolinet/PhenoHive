@@ -706,14 +706,18 @@ class PhenoHiveStation:
         last_date = datetime.strptime(last_date, DATE_FORMAT)
         now = now = datetime.now()
         if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=4):
+            print("anti-pic")
             growth_value = last_growth_value
 
         # moyenne pour lissage
         moy_value = 20
         x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value)]
         x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
+        print(x_last_dates)
         delta_time = now - datetime.strptime(x_last_dates[0], DATE_FORMAT)
         limit_time = timedelta(minutes=1.5 * self.time_interval * moy_value)
+        print(delta_time)
+        print(limit_time)
         
         if delta_time < limit_time and len(x_last_values) == moy_value:
             moy = sum(x_last_values) / moy_value
