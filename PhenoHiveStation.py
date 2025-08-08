@@ -24,7 +24,7 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from picamera2 import Picamera2, Preview
 from image_processing import get_total_length, get_segment_list
-from utils import setup_logger, create_folders, save_to_csv
+from utils import setup_logger, create_folders, save_to_csv, get_values_from_csv
 from show_display import Display
 
 CONFIG_FILE = "config.ini"
@@ -515,7 +515,7 @@ class PhenoHiveStation:
             
         try:
             LOGGER.debug("[save_photo] Capturing file...")
-            result = self.capture_with_timeout(path_img, time_to_wait=time_to_wait, timeout=16)
+            result = self.capture_with_timeout(path_img, time_to_wait=time_to_wait, timeout=10)
             if result != "":
                 LOGGER.debug("Capturing done")
             else:
@@ -683,7 +683,7 @@ class PhenoHiveStation:
         self.disp.show_collecting_data("Processing photo")
         time.sleep(1)
         # Process the segment lengths to get the growth value
-        growth_value = -1
+        growth_value = get_values_from_csv(self.csv_path, "growth", last_n=1)[0]
         if pic != "" and path_img != "":
             try:
                 growth_value = get_total_length(image_path=path_img, channel=self.channel, kernel_size=self.kernel_size, sigma=self.sigma)
