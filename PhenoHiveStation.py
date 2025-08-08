@@ -18,6 +18,7 @@ import Adafruit_MCP3008
 import RPi.GPIO as GPIO
 import logging
 import shutil
+import multiprocessing as mp
 from datetime import datetime, timezone
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -506,14 +507,55 @@ class PhenoHiveStation:
         path_img = self.image_path + "/%s.jpg" % name
         try:
             LOGGER.debug("[save_photo] Capturing file...")
-            self.cam.capture_file(file_output=path_img)
+            self.capture_with_timeout(path_img, timeout=10)
             LOGGER.debug("[save_photo] Capturing done")
         except Exception as e:
             self.register_error(type(e)(f"Error while capturing the photo: {e}"))
             path_img = ""
-        self.cam.stop_preview()
-        self.cam.stop()
+        try:
+            self.cam.stop_preview()
+            self.cam.stop()
+        except Exception as e:
+            LOGGER.warning(f"[save_photo] Camera stop error: {e}")
+
         return path_img
+
+
+    
+    def capture_with_timeout(self, path_img, timeout=10):
+        """
+        Try to capture an image with timeout and process isolation.
+        """
+        # Picamera2 is not serializable, so we avoid passing the live instance
+        # You could alternatively recreate a new camera instance inside the worker
+        manager = mp.Manager()
+        return_dict = manager.dict()
+
+        def capture_worker(cam_serialized, path_img, return_dict):
+            cam = Picamera2.deserialize(cam_serialized)
+        
+            try:
+                cam.capture_file(path_img)
+                return_dict["success"] = True
+            except Exception as e:
+                return_dict["error"] = str(e)
+    
+        p = mp.Process(target=capture_worker, args=(self.cam.serialize(), path_img, return_dict))
+        p.start()
+        p.join(timeout)
+    
+        if p.is_alive():
+            print("[ERROR] Capture timed out. Terminating process.")
+            p.terminate()
+            p.join()
+            return None
+    
+        if return_dict.get("success"):
+            return path_img
+        else:
+            print(f"[ERROR] Capture failed: {return_dict.get('error')}")
+            return None
+
 
     def measurement_pipeline(self) -> tuple[int, float, int]:
         """
