@@ -112,7 +112,7 @@ class PhenoHiveStation:
         threads = [
             threading.Thread(target=self.init_display),
             threading.Thread(target=self.init_influxdb),
-            threading.Thread(target=self.init_camera_button),
+            #threading.Thread(target=self.init_camera),
             threading.Thread(target=self.init_load),
             threading.Thread(target=self.init_button),
             threading.Thread(target=self.init_data),
@@ -123,6 +123,18 @@ class PhenoHiveStation:
             thread.start()
         for thread in threads:
             thread.join()
+
+        GPIO.setwarnings(False)
+        GPIO.setup(self.LED, GPIO.OUT)
+        GPIO.output(self.LED, GPIO.LOW)
+        time.sleep(1)
+        GPIO.output(self.LED, GPIO.HIGH)
+        time.sleep(1)
+        GPIO.output(self.LED, GPIO.LOW)
+        time.sleep(1)
+        GPIO.output(self.LED, GPIO.HIGH)
+        time.sleep(1)
+        GPIO.output(self.LED, GPIO.LOW)
 
     def parse_config_file(self, path: str) -> None:
         """
@@ -194,20 +206,9 @@ class PhenoHiveStation:
         LOGGER.debug(f"InfluxDB client initialised with url : {self.url}, org : {self.org} and token : {self.token}" +
                      f", Ping returned : {self.connected}")
 
-    def init_camera_button(self):
+    """def init_camera(self):
         # Camera and LED init
-        self.cam = Picamera2()
-        GPIO.setwarnings(False)
-        GPIO.setup(self.LED, GPIO.OUT)
-        GPIO.output(self.LED, GPIO.LOW)
-        time.sleep(1)
-        GPIO.output(self.LED, GPIO.HIGH)
-        time.sleep(1)
-        GPIO.output(self.LED, GPIO.LOW)
-        time.sleep(1)
-        GPIO.output(self.LED, GPIO.HIGH)
-        time.sleep(1)
-        GPIO.output(self.LED, GPIO.LOW)
+        self.cam = Picamera2()"""
         
     def init_load(self):
         # Hx711
@@ -229,7 +230,7 @@ class PhenoHiveStation:
                 self.SPI_ADC,  
                 max_speed_hz=self.SPEED_HZ # Utilization of the same frequency than screen
             )
-        )  
+        )
 
     def init_button(self):
         GPIO.setup(self.BUT_LEFT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -525,10 +526,10 @@ class PhenoHiveStation:
             self.register_error(type(e)(f"Error while capturing the photo: {e}"))
             path_img = ""
             
-        try:
+        """try:
             self.cam = Picamera2()
         except Exception as e:
-            LOGGER.warning(f"Failed to re init camera: {e}")
+            LOGGER.warning(f"Failed to re init camera: {e}")"""
 
         return path_img
 
