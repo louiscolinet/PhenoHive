@@ -463,12 +463,17 @@ class PhenoHiveStation:
         :return: a tuple with the photo in base64 and the path to the photo
         """
         # Take the photo
-        GPIO.output(self.LED, GPIO.HIGH)
-        time.sleep(1)
-        path_img = self.save_photo(preview=False, time_to_wait=7)
-        time.sleep(1)
-        GPIO.output(self.LED, GPIO.LOW)
-        # Display the photo
+        try:
+            GPIO.output(self.LED, GPIO.HIGH)
+            time.sleep(1)
+            path_img = self.save_photo(preview=False, time_to_wait=7)
+            time.sleep(1)
+            GPIO.output(self.LED, GPIO.LOW)
+        except Exception as e:
+            LOGGER.error(f"Error capturing photo: {e}")
+            self.register_error(e)
+            return "", ""
+        
         if path_img != "":
             LOGGER.debug(f"Photo taken and saved at {path_img}")
             self.disp.show_image(path_img)
@@ -668,7 +673,13 @@ class PhenoHiveStation:
         :return: the picture and the growth value
         """
         # Take and display the photo
-        pic, path_img = self.capture_and_display()
+        try:
+            pic, path_img = self.capture_and_display()
+        except Exception as e:
+            LOGGER.error(f"Error during capture: {e}")
+            self.register_error(e)
+            self.disp.show_collecting_data("Error capturing photo")
+            return "", ""
         self.disp.show_collecting_data("Processing photo")
         time.sleep(1)
         # Process the segment lengths to get the growth value
