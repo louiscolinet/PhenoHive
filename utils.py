@@ -80,8 +80,10 @@ def get_values_from_csv(
         raise ValueError(f"Invalid column name: {column_name}")
 
     with open(filename, "r") as f:
-        lines = f.readlines()
-
+        lines = [line for line in f.readlines() if line.strip()]
+    if not lines:
+        return [] if (last_n or first_n) else None
+        
     if target_date:
         for line in lines:
             parts = line.strip().split(",")
