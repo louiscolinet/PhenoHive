@@ -510,9 +510,12 @@ class PhenoHiveStation:
             
         try:
             LOGGER.debug("[save_photo] Capturing file...")
-            self.capture_with_timeout(path_img, time_to_wait=time_to_wait, timeout=12)
-            if path_img != "":
-                LOGGER.debug("[save_photo] Capturing done")
+            result = self.capture_with_timeout(path_img, time_to_wait=time_to_wait, timeout=12)
+            if result != "":
+                LOGGER.debug("Capturing done")
+            else:
+                self.register_error(type(e)(f"Error while capturing the photo: {e}"))
+                path_img = ""
         except Exception as e:
             self.register_error(type(e)(f"Error while capturing the photo: {e}"))
             path_img = ""
@@ -520,7 +523,7 @@ class PhenoHiveStation:
         try:
             self.cam = Picamera2()
         except Exception as e:
-            LOGGER.warning(f"[save_photo] Failed to re init camera: {e}")
+            LOGGER.warning(f"Failed to re init camera: {e}")
 
         return path_img
 
