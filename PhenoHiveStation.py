@@ -531,7 +531,7 @@ class PhenoHiveStation:
         manager = mp.Manager()
         return_dict = manager.dict()
 
-        def _capture_worker(path_img, return_dict):
+        def capture_worker(path_img, return_dict):
             cam = Picamera2()
             cam.configure(cam.create_still_configuration())  # ou ta config personnalisée
             cam.start()
