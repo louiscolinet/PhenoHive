@@ -89,7 +89,7 @@ def handle_preview_loop(station: PhenoHiveStation) -> None:
     """
     while True:
         GPIO.output(station.LED, GPIO.HIGH)
-        path_img = station.save_photo(preview=True, time_to_wait=1)
+        path_img = station.preview(time_to_wait=0.5)
         station.disp.show_image(path_img)
         if not GPIO.input(station.BUT_RIGHT):
             GPIO.output(station.LED, GPIO.LOW)
