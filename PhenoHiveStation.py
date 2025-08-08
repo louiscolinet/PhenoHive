@@ -715,7 +715,7 @@ class PhenoHiveStation:
         x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
         print(x_last_dates)
         delta_time = now - datetime.strptime(x_last_dates[0], DATE_FORMAT)
-        limit_time = timedelta(minutes=1.5 * self.time_interval * moy_value)
+        limit_time = timedelta(minutes=1.5 * self.time_interval/60 * moy_value)
         print(delta_time)
         print(limit_time)
         
