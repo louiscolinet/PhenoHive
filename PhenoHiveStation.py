@@ -705,7 +705,7 @@ class PhenoHiveStation:
         last_date = get_values_from_csv(self.csv_path, "date", last_n=1)[0]
         last_date = datetime.strptime(last_date, DATE_FORMAT)
         now = now = datetime.now()
-        if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=4):
+        if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=3):
             print("anti-pic")
             growth_value = last_growth_value
 
