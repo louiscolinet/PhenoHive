@@ -580,8 +580,8 @@ class PhenoHiveStation:
             self.data["picture"] = pic
             self.data["growth"] = float(growth_value)
         except Exception as e:
-            self.register_error(type(e)(f"Error while taking the photo: {e}"))
-            self.disp.show_collecting_data("Error while taking the photo")
+            self.register_error(type(e)(f"Error while taking/processing the photo: {e}"))
+            self.disp.show_collecting_data("Error while taking/processing the photo")
             time.sleep(5)
             growth_value = 0.0
 
