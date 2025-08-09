@@ -146,7 +146,7 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     cv2.imwrite("data/img.jpg", img)
 
     # Remove shadow if any
-    img_no_shadow = remove_shadows_hsv2(img)
+    img_no_shadow = remove_shadows(img)
 
     # Get image dimension
     height, width = img_no_shadow.shape[0], img.shape[1]
