@@ -24,7 +24,7 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 from picamera2 import Picamera2, Preview
 from image_processing import get_total_length, get_segment_list
-from utils import setup_logger, create_folders, save_to_csv, get_values_from_csv
+from utils import setup_logger, create_folders, save_to_csv, get_values_from_csv, csv_is_empty
 from show_display import Display
 
 CONFIG_FILE = "config.ini"
