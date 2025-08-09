@@ -728,9 +728,9 @@ class PhenoHiveStation:
             time.sleep(2)
             
         # anti grandes valeurs
-        print(f"last_date = {last_date}")
         if not csv_is_empty(self.csv_path):
             last_date = get_values_from_csv(self.csv_path, "date", last_n=1)[0]
+            print(f"last_date = {last_date}")
             last_date = datetime.strptime(last_date, DATE_FORMAT)
             now = now = datetime.now()
             if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=3):
