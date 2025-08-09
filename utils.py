@@ -106,3 +106,14 @@ def get_values_from_csv(
             values.append(val if column_name == "date" else float(val))
 
     return values
+
+def csv_is_empty(file_path):
+    if not os.path.isfile(file_path) or os.path.getsize(file_path) == 0:
+        return True
+    
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            if line.strip():
+                return False
+    return True
+
