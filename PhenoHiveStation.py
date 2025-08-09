@@ -501,8 +501,10 @@ class PhenoHiveStation:
             LOGGER.debug(f"Photo taken and saved at {path_img}")
             self.disp.show_image(path_img)
             # Convert image to base64
+            print("ok")
             with open(path_img, "rb") as image_file:
                 pic = base64.b64encode(image_file.read()).decode('utf-8')
+            print("ok")
             time.sleep(2)
             return pic, path_img
         else:
