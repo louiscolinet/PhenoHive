@@ -71,7 +71,7 @@ def match_luminance(img: np.ndarray, background: np.ndarray, radius: int = 30) -
     back_yuv[:, :, 0] = back_y_norm
     return cv2.cvtColor(back_yuv, cv2.COLOR_YCrCb2RGB)
 
-def remove_shadows(img: np.ndarray, beta1=0.3, beta2=0.92, tau_s=0.27, tau_h=1) -> np.ndarray:
+def remove_shadows(img: np.ndarray, beta1=0.3, beta2=0.9, tau_s=0.27, tau_h=1) -> np.ndarray:
     """
     Detect and remove shadows using HSV chromacity-based method.
     Based on Sanin et al. (2012), adapted from Cucchiara et al. (2003).
@@ -112,7 +112,7 @@ def remove_shadows(img: np.ndarray, beta1=0.3, beta2=0.92, tau_s=0.27, tau_h=1) 
 
     nb_white_pixels = np.count_nonzero(shadow_mask)
 
-    if nb_white_pixels > 20000:
+    if nb_white_pixels > 50000:
         img_no_shadow = img.copy()
         img_no_shadow[shadow_mask] = background[shadow_mask]
 
