@@ -112,7 +112,7 @@ def remove_shadows(img: np.ndarray, beta1=0.3, beta2=0.92, tau_s=0.27, tau_h=1) 
 
     nb_white_pixels = np.count_nonzero(shadow_mask)
 
-    if nb_white_pixels > 2500:
+    if nb_white_pixels > 20000:
         img_no_shadow = img.copy()
         img_no_shadow[shadow_mask] = background[shadow_mask]
 
