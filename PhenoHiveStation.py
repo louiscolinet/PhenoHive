@@ -711,7 +711,6 @@ class PhenoHiveStation:
         if not csv_is_empty(self.csv_path):
             last_growth_value = get_values_from_csv(self.csv_path, "growth", last_n=1)[0]
             growth_value = last_growth_value
-            print(f"last_growth_value = {last_growth_value}")
         else:
             growth_value = -1
         if pic != "" and path_img != "":
@@ -730,7 +729,6 @@ class PhenoHiveStation:
         # anti grandes valeurs
         if not csv_is_empty(self.csv_path):
             last_date = get_values_from_csv(self.csv_path, "date", last_n=1)[0]
-            print(f"last_date = {last_date}")
             last_date = datetime.strptime(last_date, DATE_FORMAT)
             now = now = datetime.now()
             if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=3):
@@ -740,7 +738,6 @@ class PhenoHiveStation:
         moy_value = 20
         if not csv_is_empty(self.csv_path):
             x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value)]
-            print(f"x_last_values = {x_last_values}")
             x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
             delta_time = now - datetime.strptime(x_last_dates[0], DATE_FORMAT)
             limit_time = timedelta(minutes=1.5 * self.time_interval/60 * moy_value)
