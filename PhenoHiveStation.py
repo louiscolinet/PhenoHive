@@ -707,6 +707,7 @@ class PhenoHiveStation:
         time.sleep(1)
         # Process the segment lengths to get the growth value
         last_growth_value = get_values_from_csv(self.csv_path, "growth", last_n=1)[0] #takes the last measure in case of error
+        print(f"last_growth_value = {last_growth_value}")
         if last_growth_value != None:
             growth_value = last_growth_value
         else:
@@ -726,14 +727,17 @@ class PhenoHiveStation:
             
         # anti grandes valeurs
         last_date = get_values_from_csv(self.csv_path, "date", last_n=1)[0]
-        last_date = datetime.strptime(last_date, DATE_FORMAT)
-        now = now = datetime.now()
-        if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=3):
-            growth_value = last_growth_value
+        print(f"last_date = {last_date}")
+        if last_date != None:
+            last_date = datetime.strptime(last_date, DATE_FORMAT)
+            now = now = datetime.now()
+            if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=3):
+                growth_value = last_growth_value
 
         # moyenne pour lissage
         moy_value = 20
         x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value)]
+        print(f"x_last_values = {x_last_values}")
         x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
         delta_time = now - datetime.strptime(x_last_dates[0], DATE_FORMAT)
         limit_time = timedelta(minutes=1.5 * self.time_interval/60 * moy_value)
