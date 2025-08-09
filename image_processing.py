@@ -83,7 +83,9 @@ def remove_shadows(img: np.ndarray, beta1=0.3, beta2=0.92, tau_s=0.27, tau_h=1) 
     img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV).astype(np.float32)
 
     background = cv2.imread("jamiolle ombre/background.jpg")  # ou autre chemin
+    print("entrée lum")
     background = match_luminance(img, background)
+    print("sortie lum")
     background = cv2.cvtColor(background, cv2.COLOR_BGR2RGB)
     cv2.imwrite("data_base/background.jpg", background)
     back_hsv = cv2.cvtColor(background, cv2.COLOR_RGB2HSV).astype(np.float32)
@@ -146,8 +148,9 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     cv2.imwrite("data/img.jpg", img)
 
     # Remove shadow if any
+    print("entrée_shad")
     img_no_shadow = remove_shadows(img)
-
+    print("sortie shad")
     # Get image dimension
     height, width = img_no_shadow.shape[0], img.shape[1]
 
