@@ -706,10 +706,12 @@ class PhenoHiveStation:
         self.disp.show_collecting_data("Processing photo")
         time.sleep(1)
         # Process the segment lengths to get the growth value
-        last_growth_value = get_values_from_csv(self.csv_path, "growth", last_n=1) #takes the last measure in case of error
-        print(f"last_growth_value = {last_growth_value}")
-        if last_growth_value != None:
-            growth_value = last_growth_value[0]
+        
+         #takes the last measure in case of error
+        if !csv_is_empty(self.csv_path):
+            last_growth_value = get_values_from_csv(self.csv_path, "growth", last_n=1)[0]
+            growth_value = last_growth_value
+            print(f"last_growth_value = {last_growth_value}")
         else:
             growth_value = -1
         if pic != "" and path_img != "":
@@ -726,10 +728,9 @@ class PhenoHiveStation:
             time.sleep(2)
             
         # anti grandes valeurs
-        last_date = get_values_from_csv(self.csv_path, "date", last_n=1)
         print(f"last_date = {last_date}")
-        if last_date != None:
-            last_date = last_date[0]
+        if !csv_is_empty(self.csv_path):
+            last_date = get_values_from_csv(self.csv_path, "date", last_n=1)[0]
             last_date = datetime.strptime(last_date, DATE_FORMAT)
             now = now = datetime.now()
             if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=3):
@@ -737,7 +738,7 @@ class PhenoHiveStation:
 
         # moyenne pour lissage
         moy_value = 20
-        if last_growth_value != None:
+        if !csv_is_empty(self.csv_path):
             x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value)]
             print(f"x_last_values = {x_last_values}")
             x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
