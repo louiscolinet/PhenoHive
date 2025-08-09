@@ -501,10 +501,8 @@ class PhenoHiveStation:
             LOGGER.debug(f"Photo taken and saved at {path_img}")
             self.disp.show_image(path_img)
             # Convert image to base64
-            print("ok")
             with open(path_img, "rb") as image_file:
                 pic = base64.b64encode(image_file.read()).decode('utf-8')
-            print("ok")
             time.sleep(2)
             return pic, path_img
         else:
@@ -708,10 +706,10 @@ class PhenoHiveStation:
         self.disp.show_collecting_data("Processing photo")
         time.sleep(1)
         # Process the segment lengths to get the growth value
-        last_growth_value = get_values_from_csv(self.csv_path, "growth", last_n=1)[0] #takes the last measure in case of error
+        last_growth_value = get_values_from_csv(self.csv_path, "growth", last_n=1) #takes the last measure in case of error
         print(f"last_growth_value = {last_growth_value}")
         if last_growth_value != None:
-            growth_value = last_growth_value
+            growth_value = last_growth_value[0]
         else:
             growth_value = -1
         if pic != "" and path_img != "":
@@ -728,9 +726,10 @@ class PhenoHiveStation:
             time.sleep(2)
             
         # anti grandes valeurs
-        last_date = get_values_from_csv(self.csv_path, "date", last_n=1)[0]
+        last_date = get_values_from_csv(self.csv_path, "date", last_n=1)
         print(f"last_date = {last_date}")
         if last_date != None:
+            last_date = last_date[0]
             last_date = datetime.strptime(last_date, DATE_FORMAT)
             now = now = datetime.now()
             if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=3):
@@ -738,15 +737,16 @@ class PhenoHiveStation:
 
         # moyenne pour lissage
         moy_value = 20
-        x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value)]
-        print(f"x_last_values = {x_last_values}")
-        x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
-        delta_time = now - datetime.strptime(x_last_dates[0], DATE_FORMAT)
-        limit_time = timedelta(minutes=1.5 * self.time_interval/60 * moy_value)
-        
-        if delta_time < limit_time and len(x_last_values) == moy_value:
-            moy = sum(x_last_values) / moy_value
-            growth_value = growth_value * 0.5 + moy * 0.5
+        if last_growth_value != None:
+            x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value)]
+            print(f"x_last_values = {x_last_values}")
+            x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
+            delta_time = now - datetime.strptime(x_last_dates[0], DATE_FORMAT)
+            limit_time = timedelta(minutes=1.5 * self.time_interval/60 * moy_value)
+            
+            if delta_time < limit_time and len(x_last_values) == moy_value:
+                moy = sum(x_last_values) / moy_value
+                growth_value = growth_value * 0.5 + moy * 0.5
           
         return pic, growth_value
 
