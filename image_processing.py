@@ -42,6 +42,94 @@ def get_height_pix(image_path: str, pot_limit: int, channel: str = 'k', kernel_s
     return plant_height_pix
 
 
+def match_luminance(img: np.ndarray, background: np.ndarray, radius: int = 30) -> np.ndarray:
+    """
+    Adapts the background luminance to match the local luminance
+    around the brightest pixel in the input image.
+    """
+    img_yuv = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
+    back_yuv = cv2.cvtColor(background, cv2.COLOR_RGB2YCrCb)
+
+    img_y, _, _ = cv2.split(img_yuv)
+    back_y, _, _ = cv2.split(back_yuv)
+
+    # Find the brightest pixel
+    max_loc = np.unravel_index(np.argmax(img_y), img_y.shape)
+    y, x = max_loc
+
+    # Set a window around this pixel
+    y1, y2 = max(0, y - radius), min(img_y.shape[0], y + radius + 1)
+    x1, x2 = max(0, x - radius), min(img_y.shape[1], x + radius + 1)
+
+    mean_img = img_y[y1:y2, x1:x2].mean()
+    mean_back = back_y[y1:y2, x1:x2].mean()
+
+    # Adapt the luminance of the background
+    back_y_norm = back_y + (mean_img - mean_back)
+    back_y_norm = np.clip(back_y_norm, 0, 255).astype(np.uint8)
+
+    back_yuv[:, :, 0] = back_y_norm
+    return cv2.cvtColor(back_yuv, cv2.COLOR_YCrCb2RGB)
+
+def remove_shadows(img: np.ndarray, beta1=0.3, beta2=0.92, tau_s=0.27, tau_h=1) -> np.ndarray:
+    """
+    Detect and remove shadows using HSV chromacity-based method.
+    Based on Sanin et al. (2012), adapted from Cucchiara et al. (2003).
+
+    :param img: Current RGB image (numpy array)
+    :param background: Background RGB image (numpy array)
+    :return: Shadow-free image (numpy array)
+    """
+    img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV).astype(np.float32)
+
+    background = cv2.imread("jamiolle ombre/background.jpg")  # ou autre chemin
+    background = match_luminance(img, background)
+    background = cv2.cvtColor(background, cv2.COLOR_BGR2RGB)
+    cv2.imwrite("data_base/background.jpg", background)
+    back_hsv = cv2.cvtColor(background, cv2.COLOR_RGB2HSV).astype(np.float32)
+
+    # Split channels
+    Hf, Sf, Vf = cv2.split(img_hsv)
+    Hb, Sb, Vb = cv2.split(back_hsv)
+
+    # Avoid division by zero
+    Vb[Vb == 0] = 1e-6
+
+    # Compute ratios and differences
+    v_ratio = Vf / Vb
+    s_diff = np.abs(Sf - Sb)
+    h_diff = np.abs(Hf - Hb)
+    h_diff = np.minimum(h_diff, 180 - h_diff)
+
+    # Detect shadows
+    shadow_mask = (v_ratio >= beta1) & (v_ratio <= beta2) & (s_diff <= tau_s * 255) & (h_diff <= tau_h * 255)
+
+    shadow_mask_uint8 = shadow_mask.astype(np.uint8) * 255
+    shadow_mask_blurred = cv2.GaussianBlur(shadow_mask_uint8, (3, 3), 0)
+    _, shadow_mask_clean = cv2.threshold(shadow_mask_blurred, 127, 255, cv2.THRESH_BINARY)
+    shadow_mask = shadow_mask_clean.astype(bool)
+
+    nb_white_pixels = np.count_nonzero(shadow_mask)
+
+    if nb_white_pixels > 1500:
+        img_no_shadow = img.copy()
+        img_no_shadow[shadow_mask] = background[shadow_mask]
+
+        # blur
+        shadow_mask_u8 = (shadow_mask.astype(np.uint8) * 255)
+        dilated_mask = cv2.dilate(shadow_mask_u8, np.ones((5, 5), np.uint8), iterations=1)
+        transition_mask = cv2.subtract(dilated_mask, shadow_mask_u8)
+        cv2.imwrite("debug/transition_mask.jpg", transition_mask)
+        blurred = cv2.GaussianBlur(img_no_shadow, (9, 9), 0)
+        img_no_shadow[transition_mask.astype(bool)] = blurred[transition_mask.astype(bool)]
+
+        img_no_shadow = cv2.bilateralFilter(img_no_shadow, d=30, sigmaColor=45, sigmaSpace=95)
+    else:
+        img_no_shadow = img.copy()
+
+    return img_no_shadow
+
+
 def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20, sigma: float = 2, skeleton_filename = None) -> list[int]:
     """
     Get the list of segments lengths from the plant skeleton
@@ -57,11 +145,14 @@ def get_segment_list(image_path: str, channel: str = 'k', kernel_size: int = 20,
     img, _, _ = pcv.readimage(image_path)
     cv2.imwrite("data/img.jpg", img)
 
+    # Remove shadow if any
+    img_no_shadow = remove_shadows_hsv2(img)
+
     # Get image dimension
-    height, width = img.shape[0], img.shape[1]
+    height, width = img_no_shadow.shape[0], img.shape[1]
 
     # Extract channel (grey image)
-    k = pcv.rgb2gray_cmyk(rgb_img=img, channel=channel)
+    k = pcv.rgb2gray_cmyk(rgb_img=img_no_shadow, channel=channel)
 
     # Perform canny=edge detection
     edges = pcv.canny_edge_detect(k, sigma=sigma)
