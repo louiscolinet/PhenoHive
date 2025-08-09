@@ -82,12 +82,11 @@ def remove_shadows(img: np.ndarray, beta1=0.3, beta2=0.92, tau_s=0.27, tau_h=1) 
     """
     img_hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV).astype(np.float32)
 
-    background = cv2.imread("jamiolle ombre/background.jpg")  # ou autre chemin
+    background = cv2.imread("data/images/background.jpg")  # ou autre chemin
     print("entrée lum")
     background = match_luminance(img, background)
     print("sortie lum")
     background = cv2.cvtColor(background, cv2.COLOR_BGR2RGB)
-    cv2.imwrite("data_base/background.jpg", background)
     back_hsv = cv2.cvtColor(background, cv2.COLOR_RGB2HSV).astype(np.float32)
 
     # Split channels
@@ -121,7 +120,6 @@ def remove_shadows(img: np.ndarray, beta1=0.3, beta2=0.92, tau_s=0.27, tau_h=1) 
         shadow_mask_u8 = (shadow_mask.astype(np.uint8) * 255)
         dilated_mask = cv2.dilate(shadow_mask_u8, np.ones((5, 5), np.uint8), iterations=1)
         transition_mask = cv2.subtract(dilated_mask, shadow_mask_u8)
-        cv2.imwrite("debug/transition_mask.jpg", transition_mask)
         blurred = cv2.GaussianBlur(img_no_shadow, (9, 9), 0)
         img_no_shadow[transition_mask.astype(bool)] = blurred[transition_mask.astype(bool)]
 
