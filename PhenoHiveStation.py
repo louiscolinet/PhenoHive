@@ -773,7 +773,7 @@ class PhenoHiveStation:
         if analog_voltage >= 3.28: return 0.0
         hum = (np.tan((2.041-analog_voltage)/0.994) + 4.515) / 0.119 
 
-        # moyenne pour lissage
+        """# moyenne pour lissage
         moy_value = 30
         if not csv_is_empty(self.csv_path):
             x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "humidity", last_n=moy_value-1)]
@@ -783,7 +783,7 @@ class PhenoHiveStation:
             last_hum_value = get_values_from_csv(self.csv_path, "humidity", last_n=1)[0]
             
             if delta_time < limit_time and len(x_last_values) == (moy_value-1) and hum - last_hum_value < 5 :
-                hum = (sum(x_last_values) + hum) / moy_value
+                hum = (sum(x_last_values) + hum) / moy_value"""
         
         return hum
 
