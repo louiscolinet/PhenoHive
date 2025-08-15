@@ -731,20 +731,19 @@ class PhenoHiveStation:
             last_date = get_values_from_csv(self.csv_path, "date", last_n=1)[0]
             last_date = datetime.strptime(last_date, DATE_FORMAT)
             now = now = datetime.now()
-            if abs(growth_value - last_growth_value) > 50 and now - last_date < timedelta(minutes=3):
+            if abs(growth_value - last_growth_value) > 15 and now - last_date < timedelta(minutes=3):
                 growth_value = last_growth_value
 
         # moyenne pour lissage
-        moy_value = 20
+        moy_value = 10
         if not csv_is_empty(self.csv_path):
-            x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value)]
-            x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value)
+            x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value-1)]
+            x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value-1)
             delta_time = now - datetime.strptime(x_last_dates[0], DATE_FORMAT)
-            limit_time = timedelta(minutes=1.5 * self.time_interval/60 * moy_value)
+            limit_time = timedelta(minutes=1.5 * self.time_interval/60 * (moy_value-1))
             
-            if delta_time < limit_time and len(x_last_values) == moy_value:
-                moy = sum(x_last_values) / moy_value
-                growth_value = growth_value * 0.5 + moy * 0.5
+            if delta_time < limit_time and len(x_last_values) == (moy_value-1):
+                growth_value = (sum(x_last_values) + growth_value) / moy_value
           
         return pic, growth_value
 
