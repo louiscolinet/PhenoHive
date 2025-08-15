@@ -778,7 +778,7 @@ class PhenoHiveStation:
         if not csv_is_empty(self.csv_path):
             x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "humidity", last_n=moy_value-1)]
             x_last_dates = get_values_from_csv(self.csv_path, "date", last_n=moy_value-1)
-            delta_time = now - datetime.strptime(x_last_dates[0], DATE_FORMAT)
+            delta_time = datetime.now() - datetime.strptime(x_last_dates[0], DATE_FORMAT)
             limit_time = timedelta(minutes=1.5 * self.time_interval/60 * (moy_value-1))
             last_hum_value = get_values_from_csv(self.csv_path, "humidity", last_n=1)[0]
             
