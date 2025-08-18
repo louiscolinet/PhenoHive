@@ -71,8 +71,9 @@ def get_values_from_csv(
         "growth": 1,
         "weight": 2,
         "weight_g": 3,
-        "humidity": 4,
-        "light": 5
+        "standard_deviation": 4,
+        "humidity": 5,
+        "light": 6
     }
 
     col_index = columns.get(column_name)
