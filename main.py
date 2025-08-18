@@ -81,7 +81,6 @@ def handle_configuration_menu(station: PhenoHiveStation) -> None:
             time.sleep(1)
             break
 
-
 def handle_preview_loop(station: PhenoHiveStation) -> None:
     """
     Preview loop: takes a preview photo and displays it on the screen to check the camera position
@@ -116,10 +115,9 @@ def handle_calibration_menu(station: PhenoHiveStation) -> None:
 def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
     """
     Image parameters calibration loop.
-    .......
+    
     :param station: station object
     """
-    print("entrée menu calib")
     inc = 1
     sigma = float(station.sigma)
     kernel_size = int(station.kernel_size)
@@ -131,7 +129,6 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
     
     while True:
         if not GPIO.input(station.BUT_RIGHT):
-            print("bouton droit")
             time.sleep(1)
             break
         if not GPIO.input(station.BUT_LEFT):
@@ -139,7 +136,6 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
             if inc > 10:
                 break
             elif inc % 2 == 0:
-                print("calcul")
                 sigma, kernel_size = station.calib_img_param(image_path, channel, sigma, kernel_size, inc)
                 station.parser['image_arg']["sigma"] = str(sigma)
                 station.parser['image_arg']["kernel_size"] = str(kernel_size)
@@ -151,7 +147,6 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
                 inc += 1
                 time.sleep(1)
             else:
-                print("photo")
                 GPIO.output(station.LED, GPIO.HIGH)
                 image_path = station.save_photo(img_name = 'img_calib')
                 GPIO.output(station.LED, GPIO.LOW)
@@ -159,7 +154,6 @@ def handle_imag_param_calibration_menu(station: PhenoHiveStation) -> None:
                 time.sleep(1)
                 station.disp.show_img_param_menu(sigma, kernel_size, inc-1)
                 inc += 1
-
 
 def handle_weight_calibration_menu(station: PhenoHiveStation) -> None:
     """
@@ -203,8 +197,6 @@ def handle_weight_calibration_menu(station: PhenoHiveStation) -> None:
             except (KeyError, ValueError) as e:
                 LOGGER.error(f"Error in calibration: {e}")
                 return
-
-
 
 def handle_status_menu(station: PhenoHiveStation) -> bool:
     """
@@ -273,7 +265,6 @@ def handle_measurement_loop(station: PhenoHiveStation, n_round: int) -> None:
                 break
             time.sleep(1)
     time.sleep(1)
-
 
 if __name__ == "__main__":
     # Parse arguments
