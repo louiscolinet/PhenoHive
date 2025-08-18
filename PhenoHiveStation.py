@@ -207,7 +207,7 @@ class PhenoHiveStation:
                      f", Ping returned : {self.connected}")
 
     def init_camera(self):
-        # Camera and LED init
+        # Camera
         self.cam = Picamera2()
         
     def init_load(self):
@@ -223,7 +223,6 @@ class PhenoHiveStation:
         
     def init_adc(self):
         # MCP3008
-        
         self.mcp = Adafruit_MCP3008.MCP3008(
             spi=SPI.SpiDev(
                 self.SPI_PORT,  # Utilization of the same port than screen
@@ -269,16 +268,13 @@ class PhenoHiveStation:
         kernel_values = np.unique(kernel_values)
         param_grid = list(product(sigma_values, kernel_values))
     
-        print(f"Best score: {best_score}")
-        print(f"Sigma: {sigma_values}, Kernel: {kernel_values}")
-    
-        # Préparer 4 copies de skeleton_ref.jpg
+        # Prepare 4 copies of skeleton_ref.jpg
         for i in range(4):
             shutil.copyfile(self.image_path + "skeleton_ref.jpg", self.image_path + f"skeleton_ref_{i}.jpg")
             shutil.copyfile(self.image_path + "img_calib.jpg", self.image_path + f"img_calib_{i}.jpg")
     
         def worker(index, sig, ker):
-            # Nom unique de squelette généré pour chaque thread
+            # Unique skeleton name generated for each thread
             skeleton_filename = f"skeleton_{index}.jpg"
             skeleton_path = os.path.join(self.image_path, skeleton_filename)
             ref_path = os.path.join(self.image_path, f"skeleton_ref_{index}.jpg")
@@ -294,7 +290,7 @@ class PhenoHiveStation:
                 return (None, sig, ker)
     
             try:
-                dsc, _ = self.evaluate_skeleton(skeleton_path, ref_path)
+                dsc = self.evaluate_skeleton(skeleton_path, ref_path)
             except Exception as e:
                 print(f"[Thread {index}] Erreur: evaluate_skeleton a échoué ({e})")
                 return (None, sig, ker)
@@ -315,12 +311,11 @@ class PhenoHiveStation:
                 if score is not None and score > best_score:
                     best_score = score
                     best_params = (sig, ker)
-                    print(f"Nouvelle meilleure combinaison: sigma={sig}, kernel={ker}, score={score}")
     
         if best_params is None:
             return (sigma, kernel)
         if best_params[0] > 4: best_params = (4, best_params[1])
-        if best_params[1] < 12: best_params= (best_params[0], 12)   
+        if best_params[1] < 10: best_params= (best_params[0], 10)   
     
         self.best_score = best_score
         self.parser["image_arg"]["best_score"] = str(best_score)
@@ -328,13 +323,13 @@ class PhenoHiveStation:
 
     def evaluate_skeleton(self, generated_skeleton_path: str, reference_skeleton_path: str) -> dict:
         """
-        Compare un squelette généré avec un squelette de référence.
-        
-        :param generated_skeleton_path: Chemin de l'image du squelette généré
-        :param reference_skeleton_path: Chemin de l'image du squelette de référence
-        :return: Dictionnaire contenant le nombre de branches, intersections et DSC
+        Compare a generated skeleton with a reference skeleton.
+
+        :param generated_skeleton_path: Path to the generated skeleton image
+        :param reference_skeleton_path: Path to the reference skeleton image
+        :return: Dictionary containing the number of branches, intersections, and DSC
         """
-        # Charger les images en niveaux de gris
+        # Load grayscale images
         gen_skel = cv2.imread(generated_skeleton_path)
         ref_skel = cv2.imread(reference_skeleton_path)
 
@@ -342,23 +337,15 @@ class PhenoHiveStation:
         height, width = ref_skel.shape[0], ref_skel.shape[1]
         ref_skel = pcv.crop(ref_skel, 5, 5, height - 10, width - 10)
         
-        # Convertir en format binaire (0 et 1)
+        # Convert to binary format (0 and 1)
         gen_skel_bin = gen_skel // 255
         ref_skel_bin = ref_skel // 255
         
-        # Calcul du Dice Similarity Coefficient (DSC)
+        # Calculation of the Dice Similarity Coefficient (DSC)
         intersection = np.sum(gen_skel_bin * ref_skel_bin)
         dsc = (2.0 * intersection) / (np.sum(gen_skel_bin) + np.sum(ref_skel_bin))
         
-        # Comptage des branches avec l'opération de squelette
-        """skeleton = pcv.morphology.skeletonize(mask=gen_skel_bin)
-        num_branches = np.sum(skeleton)
-        segmented_img, obj = pcv.morphology.segment_skeleton(skel_img=skeleton)
-        _ = pcv.morphology.segment_path_length(segmented_img=segmented_img, objects=obj, label="default")"""
-
-        num_branches = 4
-        
-        return (dsc, num_branches)
+        return dsc
 
     def register_error(self, exception: Exception) -> None:
         """
@@ -559,8 +546,6 @@ class PhenoHiveStation:
         """
         Try to capture an image with timeout and process isolation.
         """
-        # Picamera2 is not serializable, so we avoid passing the live instance
-        # You could alternatively recreate a new camera instance inside the worker
         manager = mp.Manager()
         return_dict = manager.dict()
 
@@ -568,7 +553,7 @@ class PhenoHiveStation:
             cam = Picamera2()
             cam.start_preview(Preview.NULL)
             cam.start()
-            time.sleep(time_to_wait)  # laisser un petit délai pour initialiser
+            time.sleep(time_to_wait)
             try:
                 cam.capture_file(path_img)
                 return_dict["success"] = True
@@ -707,7 +692,7 @@ class PhenoHiveStation:
         time.sleep(1)
         # Process the segment lengths to get the growth value
         
-         #takes the last measure in case of error
+        # takes the last measure in case of error
         if not csv_is_empty(self.csv_path):
             last_growth_value = get_values_from_csv(self.csv_path, "growth", last_n=1)[0]
             growth_value = last_growth_value
@@ -726,7 +711,7 @@ class PhenoHiveStation:
             self.disp.show_collecting_data(f"Growth value : {round(growth_value, 2)}")
             time.sleep(2)
             
-        # anti grandes valeurs
+        # Anti peak values
         if not csv_is_empty(self.csv_path):
             last_date = get_values_from_csv(self.csv_path, "date", last_n=1)[0]
             last_date = datetime.strptime(last_date, DATE_FORMAT)
@@ -734,7 +719,7 @@ class PhenoHiveStation:
             if abs(growth_value - last_growth_value) > 15 and now - last_date < timedelta(minutes=3):
                 growth_value = last_growth_value
 
-        # moyenne pour lissage
+        # Filtering by average
         moy_value = 10
         if not csv_is_empty(self.csv_path):
             x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "growth", last_n=moy_value-1)]
@@ -774,7 +759,7 @@ class PhenoHiveStation:
         hum = (np.tan((2.041-analog_voltage)/0.994) + 4.515) / 0.119 
         print(f"hum = {hum}")
 
-        # moyenne pour lissage
+        # Filtering
         moy_value = 30
         if not csv_is_empty(self.csv_path):
             x_last_values = [float(v) for v in get_values_from_csv(self.csv_path, "humidity", last_n=moy_value-1)]
@@ -782,15 +767,9 @@ class PhenoHiveStation:
             delta_time = datetime.now() - datetime.strptime(x_last_dates[0], DATE_FORMAT)
             limit_time = timedelta(minutes=1.5 * self.time_interval/60 * (moy_value-1))
             last_hum_value = get_values_from_csv(self.csv_path, "humidity", last_n=1)[0]
-            print(f"x_last_values = {x_last_values}")
-            print(f"delta_time = {delta_time}")
-            print(f"limit_time = {limit_time}")
-            print(f"last = {last_hum_value}")
             
             if delta_time < limit_time and len(x_last_values) == (moy_value-1) and hum - last_hum_value < 5 :
-                print(f"moy")
                 hum = (sum(x_last_values) + hum) / moy_value
-                print(f"hum = {hum}")
         
         return hum
 
