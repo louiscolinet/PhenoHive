@@ -782,11 +782,15 @@ class PhenoHiveStation:
             delta_time = datetime.now() - datetime.strptime(x_last_dates[0], DATE_FORMAT)
             limit_time = timedelta(minutes=1.5 * self.time_interval/60 * (moy_value-1))
             last_hum_value = get_values_from_csv(self.csv_path, "humidity", last_n=1)[0]
+            print(f"x_last_values = {x_last_values}")
+            print(f"delta_time = {delta_time}")
+            print(f"limit_time = {limit_time}")
             print(f"last = {last_hum_value}")
             
             if delta_time < limit_time and len(x_last_values) == (moy_value-1) and hum - last_hum_value < 5 :
                 print(f"moy")
                 hum = (sum(x_last_values) + hum) / moy_value
+                print(f"hum = {hum}")
         
         return hum
 
